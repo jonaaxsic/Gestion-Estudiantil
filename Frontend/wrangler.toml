@@ -4,7 +4,7 @@
 
 name = "gestion-estudiantil"
 compatibility_date = "2025-04-04"
-pages_build_output_dir = "./dist/Frontend/browser"
+pages_build_output_dir = "./dist/cloudflare"
 
 # La API está en /api/* del mismo dominio
 [vars]
