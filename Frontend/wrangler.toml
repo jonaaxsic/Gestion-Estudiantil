@@ -6,9 +6,6 @@ name = "gestion-estudiantil"
 compatibility_date = "2025-04-04"
 pages_build_output_dir = "./dist/cloudflare/browser"
 
-# Worker para la API
-main = "_worker.js"
-
-# La API está en /api/* del mismo dominio
+# API está en /api/* del mismo dominio
 [vars]
 API_URL = "/api"
