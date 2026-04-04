@@ -5,11 +5,16 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:cloudflare": "npm install -g bun && bun run build",
+    "build:npm": "npm run build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
   "packageManager": "bun@1.2.21",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@angular/animations": "^21.2.7",
     "@angular/cdk": "^21.2.5",
