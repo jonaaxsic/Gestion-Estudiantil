@@ -1,0 +1,93 @@
+# ===========================================
+# GitIgnore - Proyecto Gestión Estudiantil
+# ===========================================
+
+# -------- PYTHON / DJANGO (Backend) --------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media
+/staticfiles
+
+# PyCharm
+.idea/
+
+# -------- NODE / ANGULAR (Frontend) --------
+# Compiled output
+Frontend/dist/
+Frontend/tmp/
+Frontend/out-tsc/
+Frontend/bazel-out/
+
+# Node dependencies
+Frontend/node_modules/
+Frontend/npm-debug.log
+Frontend/yarn-error.log
+
+# Angular cache
+Frontend/.angular/
+Frontend/.angular/cache/
+
+# Miscellaneous
+Frontend/coverage/
+Frontend/libpeerconnection.log
+Frontend/testem.log
+
+# -------- IDE / EDITORES --------
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# -------- ARCHIVOS SENSIBLES --------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+serviceAccountKey.json
+firebase-config.js
+config.js
+secreto*
+api_key*
+
+# -------- DOCKER --------
+*.dockerignore
+docker-compose.override.yml
