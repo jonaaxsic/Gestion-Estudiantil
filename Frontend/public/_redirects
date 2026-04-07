@@ -1,3 +1,4 @@
 # Cloudflare Pages redirects
-# Todas las rutas que no son /api/* van al index.html (SPA)
-/* /index.html 200
+# SPA routing configuration
+# NOTA: La API está desplegada como Worker separado
+/!* /index.html 200

@@ -1,0 +1,17 @@
+# ===========================================
+# wrangler.toml - Cloudflare Worker API
+# ===========================================
+
+name = "gestion-estudiantil-api"
+main = "src/index.ts"
+compatibility_date = "2025-04-04"
+compatibility_flags = ["streams_enable_constructors"]
+
+# Rutas - todas las peticiones /api van al worker
+routes = [
+  { pattern = "gestionestudiantil.pages.dev/api/*" }
+]
+
+# Variables de entorno
+[vars]
+ENVIRONMENT = "production"
