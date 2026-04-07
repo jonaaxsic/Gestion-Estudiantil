@@ -23,6 +23,14 @@ def get_client():
     # Try different connection methods in order
     mongo_uris = []
 
+    # Debug: Print environment variables
+    print(f"DEBUG - MONGO_USER: {getattr(settings, 'MONGO_USER', 'NOT_SET')}")
+    print(
+        f"DEBUG - MONGO_PASSWORD: {'SET' if getattr(settings, 'MONGO_PASSWORD', None) else 'NOT_SET'}"
+    )
+    print(f"DEBUG - MONGO_HOST: {getattr(settings, 'MONGO_HOST', 'NOT_SET')}")
+    print(f"DEBUG - MONGO_URI: {getattr(settings, 'MONGO_URI', 'NOT_SET')}")
+
     # 1. Try local MongoDB first
     mongo_uris.append(("local", "mongodb://localhost:27017"))
 
@@ -41,7 +49,9 @@ def get_client():
 
         password = quote_plus(settings.MONGO_PASSWORD)
         host = getattr(settings, "MONGO_HOST", "main-database.rpaamyh.mongodb.net")
-        atlas_uri = f"mongodb+srv://{settings.MONGO_USER}:{password}@{host}/?appName=Main-Database"
+        db_name = getattr(settings, "MONGO_DB_NAME", "App_estudiantil")
+        atlas_uri = f"mongodb+srv://{settings.MONGO_USER}:{password}@{host}/{db_name}?appName=Main-Database"
+        print(f"DEBUG - Atlas URI generated")
         mongo_uris.append(("atlas", atlas_uri))
 
     # 4. Try Atlas SQL endpoint (provided by user)
