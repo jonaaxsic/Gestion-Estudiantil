@@ -1,0 +1,18 @@
+# ===========================================
+# wrangler.toml - API Worker for Backend Proxy
+# ===========================================
+
+name = "gestion-estudiantil-api"
+main = "src/index.js"
+compatibility_date = "2025-04-04"
+
+# Workers con rutas para API
+routes = [
+  { pattern = "gestionestudiantil.pages.dev/api/*", zone_name = "gestionestudiantil.pages.dev" }
+]
+
+[vars]
+ENVIRONMENT = "production"
+
+#-backend URL - se actualiza cuando hagas deploy en Render
+# Por ahora dejaremos esta variable para configurar después
