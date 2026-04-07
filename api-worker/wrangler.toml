@@ -5,12 +5,9 @@
 name = "gestion-estudiantil-api"
 main = "src/index.ts"
 compatibility_date = "2025-04-04"
-compatibility_flags = ["streams_enable_constructors"]
 
-# Rutas - todas las peticiones /api van al worker
-routes = [
-  { pattern = "gestionestudiantil.pages.dev/api/*" }
-]
+# No routes - Worker will get its own subdomain
+# Frontend will call https://gestion-estudiantil-api.pages.dev/api/*
 
 # Variables de entorno
 [vars]
