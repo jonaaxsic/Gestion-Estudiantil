@@ -3,16 +3,14 @@
 # ===========================================
 
 name = "gestion-estudiantil-api"
-main = "src/index.js"
+main = "index.js"
 compatibility_date = "2025-04-04"
 
-# Workers con rutas para API
-routes = [
-  { pattern = "gestionestudiantil.pages.dev/api/*", zone_name = "gestionestudiantil.pages.dev" }
-]
+# Routes removed - using Pages Functions instead
+# See: functions/api.ts for API proxy
 
 [vars]
 ENVIRONMENT = "production"
 
-#-backend URL - se actualiza cuando hagas deploy en Render
-# Por ahora dejaremos esta variable para configurar después
+# Backend URL - update when deploying backend
+BACKEND_URL = "https://gestion-estudiantil-backend.onrender.com"

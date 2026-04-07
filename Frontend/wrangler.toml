@@ -8,8 +8,11 @@ compatibility_date = "2025-04-04"
 # Output directory
 pages_build_output_dir = "./dist/cloudflare/browser"
 
-# No Workers/Serverless - pure static
-compatibility_flags = ["no_global_worker"]
+# Enable Node.js compatibility for Pages Functions
+compatibility_flags = ["nodejs_compat"]
 
 [vars]
 ENVIRONMENT = "production"
+
+# Backend URL for API proxy
+BACKEND_URL = "https://gestion-estudiantil-backend.onrender.com"
