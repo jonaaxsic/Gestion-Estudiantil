@@ -8,7 +8,7 @@ services:
       - key: MONGO_USER
         value: jonaaxsic
       - key: MONGO_PASSWORD
-        sync: false  # IMPORTANTE: Configura esto manualmente en el panel de Render - NO hagas git push con tu password real
+        value: ""  # Configura manualmente en el panel de Render - NO subas tu password real
       - key: MONGO_HOST
         value: main-database.rpaamyh.mongodb.net
       - key: MONGO_DB_NAME
@@ -16,7 +16,7 @@ services:
       - key: MONGO_PORT
         value: 27017
       - key: SECRET_KEY
-        generate: SECRET_KEY
+        value: "django-insecure-dev-key-change-in-production-123456789"
       - key: DEBUG
         value: "False"
       - key: ALLOWED_HOSTS
