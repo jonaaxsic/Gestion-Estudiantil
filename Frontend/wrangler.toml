@@ -4,9 +4,11 @@
 
 name = "gestion-estudiantil"
 compatibility_date = "2025-04-04"
+
+# This tells Wrangler to deploy to Cloudflare Pages
+# The output directory where the build artifacts are located
 pages_build_output_dir = "./dist/cloudflare/browser"
 
-# Variables de entorno para la API
 [vars]
 API_URL = "/api"
 ENVIRONMENT = "production"
