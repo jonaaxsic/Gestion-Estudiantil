@@ -24,7 +24,7 @@ const ATLAS_DB_NAME = 'App_estudiantil';
 // ===========================================
 const mockData = {
   usuarios: [
-    { _id: "1", nombre: "Admin", apellido: "Sistema", email: "admin@colegio.cl", rol: "admin", password: "admin", activo: true },
+    { _id: "1", nombre: "Admin", apellido: "Sistema", email: "admin@colegio.cl", rol: "admin", password: "admin123", activo: true },
     { _id: "2", nombre: "Juan", apellido: "Pérez", email: "juan@colegio.cl", rol: "docente", password: "123", activo: true },
     { _id: "3", nombre: "María", apellido: "García", email: "maria@colegio.cl", rol: "admin", password: "123", activo: true },
   ],
