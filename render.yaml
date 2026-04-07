@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: backend-gestion-estudiantil
+    env: python
+    buildCommand: pip install -r Backend/requirements.txt
+    startCommand: gunicorn Backend.wsgi:application --bind 0.0.0.0:$PORT --chdir .
+    envVars:
+      - key: MONGO_USER
+        value: jonaaxsic
+      - key: MONGO_PASSWORD
+        sync: false  # IMPORTANTE: Configura esto manualmente en el panel de Render - NO hagas git push con tu password real
+      - key: MONGO_HOST
+        value: main-database.rpaamyh.mongodb.net
+      - key: MONGO_DB_NAME
+        value: App_estudiantil
+      - key: MONGO_PORT
+        value: 27017
+      - key: SECRET_KEY
+        generate: SECRET_KEY
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: PYTHON_VERSION
+        value: "3.11"
