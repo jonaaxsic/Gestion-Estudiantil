@@ -80,7 +80,6 @@ export class DashboardApoderadoPage implements OnInit {
     this.api.getNotas({ estudiante_id: studentId, ano_escolar: this.anoEscolar }).subscribe(data => this.notas.set(data));
     
     // Cargar reuniones del curso del estudiante
-    const student = this.estudiante();
     if (student?.curso_id) {
       this.api.getReuniones(student.curso_id).subscribe(data => {
         this.reuniones.set(data);
