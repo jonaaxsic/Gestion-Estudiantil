@@ -49,6 +49,13 @@ urlpatterns = [
     path(
         "apoderados/<str:pk>", views.ApoderadoDetail.as_view(), name="apoderado-detail"
     ),
+    # Recordatorios
+    path("recordatorios", views.RecordatorioList.as_view(), name="recordatorio-list"),
+    path(
+        "recordatorios/<str:pk>",
+        views.RecordatorioDetail.as_view(),
+        name="recordatorio-detail",
+    ),
     # Dashboards
     path("dashboard/docente", views.dashboard_docente, name="dashboard-docente"),
     path("dashboard/apoderado", views.dashboard_apoderado, name="dashboard-apoderado"),

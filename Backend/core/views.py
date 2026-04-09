@@ -17,6 +17,7 @@ from .models import (
     Anotacion,
     Reunione,
     Apoderado,
+    Recordatorio,
 )
 from .serializers import (
     UsuarioSerializer,
@@ -27,6 +28,7 @@ from .serializers import (
     AnotacionSerializer,
     ReunioneSerializer,
     ApoderadoSerializer,
+    RecordatorioSerializer,
 )
 
 
@@ -678,3 +680,68 @@ def dashboard_apoderado(request):
             "anotaciones": AnotacionSerializer(anotaciones, many=True).data,
         }
     )
+
+
+# ============ RECORDATORIOS ============
+class RecordatorioList(APIView, MongoObjectIdMixin):
+    """Listar recordatorios o crear nuevo"""
+
+    def get(self, request):
+        # Obtener usuario_id de los filtros o del query
+        usuario_id = request.query_params.get("usuario_id")
+
+        query = {}
+        if usuario_id:
+            # Mostrar solo los recordatorios del usuario o los no privados
+            query["$or"] = [{"usuario_id": usuario_id}, {"privado": False}]
+
+        recordatorios = Recordatorio.find(query, sort=[("fecha", 1)])
+        serializer = RecordatorioSerializer(recordatorios, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = RecordatorioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RecordatorioDetail(APIView, MongoObjectIdMixin):
+    """Detalle de un recordatorio"""
+
+    def get_object(self, pk):
+        return Recordatorio.find_one({"_id": ObjectId(pk)})
+
+    def get(self, request, pk):
+        recordatorio = self.get_object(pk)
+        if not recordatorio:
+            return Response(
+                {"error": "Recordatorio no encontrado"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = RecordatorioSerializer(recordatorio)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        recordatorio = self.get_object(pk)
+        if not recordatorio:
+            return Response(
+                {"error": "Recordatorio no encontrado"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = RecordatorioSerializer(recordatorio, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        recordatorio = self.get_object(pk)
+        if not recordatorio:
+            return Response(
+                {"error": "Recordatorio no encontrado"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        recordatorio.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

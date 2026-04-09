@@ -13,6 +13,7 @@ from .models import (
     Anotacion,
     Reunione,
     Apoderado,
+    Recordatorio,
 )
 
 
@@ -208,8 +209,33 @@ class ApoderadoSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         apoderado = Apoderado(validated_data)
-        apoderado.save()
-        return apoderado
+        apoderaDo.save()
+        return apoderaDo
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class RecordatorioSerializer(serializers.Serializer):
+    """Serializer para Recordatorio"""
+
+    id = serializers.CharField(source="_id", read_only=True)
+    usuario_id = serializers.CharField(required=True)
+    titulo = serializers.CharField(required=True)
+    descripcion = serializers.CharField(required=False, allow_null=True)
+    fecha = serializers.DateField(required=True)
+    hora = serializers.TimeField(required=False, allow_null=True)
+    privado = serializers.BooleanField(default=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        recordatorio = Recordatorio(validated_data)
+        recordatorio.save()
+        return recordatorio
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():

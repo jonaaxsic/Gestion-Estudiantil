@@ -431,3 +431,41 @@ class Apoderado(BaseModel):
             }
         )
         return data
+
+
+class Recordatorio(BaseModel):
+    """Modelo para notas de recordatorio"""
+
+    collection_name = "recordatorios"
+
+    def __init__(self, data=None):
+        self.usuario_id = None  # ID del usuario que creó el recordatorio
+        self.titulo = None
+        self.descripcion = None
+        self.fecha = None  # Fecha del recordatorio
+        self.hora = None  # Hora del recordatorio (opcional)
+        self.privado = True  # Solo visible por el usuario que lo creó
+        super().__init__(data)
+
+    def _load_from_dict(self, data):
+        super()._load_from_dict(data)
+        self.usuario_id = data.get("usuario_id")
+        self.titulo = data.get("titulo")
+        self.descripcion = data.get("descripcion")
+        self.fecha = data.get("fecha")
+        self.hora = data.get("hora")
+        self.privado = data.get("privado", True)
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "usuario_id": self.usuario_id,
+                "titulo": self.titulo,
+                "descripcion": self.descripcion,
+                "fecha": self.fecha,
+                "hora": self.hora,
+                "privado": self.privado,
+            }
+        )
+        return data
