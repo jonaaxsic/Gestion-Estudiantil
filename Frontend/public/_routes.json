@@ -1,6 +1,5 @@
 {
   "version": 1,
-  "routes": [
-    { "pattern": "/api/*", "fallthrough": true }
-  ]
+  "include": ["/api/*"],
+  "exclude": []
 }
