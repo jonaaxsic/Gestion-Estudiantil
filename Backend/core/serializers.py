@@ -101,15 +101,16 @@ class AsistenciaSerializer(serializers.Serializer):
     """Serializer para Asistencia"""
 
     id = serializers.CharField(source="_id", read_only=True)
-    estudiante_id = serializers.CharField(required=True)
+    estudiante_id = serializers.CharField(required=False, allow_null=True)
     curso_id = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
-    presente = serializers.BooleanField(required=True)
+    presente = serializers.BooleanField(required=False)
     observacion = serializers.CharField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        print(f"DEBUG - Creating Asistencia with data: {validated_data}")
         asistencia = Asistencia(validated_data)
         asistencia.save()
         return asistencia
@@ -125,9 +126,9 @@ class EvaluacionSerializer(serializers.Serializer):
     """Serializer para Evaluacion"""
 
     id = serializers.CharField(source="_id", read_only=True)
-    curso_id = serializers.CharField(required=True)
-    materia = serializers.CharField(required=True)
-    titulo = serializers.CharField(required=True)
+    curso_id = serializers.CharField(required=False, allow_null=True)
+    materia = serializers.CharField(required=False, allow_null=True)
+    titulo = serializers.CharField(required=False, allow_null=True)
     descripcion = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
     ponderacion = serializers.FloatField(required=False, allow_null=True)
@@ -135,6 +136,7 @@ class EvaluacionSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        print(f"DEBUG - Creating Evaluacion with data: {validated_data}")
         evaluacion = Evaluacion(validated_data)
         evaluacion.save()
         return evaluacion
@@ -150,9 +152,11 @@ class AnotacionSerializer(serializers.Serializer):
     """Serializer para Anotacion"""
 
     id = serializers.CharField(source="_id", read_only=True)
-    estudiante_id = serializers.CharField(required=True)
-    tipo = serializers.CharField(required=True)  # 'positiva' o 'negativa'
-    descripcion = serializers.CharField(required=True)
+    estudiante_id = serializers.CharField(required=False, allow_null=True)
+    tipo = serializers.CharField(
+        required=False, allow_null=True
+    )  # 'positiva' o 'negativa'
+    descripcion = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
@@ -163,6 +167,7 @@ class AnotacionSerializer(serializers.Serializer):
             from datetime import date
 
             validated_data["fecha"] = date.today().isoformat()
+        print(f"DEBUG - Creating Anotacion with data: {validated_data}")
         anotacion = Anotacion(validated_data)
         anotacion.save()
         return anotacion
@@ -178,7 +183,7 @@ class ReunioneSerializer(serializers.Serializer):
     """Serializer para Reuniones"""
 
     id = serializers.CharField(source="_id", read_only=True)
-    curso_id = serializers.CharField(required=True)
+    curso_id = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
     hora = serializers.TimeField(required=False, allow_null=True)
     lugar = serializers.CharField(required=False, allow_null=True)
@@ -188,6 +193,7 @@ class ReunioneSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        print(f"DEBUG - Creating Reunione with data: {validated_data}")
         reunion = Reunione(validated_data)
         reunion.save()
         return reunion
@@ -229,8 +235,8 @@ class RecordatorioSerializer(serializers.Serializer):
     """Serializer para Recordatorio"""
 
     id = serializers.CharField(source="_id", read_only=True)
-    usuario_id = serializers.CharField(required=True)
-    titulo = serializers.CharField(required=True)
+    usuario_id = serializers.CharField(required=False, allow_null=True)
+    titulo = serializers.CharField(required=False, allow_null=True)
     descripcion = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
     fecha_limite = serializers.DateField(required=False, allow_null=True)
@@ -241,6 +247,7 @@ class RecordatorioSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        print(f"DEBUG - Creating Recordatorio with data: {validated_data}")
         recordatorio = Recordatorio(validated_data)
         recordatorio.save()
         return recordatorio
@@ -256,16 +263,19 @@ class AsignacionDocenteSerializer(serializers.Serializer):
     """Serializer para Asignación Docente"""
 
     id = serializers.CharField(source="_id", read_only=True)
-    docente_id = serializers.CharField(required=True)
-    curso_id = serializers.CharField(required=True)
-    asignatura = serializers.CharField(required=True)
+    docente_id = serializers.CharField(required=False, allow_null=True)
+    curso_id = serializers.CharField(required=False, allow_null=True)
+    asignatura = serializers.CharField(required=False, allow_null=True)
     activo = serializers.BooleanField(default=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        print(f"DEBUG - Creating AsignacionDocente with data: {validated_data}")
         asignacion = AsignacionDocente(validated_data)
+        print(f"DEBUG - Before save: {asignacion.to_dict()}")
         asignacion.save()
+        print(f"DEBUG - After save, _id: {asignacion._id}")
         return asignacion
 
     def update(self, instance, validated_data):
