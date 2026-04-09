@@ -48,7 +48,7 @@
           <span>Cursos</span>
         </button>
         <button class="mobile-menu-item" (click)="activeTab.set('docentes'); closeMobileMenu()">
-          <span class="material-icons">teacher</span>
+          <span class="material-icons">co_present</span>
           <span>Docentes</span>
         </button>
         <button class="mobile-menu-item" (click)="openRecordatorioDialog(); closeMobileMenu()">
@@ -109,7 +109,7 @@
       Cursos
     </button>
     <button class="tab" [class.active]="activeTab() === 'docentes'" (click)="activeTab.set('docentes')">
-      <span class="material-icons">teacher</span>
+      <span class="material-icons">co_present</span>
       Docentes
     </button>
   </div>
@@ -413,7 +413,7 @@
       <div class="card-header">
         <div class="card-header-left">
           <h3 class="card-title">
-            <span class="material-icons">teacher</span>
+            <span class="material-icons">co_present</span>
             Asignación de Docentes a Cursos
           </h3>
         </div>
@@ -753,7 +753,7 @@
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
         <h2 class="dialog-title">
-          <span class="material-icons">teacher</span>
+          <span class="material-icons">co_present</span>
           Asignar Docente a Curso
         </h2>
         <button class="btn-icon" (click)="closeAsignacionDocenteDialog()">

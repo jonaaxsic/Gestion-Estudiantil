@@ -1,60 +1,167 @@
-/* Angular Material Theme - Import */
-@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+/* ============================================================
+   GESTIÓN ESTUDIANTIL – Design System
+   Paleta Modo Claro + Modo Oscuro basada en imágenes de referencia
+   ============================================================ */
 
-/* CSS Variables - Following reference images */
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+/* ── MODO CLARO (default) ─────────────────────────────── */
 :root {
-  /* Primary colors from reference images */
-  --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --primary-light: #6366f1;
-  
-  /* Accent colors */
-  --accent-blue: #3b82f6;
-  --accent-cyan: #06b6d4;
-  --accent-violet: #8b5cf6;
-  
-  /* Semantic colors */
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  
-  /* Text colors */
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  
-  /* Background colors */
-  --bg-primary: #f8fafc;
-  --bg-white: #ffffff;
-  --bg-light: #f1f5f9;
-  
-  /* Border */
-  --border: #e2e8f0;
-  --border-light: #f1f5f9;
-  
-  /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  color-scheme: light;
+
+  /* Acento principal – azul índigo rico */
+  --brand:          #3b55e6;
+  --brand-dark:     #2d44c7;
+  --brand-light:    #eef0fd;
+  --brand-muted:    #c7cef8;
+
+  /* Superficies */
+  --bg-page:        #f0f2f9;
+  --bg-card:        #ffffff;
+  --bg-header:      #ffffff;
+  --bg-hover:       #f5f7ff;
+  --bg-subtle:      #f8f9fc;
+
+  /* Bordes */
+  --border:         #dde1ef;
+  --border-light:   #eef0f8;
+
+  /* Texto */
+  --text-primary:   #1a1f3c;
+  --text-secondary: #4a5270;
+  --text-muted:     #8892b0;
+  --text-inverse:   #ffffff;
+
+  /* Íconos del header / nav */
+  --icon-nav:       #3b55e6;
+
+  /* Tabs activas */
+  --tab-active-bg:  #1a1f3c;
+  --tab-active-txt: #ffffff;
+  --tab-hover-bg:   #eef0fd;
+  --tab-hover-txt:  #3b55e6;
+
+  /* Stat cards */
+  --stat-icon-1:    #3b55e6;   /* usuarios */
+  --stat-icon-2:    #6c63ff;   /* admins/docentes */
+  --stat-icon-3:    #00b4d8;   /* apoderados/cursos */
+  --stat-icon-4:    #f59e0b;   /* con apoderado */
+  --stat-danger:    #ef4444;
+
+  /* Botones */
+  --btn-primary-bg:  #1a1f3c;
+  --btn-primary-txt: #ffffff;
+  --btn-primary-hover: #2d3560;
+  --btn-secondary-bg:  #ffffff;
+  --btn-secondary-txt: #1a1f3c;
+  --btn-secondary-border: #dde1ef;
+  --btn-secondary-hover:  #f5f7ff;
+
+  /* Semánticos */
+  --success:     #22c55e;
+  --warning:     #f59e0b;
+  --danger:      #ef4444;
+  --info:        #00b4d8;
+
+  /* Sombras */
+  --shadow-sm:   0 1px 3px rgba(59, 85, 230, 0.08);
+  --shadow-md:   0 4px 16px rgba(59, 85, 230, 0.12);
+  --shadow-lg:   0 12px 32px rgba(59, 85, 230, 0.16);
+
+  /* Radio */
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
 }
 
-/* Base */
+/* ── MODO OSCURO ─────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --brand:          #5b71f5;
+    --brand-dark:     #4255d4;
+    --brand-light:    #1e2455;
+    --brand-muted:    #3b4480;
+
+    --bg-page:        #0f1117;
+    --bg-card:        #181c2e;
+    --bg-header:      #141726;
+    --bg-hover:       #1f2540;
+    --bg-subtle:      #1a1f35;
+
+    --border:         #2a3050;
+    --border-light:   #222844;
+
+    --text-primary:   #e8eaf5;
+    --text-secondary: #8892b0;
+    --text-muted:     #5a6380;
+    --text-inverse:   #0f1117;
+
+    --icon-nav:       #7b8fff;
+
+    --tab-active-bg:  #5b71f5;
+    --tab-active-txt: #ffffff;
+    --tab-hover-bg:   #1e2455;
+    --tab-hover-txt:  #7b8fff;
+
+    --stat-icon-1:    #5b71f5;
+    --stat-icon-2:    #7c6fff;
+    --stat-icon-3:    #00c8ef;
+    --stat-icon-4:    #f59e0b;
+    --stat-danger:    #f87171;
+
+    --btn-primary-bg:   #5b71f5;
+    --btn-primary-txt:  #ffffff;
+    --btn-primary-hover:#4255d4;
+    --btn-secondary-bg:  #1a1f35;
+    --btn-secondary-txt: #e8eaf5;
+    --btn-secondary-border: #2a3050;
+    --btn-secondary-hover:  #1f2540;
+
+    --success:     #34d399;
+    --warning:     #fbbf24;
+    --danger:      #f87171;
+    --info:        #38bdf8;
+
+    --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.5);
+    --shadow-lg:   0 12px 32px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ── BASE ─────────────────────────────────────────────── */
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  background-color: #f5f5f5;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  background-color: var(--bg-page);
   color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* ── UTILIDADES GLOBALES ─────────────────────────────── */
+.container {
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Angular Material overrides */
 .mat-mdc-card {
   margin: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  box-shadow: var(--shadow-md) !important;
+  background-color: var(--bg-card) !important;
 }
 
 .mat-mdc-form-field {
@@ -62,14 +169,5 @@ html, body {
 }
 
 .mat-mdc-table {
-  width: 100%;
-}
-
-
-.container {
-  padding: 20px;
-}
-
-.full-width {
   width: 100%;
 }
