@@ -55,7 +55,7 @@
           <span class="material-icons">co_present</span>
           <span>Docentes</span>
         </button>
-        <button class="mobile-menu-item" (click)="openRecordatorioDialog(); closeMobileMenu()">
+        <button class="mobile-menu-item" (click)="activeTab.set('docentes'); closeMobileMenu()">
           <span class="material-icons">add_alert</span>
           <span>Mis Recordatorios</span>
         </button>
@@ -669,34 +669,32 @@
       
       <form (ngSubmit)="saveCurso()" class="dialog-form">
         <div class="form-group">
-          <label class="form-label">Nombre del Curso</label>
-          <input type="text" class="form-input" [(ngModel)]="cursoForm.nombre" name="nombre" placeholder="Ej: 1° Medio A" required>
+          <label class="form-label">Nivel</label>
+          <select class="form-input" [(ngModel)]="cursoForm.nivel" name="nivel" required>
+            <option value="Prekinder">Prekinder</option>
+            <option value="Kinder">Kinder</option>
+            <option value="Básico">Básico</option>
+            <option value="Medio">Medio</option>
+          </select>
         </div>
         
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nivel</label>
-            <select class="form-input" [(ngModel)]="cursoForm.nivel" name="nivel" required>
-              <option value="Prekinder">Prekinder</option>
-              <option value="Kinder">Kinder</option>
-              <option value="1° Básico">1° Básico</option>
-              <option value="2° Básico">2° Básico</option>
-              <option value="3° Básico">3° Básico</option>
-              <option value="4° Básico">4° Básico</option>
-              <option value="5° Básico">5° Básico</option>
-              <option value="6° Básico">6° Básico</option>
-              <option value="7° Básico">7° Básico</option>
-              <option value="8° Básico">8° Básico</option>
-              <option value="1° Medio">1° Medio</option>
-              <option value="2° Medio">2° Medio</option>
-              <option value="3° Medio">3° Medio</option>
-              <option value="4° Medio">4° Medio</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Año</label>
-            <input type="number" class="form-input" [(ngModel)]="cursoForm.ano" name="ano" required>
-          </div>
+        <div class="form-group">
+          <label class="form-label">Nombre del Curso</label>
+          <select class="form-input" [(ngModel)]="cursoForm.nombre" name="nombre" required>
+            <option value="1ºA">1ºA</option>
+            <option value="1ºB">1ºB</option>
+            <option value="2ºA">2ºA</option>
+            <option value="2ºB">2ºB</option>
+            <option value="3ºA">3ºA</option>
+            <option value="3ºB">3ºB</option>
+            <option value="4ºA">4ºA</option>
+            <option value="4ºB">4ºB</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Año</label>
+          <input type="number" class="form-input" [(ngModel)]="cursoForm.ano" name="ano" required>
         </div>
         
         <div class="dialog-actions">

@@ -153,11 +153,16 @@ class AnotacionSerializer(serializers.Serializer):
     estudiante_id = serializers.CharField(required=True)
     tipo = serializers.CharField(required=True)  # 'positiva' o 'negativa'
     descripcion = serializers.CharField(required=True)
-    fecha = serializers.DateField(required=True)
+    fecha = serializers.DateField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        # Si no hay fecha, usar la fecha actual
+        if not validated_data.get("fecha"):
+            from datetime import date
+
+            validated_data["fecha"] = date.today().isoformat()
         anotacion = Anotacion(validated_data)
         anotacion.save()
         return anotacion
@@ -174,9 +179,9 @@ class ReunioneSerializer(serializers.Serializer):
 
     id = serializers.CharField(source="_id", read_only=True)
     curso_id = serializers.CharField(required=True)
-    fecha = serializers.DateField(required=True)
-    hora = serializers.TimeField(required=True)
-    lugar = serializers.CharField(required=True)
+    fecha = serializers.DateField(required=False, allow_null=True)
+    hora = serializers.TimeField(required=False, allow_null=True)
+    lugar = serializers.CharField(required=False, allow_null=True)
     descripcion = serializers.CharField(required=False, allow_null=True)
     notificacion_enviada = serializers.BooleanField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
@@ -227,9 +232,11 @@ class RecordatorioSerializer(serializers.Serializer):
     usuario_id = serializers.CharField(required=True)
     titulo = serializers.CharField(required=True)
     descripcion = serializers.CharField(required=False, allow_null=True)
-    fecha = serializers.DateField(required=True)
+    fecha = serializers.DateField(required=False, allow_null=True)
+    fecha_limite = serializers.DateField(required=False, allow_null=True)
     hora = serializers.TimeField(required=False, allow_null=True)
     privado = serializers.BooleanField(default=True)
+    completada = serializers.BooleanField(default=False)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 

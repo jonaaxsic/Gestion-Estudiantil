@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('https://res.cloudinary.com/dyslpppz8/image/upload/q_auto/f_auto/v1775268474/fondologin_tje53d.png');
+  background-image: url('https://res.cloudinary.com/dyslpppz8/image/upload/q_auto/f_auto/v1775741611/ChatGPT_Image_9_abr_2026_10_22_23_a.m._ifgmqd.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -179,6 +179,32 @@
   border-top: 1px solid var(--border);
   position: relative;
   z-index: 100;
+}
+
+.login-footer p {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+
+.login-footer a {
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
+  z-index: 101;
+  margin-left: 8px;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+.help-text {
+  margin-top: 12px !important;
+  color: var(--text-muted) !important;
 }
 
 .login-footer p {

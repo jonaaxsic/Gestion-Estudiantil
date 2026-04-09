@@ -153,6 +153,31 @@
   transform: none;
 }
 
+.btn-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--brand);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-new:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+}
+
+.btn-new .material-icons {
+  font-size: 16px;
+}
+
 .btn-logout {
   display: inline-flex;
   align-items: center;

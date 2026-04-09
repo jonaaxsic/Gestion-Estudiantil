@@ -25,6 +25,23 @@ export class AuthService {
 
   constructor() {
     this.checkStoredAuth();
+    // Prevenir navegación hacia atrás
+    if (typeof window !== 'undefined') {
+      window.addEventListener('popstate', this.preventBack.bind(this));
+    }
+  }
+
+  private preventBack(event: PopStateEvent): void {
+    // Si el usuario está autenticado, prevenir que vuelva atrás
+    if (this._isAuthenticated()) {
+      history.pushState(null, '', window.location.href);
+      // Forzar redirección al dashboard si intenta volver
+      if (!window.location.pathname.includes('/dashboard') && 
+          !window.location.pathname.includes('/admin') &&
+          window.location.pathname !== '/') {
+        this.redirectByRole();
+      }
+    }
   }
 
   private checkStoredAuth(): void {
@@ -77,6 +94,9 @@ export class AuthService {
             this.setCookie('user', userString, 7);
             localStorage.setItem('user', userString);
             
+            // Reemplazar historial para prevenir volver atrás sin autenticación
+            history.replaceState(null, '', window.location.href);
+            
             this._isLoading.set(false);
             resolve(true);
           } else {
@@ -97,6 +117,8 @@ export class AuthService {
     this._isAuthenticated.set(false);
     this.deleteCookie('user');
     localStorage.removeItem('user');
+    // Reemplazar historial para prevenir volver atrás
+    history.replaceState(null, '', '/login');
     this.router.navigate(['/login']);
   }
 
