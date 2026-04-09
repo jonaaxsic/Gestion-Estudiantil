@@ -159,7 +159,6 @@ export class AdminPage implements OnInit {
       titulo: this.recordatorioForm.titulo,
       descripcion: this.recordatorioForm.descripcion || '',
       fecha_limite: this.recordatorioForm.fecha_limite || undefined,
-      fecha: this.recordatorioForm.fecha_limite || undefined,
       completada: false
     }).subscribe({
       next: () => {
