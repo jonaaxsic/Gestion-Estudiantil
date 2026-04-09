@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/services/auth.service';
@@ -9,6 +10,7 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [
     FormsModule,
+    RouterLink,
     MatIconModule,
     MatProgressSpinnerModule,
   ],
