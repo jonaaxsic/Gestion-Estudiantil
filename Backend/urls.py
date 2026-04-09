@@ -94,9 +94,24 @@ urlpatterns = [
     ),
     # Asignaciones Docente
     path(
+        "asignaciones-docente",
+        views.AsignacionDocenteList.as_view(),
+        name="asignacion-docente-list",
+    ),
+    path(
+        "asignaciones-docente/",
+        views.AsignacionDocenteList.as_view(),
+        name="asignacion-docente-list-slash",
+    ),
+    path(
         "asignaciones-docente/<str:pk>",
         views.AsignacionDocenteDetail.as_view(),
         name="asignacion-docente-detail",
+    ),
+    path(
+        "asignaciones-docente/<str:pk>/",
+        views.AsignacionDocenteDetail.as_view(),
+        name="asignacion-docente-detail-slash",
     ),
     # Cursos con asignaciones (para dashboard docente)
     path(
