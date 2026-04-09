@@ -482,6 +482,11 @@ export class DashboardDocentePage implements OnInit {
     });
   }
 
+  // Array para iterar las 6 notas
+  get numerosNota(): string[] {
+    return ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6'];
+  }
+
   // Menú móvil
   toggleMobileMenu(): void {
     this.showMobileMenu.update(v => !v);

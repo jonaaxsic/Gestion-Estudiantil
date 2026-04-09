@@ -194,6 +194,11 @@ export class DashboardApoderadoPage implements OnInit {
     const hoy = new Date().toISOString().split('T')[0];
     return this.reuniones().filter(r => r.fecha >= hoy);
   }
+
+  // Array para iterar las 6 notas
+  get numerosNota(): string[] {
+    return ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6'];
+  }
   
   logout(): void {
     this.auth.logout();

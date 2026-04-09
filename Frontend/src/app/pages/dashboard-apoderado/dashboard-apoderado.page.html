@@ -240,11 +240,11 @@
                 </span>
               </div>
               <div class="notas-lista">
-                @for ($index from 1 to 6) {
+                @for (numNota of numerosNota; track numNota; let i = $index) {
                   <div class="nota-item">
-                    <span class="nota-label">Nota {{ $index }}:</span>
-                    <span class="nota-valor" [class.vacio]="!nota.notas || !nota.notas['nota' + $index]">
-                      {{ nota.notas ? nota.notas['nota' + $index] || '-' : '-' }}
+                    <span class="nota-label">Nota {{ i + 1 }}:</span>
+                    <span class="nota-valor" [class.vacio]="!nota.notas || !nota.notas[numNota]">
+                      {{ nota.notas ? nota.notas[numNota] || '-' : '-' }}
                     </span>
                   </div>
                 }
