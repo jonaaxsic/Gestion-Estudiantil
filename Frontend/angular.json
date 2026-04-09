@@ -31,6 +31,14 @@
           "configurations": {
             "production": {
               "outputPath": "dist/cloudflare",
+              "optimization": true,
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -42,8 +50,7 @@
                   "maximumWarning": "10kB",
                   "maximumError": "20kB"
                 }
-              ],
-              "outputHashing": "all"
+              ]
             },
             "cloudflare": {
               "outputPath": "dist/cloudflare",
