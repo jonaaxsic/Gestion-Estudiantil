@@ -197,12 +197,14 @@ class ReunioneSerializer(serializers.Serializer):
     id = serializers.CharField(source="_id", read_only=True)
     curso_id = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
-    hora = serializers.TimeField(required=False, allow_null=True)
+    hora = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )  # Changed to Char for string format
     lugar = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     descripcion = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
-    notificacion_enviada = serializers.BooleanField(read_only=True)
+    notificacion_enviada = serializers.BooleanField(required=False, default=False)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
@@ -213,6 +215,9 @@ class ReunioneSerializer(serializers.Serializer):
             validated_data["lugar"] = "Por definir"
         if not validated_data.get("notificacion_enviada"):
             validated_data["notificacion_enviada"] = False
+        # Convertir hora a string si es necesario
+        if validated_data.get("hora") and not isinstance(validated_data["hora"], str):
+            validated_data["hora"] = str(validated_data["hora"])
         reunion = Reunione(validated_data)
         reunion.save()
         return reunion
