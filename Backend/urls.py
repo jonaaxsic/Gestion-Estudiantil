@@ -80,4 +80,32 @@ urlpatterns = [
     path("notas/<str:pk>", views.NotaDetail.as_view(), name="nota-detail"),
     path("notas/cerrar", views.cerrar_ramo, name="cerrar-ramo"),
     path("notas/actualizar", views.actualizar_nota_simple, name="actualizar-nota"),
+    # Recordatorios
+    path("recordatorios", views.RecordatorioList.as_view(), name="recordatorio-list"),
+    path(
+        "recordatorios/",
+        views.RecordatorioList.as_view(),
+        name="recordatorio-list-slash",
+    ),
+    path(
+        "recordatorios/<str:pk>",
+        views.RecordatorioDetail.as_view(),
+        name="recordatorio-detail",
+    ),
+    # Asignaciones Docente
+    path(
+        "asignaciones-docente",
+        views.AsignacionDocenteList.as_view(),
+        name="asignacion-docente-list",
+    ),
+    path(
+        "asignaciones-docente/",
+        views.AsignacionDocenteList.as_view(),
+        name="asignacion-docente-list-slash",
+    ),
+    path(
+        "asignaciones-docente/<str:pk>",
+        views.AsignacionDocenteDetail.as_view(),
+        name="asignacion-docente-detail",
+    ),
 ]

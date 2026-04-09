@@ -63,8 +63,17 @@ export class DashboardApoderadoPage implements OnInit {
   }
   
   loadStudentData(studentId: string): void {
+    const student = this.estudiante();
+    
     this.api.getAsistencia({ estudiante_id: studentId }).subscribe(data => this.asistencia.set(data));
-    this.api.getEvaluaciones().subscribe(data => this.evaluaciones.set(data));
+    
+    // Cargar evaluaciones filtradas por el curso del estudiante
+    if (student?.curso_id) {
+      this.api.getEvaluaciones(student.curso_id).subscribe(data => this.evaluaciones.set(data));
+    } else {
+      this.api.getEvaluaciones().subscribe(data => this.evaluaciones.set(data));
+    }
+    
     this.api.getAnotaciones(studentId).subscribe(data => this.anotaciones.set(data));
     
     // Cargar notas del estudiante
