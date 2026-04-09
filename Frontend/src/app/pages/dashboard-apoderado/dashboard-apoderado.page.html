@@ -1,0 +1,207 @@
+<div class="header-bar">
+  <div class="header-left">
+    <span class="material-icons header-icon">family_restroom</span>
+    <h1 class="header-title">Panel del Apoderado</h1>
+  </div>
+  <div class="header-right">
+    <div class="user-info">
+      <span class="user-name">{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
+      <span class="user-rut">RUT: {{ auth.user()?.rut || 'Sin RUT' }}</span>
+    </div>
+    <button class="btn btn-secondary" (click)="logout()">
+      <span class="material-icons">logout</span>
+      Cerrar Sesión
+    </button>
+  </div>
+</div>
+
+<div class="page-container">
+  <div class="cards-row">
+    <!-- Apoderado Info Card - Blue -->
+    <div class="info-card azul">
+      <div class="card-header">
+        <span class="material-icons">person</span>
+        <h2>Datos del Apoderado</h2>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="label">Nombre:</span>
+          <span class="value">{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">RUT:</span>
+          <span class="value">{{ auth.user()?.rut || 'Sin RUT' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">Email:</span>
+          <span class="value">{{ auth.user()?.email }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Pupilo Info Card - Green -->
+    @if (estudiante()) {
+      <div class="info-card verde">
+        <div class="card-header">
+          <span class="material-icons">school</span>
+          <h2>Información del Pupilo</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-row">
+            <span class="label">Nombre:</span>
+            <span class="value">{{ estudiante()?.nombre }} {{ estudiante()?.apellido }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">RUT:</span>
+            <span class="value">{{ estudiante()?.rut }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Curso:</span>
+            <span class="value">{{ getCursoNombre(estudiante()?.curso_id) }}</span>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <div class="info-card verde empty">
+        <div class="card-header">
+          <span class="material-icons">person_off</span>
+          <h2>Sin Pupilo</h2>
+        </div>
+        <div class="card-body">
+          <p>No hay pupilo asignado</p>
+        </div>
+      </div>
+    }
+  </div>
+  
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon asistencia">
+        <span class="material-icons">check_circle</span>
+      </div>
+      <div class="stat-value">{{ getPresentes() }}/{{ asistencia().length }}</div>
+      <div class="stat-label">Asistencias</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon evaluaciones">
+        <span class="material-icons">assignment</span>
+      </div>
+      <div class="stat-value">{{ evaluaciones().length }}</div>
+      <div class="stat-label">Evaluaciones</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon positivas">
+        <span class="material-icons">thumb_up</span>
+      </div>
+      <div class="stat-value">{{ getAnotacionesPositivas() }}</div>
+      <div class="stat-label">Anot. Positivas</div>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-icon negativas">
+        <span class="material-icons">thumb_down</span>
+      </div>
+      <div class="stat-value">{{ getAnotacionesNegativas() }}</div>
+      <div class="stat-label">Anot. Negativas</div>
+    </div>
+  </div>
+  
+  <!-- Content Grid -->
+  <div class="card-grid">
+    <!-- Asistencia -->
+    <div class="content-card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons">check_circle</span>
+          Asistencia Reciente
+        </h3>
+      </div>
+      <div class="card-body">
+        @if (asistencia().length === 0) {
+          <div class="empty-state">
+            <span class="material-icons">info</span>
+            <p>No hay registros de asistencia</p>
+          </div>
+        } @else {
+          @for (asist of asistencia(); track asist.id) {
+            <div class="list-item">
+              <div class="list-icon" [class.presente]="asist.presente" [class.falta]="!asist.presente">
+                <span class="material-icons">{{ asist.presente ? 'check_circle' : 'cancel' }}</span>
+              </div>
+              <div class="list-content">
+                <span class="title">{{ asist.presente ? 'Presente' : 'Ausente' }}</span>
+                <span class="subtitle">{{ asist.fecha }}</span>
+              </div>
+              @if (asist.observacion) {
+                <span class="badge-obs">{{ asist.observacion }}</span>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+    
+    <!-- Evaluaciones -->
+    <div class="content-card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons">assignment</span>
+          Evaluaciones Próximas
+        </h3>
+      </div>
+      <div class="card-body">
+        @if (evaluaciones().length === 0) {
+          <div class="empty-state">
+            <span class="material-icons">info</span>
+            <p>No hay evaluaciones próximas</p>
+          </div>
+        } @else {
+          @for (eval of evaluaciones(); track eval.id) {
+            <div class="list-item">
+              <div class="list-icon eval">
+                <span class="material-icons">description</span>
+              </div>
+              <div class="list-content">
+                <span class="title">{{ eval.titulo }}</span>
+                <span class="subtitle">{{ eval.materia }} • {{ eval.fecha }}</span>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+    
+    <!-- Anotaciones -->
+    <div class="content-card full-width">
+      <div class="card-header">
+        <h3 class="card-title">
+          <span class="material-icons">note</span>
+          Anotaciones del Estudiante
+        </h3>
+      </div>
+      <div class="card-body">
+        @if (anotaciones().length === 0) {
+          <div class="empty-state">
+            <span class="material-icons">info</span>
+            <p>No hay anotaciones</p>
+          </div>
+        } @else {
+          @for (anot of anotaciones(); track anot.id) {
+            <div class="list-item">
+              <div class="list-icon" [class.positiva]="anot.tipo === 'positiva'" [class.negativa]="anot.tipo === 'negativa'">
+                <span class="material-icons">{{ anot.tipo === 'positiva' ? 'thumb_up' : 'thumb_down' }}</span>
+              </div>
+              <div class="list-content">
+                <span class="title">{{ anot.descripcion }}</span>
+                <span class="subtitle">{{ anot.fecha }}</span>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
