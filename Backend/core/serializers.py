@@ -128,8 +128,10 @@ class EvaluacionSerializer(serializers.Serializer):
     id = serializers.CharField(source="_id", read_only=True)
     curso_id = serializers.CharField(required=False, allow_null=True)
     materia = serializers.CharField(required=False, allow_null=True)
-    titulo = serializers.CharField(required=False, allow_null=True)
-    descripcion = serializers.CharField(required=False, allow_null=True)
+    titulo = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    descripcion = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
     fecha = serializers.DateField(required=False, allow_null=True)
     ponderacion = serializers.FloatField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
@@ -137,6 +139,11 @@ class EvaluacionSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         print(f"DEBUG - Creating Evaluacion with data: {validated_data}")
+        # Asegurar que los campos opcionales tengan valores por defecto
+        if not validated_data.get("titulo"):
+            validated_data["titulo"] = "Sin título"
+        if not validated_data.get("ponderacion"):
+            validated_data["ponderacion"] = 20
         evaluacion = Evaluacion(validated_data)
         evaluacion.save()
         return evaluacion
@@ -154,9 +161,11 @@ class AnotacionSerializer(serializers.Serializer):
     id = serializers.CharField(source="_id", read_only=True)
     estudiante_id = serializers.CharField(required=False, allow_null=True)
     tipo = serializers.CharField(
-        required=False, allow_null=True
+        required=False, allow_null=True, allow_blank=True
     )  # 'positiva' o 'negativa'
-    descripcion = serializers.CharField(required=False, allow_null=True)
+    descripcion = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )
     fecha = serializers.DateField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
@@ -167,6 +176,9 @@ class AnotacionSerializer(serializers.Serializer):
             from datetime import date
 
             validated_data["fecha"] = date.today().isoformat()
+        # Si no hay tipo, usar 'negativa' por defecto
+        if not validated_data.get("tipo"):
+            validated_data["tipo"] = "negativa"
         print(f"DEBUG - Creating Anotacion with data: {validated_data}")
         anotacion = Anotacion(validated_data)
         anotacion.save()
@@ -186,14 +198,21 @@ class ReunioneSerializer(serializers.Serializer):
     curso_id = serializers.CharField(required=False, allow_null=True)
     fecha = serializers.DateField(required=False, allow_null=True)
     hora = serializers.TimeField(required=False, allow_null=True)
-    lugar = serializers.CharField(required=False, allow_null=True)
-    descripcion = serializers.CharField(required=False, allow_null=True)
+    lugar = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    descripcion = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
     notificacion_enviada = serializers.BooleanField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
         print(f"DEBUG - Creating Reunione with data: {validated_data}")
+        # Valores por defecto
+        if not validated_data.get("lugar"):
+            validated_data["lugar"] = "Por definir"
+        if not validated_data.get("notificacion_enviada"):
+            validated_data["notificacion_enviada"] = False
         reunion = Reunione(validated_data)
         reunion.save()
         return reunion
@@ -236,8 +255,10 @@ class RecordatorioSerializer(serializers.Serializer):
 
     id = serializers.CharField(source="_id", read_only=True)
     usuario_id = serializers.CharField(required=False, allow_null=True)
-    titulo = serializers.CharField(required=False, allow_null=True)
-    descripcion = serializers.CharField(required=False, allow_null=True)
+    titulo = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    descripcion = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
     fecha = serializers.DateField(required=False, allow_null=True)
     fecha_limite = serializers.DateField(required=False, allow_null=True)
     hora = serializers.TimeField(required=False, allow_null=True)
@@ -248,6 +269,11 @@ class RecordatorioSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         print(f"DEBUG - Creating Recordatorio with data: {validated_data}")
+        # Asegurar valores por defecto
+        if not validated_data.get("titulo"):
+            validated_data["titulo"] = "Sin título"
+        if validated_data.get("fecha_limite") and not validated_data.get("fecha"):
+            validated_data["fecha"] = validated_data["fecha_limite"]
         recordatorio = Recordatorio(validated_data)
         recordatorio.save()
         return recordatorio
