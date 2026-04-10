@@ -132,7 +132,7 @@ class EvaluacionSerializer(serializers.Serializer):
     descripcion = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
-    fecha = serializers.DateField(required=False, allow_null=True)
+    fecha = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     ponderacion = serializers.FloatField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
@@ -172,7 +172,7 @@ class AnotacionSerializer(serializers.Serializer):
     descripcion = serializers.CharField(
         required=False, allow_null=True, allow_blank=True
     )
-    fecha = serializers.DateField(required=False, allow_null=True)
+    fecha = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
@@ -275,8 +275,10 @@ class RecordatorioSerializer(serializers.Serializer):
     descripcion = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
     )
-    fecha = serializers.DateField(required=False, allow_null=True)
-    fecha_limite = serializers.DateField(required=False, allow_null=True)
+    fecha = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    fecha_limite = serializers.CharField(
+        required=False, allow_null=True, allow_blank=True
+    )
     hora = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     privado = serializers.BooleanField(default=True)
     completada = serializers.BooleanField(default=False)

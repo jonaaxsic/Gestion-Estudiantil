@@ -133,7 +133,7 @@ export class DashboardApoderadoPage implements OnInit {
       usuario_id: userId,
       titulo: this.recordatorioForm.titulo,
       descripcion: this.recordatorioForm.descripcion || '',
-      fecha_limite: this.recordatorioForm.fecha_limite || undefined,
+      fecha_limite: this.normalizeDate(this.recordatorioForm.fecha_limite),
       completada: false
     }).subscribe({
       next: () => {
@@ -227,5 +227,16 @@ export class DashboardApoderadoPage implements OnInit {
   
   logout(): void {
     this.auth.logout();
+  }
+  
+  // Normalizar fecha para el backend
+  private normalizeDate(dateStr: string | undefined): string | undefined {
+    if (!dateStr) return dateStr;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split('-');
+      return `${y}-${m}-${d}`;
+    }
+    return dateStr;
   }
 }

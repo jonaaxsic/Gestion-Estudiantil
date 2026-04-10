@@ -326,7 +326,7 @@ export class DashboardDocentePage implements OnInit {
       materia: this.evaluacionForm.materia,
       titulo: this.evaluacionForm.titulo,
       descripcion: this.evaluacionForm.descripcion,
-      fecha: this.evaluacionForm.fecha,
+      fecha: this.normalizeDate(this.evaluacionForm.fecha),
       ponderacion: this.evaluacionForm.ponderacion
     }).subscribe({
       next: () => {
@@ -396,7 +396,7 @@ export class DashboardDocentePage implements OnInit {
       estudiante_id: this.anotacionForm.estudianteId,
       tipo: this.anotacionForm.tipo,
       descripcion: this.anotacionForm.descripcion,
-      fecha: this.anotacionForm.fecha
+      fecha: this.normalizeDate(this.anotacionForm.fecha)
     }).subscribe({
       next: () => {
         this.saving.set(false);
@@ -420,7 +420,7 @@ export class DashboardDocentePage implements OnInit {
     this.saving.set(true);
     this.api.createReunion({
       curso_id: this.reunionForm.cursoId,
-      fecha: this.reunionForm.fecha,
+      fecha: this.normalizeDate(this.reunionForm.fecha),
       hora: this.reunionForm.hora,
       lugar: this.reunionForm.lugar,
       descripcion: this.reunionForm.descripcion || '',
@@ -457,7 +457,7 @@ export class DashboardDocentePage implements OnInit {
       usuario_id: userId,
       titulo: this.recordatorioForm.titulo,
       descripcion: this.recordatorioForm.descripcion,
-      fecha_limite: this.recordatorioForm.fecha_limite || undefined,
+      fecha_limite: this.normalizeDate(this.recordatorioForm.fecha_limite),
       completada: false
     }).subscribe({
       next: () => {
@@ -651,5 +651,18 @@ export class DashboardDocentePage implements OnInit {
 
   logout(): void {
     this.auth.logout();
+  }
+  
+  // Normalizar fecha para el backend
+  private normalizeDate(dateStr: string | undefined): string | undefined {
+    if (!dateStr) return dateStr;
+    // Si ya está en formato YYYY-MM-DD, retornar tal cual
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+    // Si está en DD-MM-YYYY, convertir
+    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      const [d, m, y] = dateStr.split('-');
+      return `${y}-${m}-${d}`;
+    }
+    return dateStr;
   }
 }
