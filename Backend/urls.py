@@ -74,12 +74,12 @@ urlpatterns = [
         views.estudiantes_sin_apoderado,
         name="estudiantes-sin-apoderado",
     ),
-    # Notas
+    # Notas - rutas específicas primero, luego la genérica
     path("notas", views.NotaList.as_view(), name="nota-list"),
     path("notas/", views.NotaList.as_view(), name="nota-list-slash"),
-    path("notas/<str:pk>", views.NotaDetail.as_view(), name="nota-detail"),
     path("notas/cerrar", views.cerrar_ramo, name="cerrar-ramo"),
     path("notas/actualizar", views.actualizar_nota_simple, name="actualizar-nota"),
+    path("notas/<str:pk>", views.NotaDetail.as_view(), name="nota-detail"),
     # Recordatorios
     path("recordatorios", views.RecordatorioList.as_view(), name="recordatorio-list"),
     path(

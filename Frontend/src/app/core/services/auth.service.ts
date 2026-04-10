@@ -80,9 +80,10 @@ export class AuthService {
       this.api.login(email, password).subscribe({
         next: (response) => {
           if (response.success && response.user) {
-            // Ensure rut field is saved properly
+            // Normalizar el campo id desde _id de MongoDB
             const userData = {
               ...response.user,
+              id: response.user.id || (response.user as any)._id,
               rut: response.user.rut || undefined
             };
             const userString = JSON.stringify(userData);

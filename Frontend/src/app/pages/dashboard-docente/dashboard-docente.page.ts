@@ -77,6 +77,11 @@ export class DashboardDocentePage implements OnInit {
   successMessage = signal('');
   anoEscolar = new Date().getFullYear();
   
+  // Asistencia signals
+  cursoTab = signal<'notas' | 'asistencia'>('notas');
+  asistenciaHoy: Record<string, boolean> = {};
+  fechaAsistenciaHoy = new Date().toISOString().split('T')[0];
+  
   // Form data
   asistenciaForm = {
     cursoId: '',
@@ -221,6 +226,20 @@ export class DashboardDocentePage implements OnInit {
   }
   
   openAnotacionDialog(): void {
+    // Si hay un curso seleccionado, cargar sus estudiantes primero
+    if (this.selectedCurso()?.id) {
+      this.api.getEstudiantes(this.selectedCurso()!.id).subscribe(data => {
+        this.estudiantes.set(data);
+      });
+    } else if (this.cursosAsignados().length > 0) {
+      // Cargar estudiantes del primer curso asignado
+      const primerCurso = this.cursosAsignados()[0];
+      if (primerCurso.id) {
+        this.api.getEstudiantes(primerCurso.id).subscribe(data => {
+          this.estudiantes.set(data);
+        });
+      }
+    }
     this.anotacionForm = {
       estudianteId: '',
       tipo: 'negativa',
@@ -427,8 +446,11 @@ export class DashboardDocentePage implements OnInit {
       return;
     }
     
-    const userId = this.auth.user()?.id;
-    if (!userId) return;
+    const userId = this.auth.user()?.id || (this.auth.user() as any)?._id;
+    if (!userId) {
+      console.error('No hay userId disponible');
+      return;
+    }
     
     this.saving.set(true);
     this.api.createRecordatorio({
@@ -566,6 +588,65 @@ export class DashboardDocentePage implements OnInit {
 
   closeMobileMenu(): void {
     this.showMobileMenu.set(false);
+  }
+  
+  // Asistencia por curso
+  toggleAsistenciaEstudiante(estudianteId: string): void {
+    this.asistenciaHoy[estudianteId] = !this.asistenciaHoy[estudianteId];
+  }
+  
+  loadAsistenciaCurso(): void {
+    const curso = this.selectedCurso();
+    if (!curso?.id) return;
+    
+    // Inicializar todos como presentes por defecto
+    this.estudiantes().forEach(est => {
+      if (est.id) this.asistenciaHoy[est.id] = true;
+    });
+    
+    // Cargar asistencia del día de hoy para este curso
+    this.api.getAsistencia({ 
+      curso_id: curso.id,
+      fecha: this.fechaAsistenciaHoy
+    }).subscribe(data => {
+      // Si hay registros, actualizar el estado
+      if (data && data.length > 0) {
+        data.forEach((a: any) => {
+          if (a.estudiante_id) {
+            this.asistenciaHoy[a.estudiante_id] = a.presente ?? true;
+          }
+        });
+      }
+    });
+  }
+  
+  guardarAsistenciaHoy(): void {
+    const curso = this.selectedCurso();
+    if (!curso?.id) return;
+    
+    const registros = this.estudiantes()
+      .filter(e => e.id)
+      .map(e => ({ 
+        estudiante_id: e.id!, 
+        presente: this.asistenciaHoy[e.id!] ?? true 
+      }));
+    
+    this.saving.set(true);
+    this.api.createAsistenciaBulk({
+      curso_id: curso.id,
+      fecha: this.fechaAsistenciaHoy,
+      registros
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.showSuccess('Asistencia guardada');
+        this.loadAsistenciaCurso();
+      },
+      error: () => { 
+        this.saving.set(false); 
+        alert('Error al guardar asistencia'); 
+      }
+    });
   }
 
   logout(): void {

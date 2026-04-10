@@ -122,8 +122,11 @@ export class DashboardApoderadoPage implements OnInit {
       alert('Ingrese un título');
       return;
     }
-    const userId = this.auth.user()?.id;
-    if (!userId) return;
+    const userId = this.auth.user()?.id || (this.auth.user() as any)?._id;
+    if (!userId) {
+      console.error('No hay userId disponible');
+      return;
+    }
     
     this.saving.set(true);
     this.api.createRecordatorio({

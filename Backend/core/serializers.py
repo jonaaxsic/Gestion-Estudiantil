@@ -245,8 +245,8 @@ class ApoderadoSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         apoderado = Apoderado(validated_data)
-        apoderaDo.save()
-        return apoderaDo
+        empoderado.save()
+        return empoderado
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():
@@ -266,7 +266,7 @@ class RecordatorioSerializer(serializers.Serializer):
     )
     fecha = serializers.DateField(required=False, allow_null=True)
     fecha_limite = serializers.DateField(required=False, allow_null=True)
-    hora = serializers.TimeField(required=False, allow_null=True)
+    hora = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     privado = serializers.BooleanField(default=True)
     completada = serializers.BooleanField(default=False)
     created_at = serializers.DateTimeField(read_only=True)

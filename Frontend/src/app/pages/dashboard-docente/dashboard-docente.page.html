@@ -270,65 +270,122 @@
             <span class="material-icons">close</span>
           </button>
         </div>
+        
+        <!-- Tabs -->
+        <div class="curso-tabs">
+          <button class="curso-tab" [class.active]="cursoTab() === 'notas'" 
+                  (click)="cursoTab.set('notas')">
+            <span class="material-icons">grade</span> Notas
+          </button>
+          <button class="curso-tab" [class.active]="cursoTab() === 'asistencia'" 
+                  (click)="cursoTab.set('asistencia'); loadAsistenciaCurso()">
+            <span class="material-icons">how_to_reg</span> Asistencia
+          </button>
+        </div>
+        
         <div class="card-body">
-          <!-- Notas de Estudiantes -->
-          <h4 class="subsection-title">
-            <span class="material-icons">grade</span>
-            Notas de Alumnos ({{ anoEscolar }})
-          </h4>
-          
-          <div class="notas-table-wrapper">
-            <table class="notas-table">
-              <thead>
-                <tr>
-                  <th>Alumno</th>
-                  <th>Nota 1</th>
-                  <th>Nota 2</th>
-                  <th>Nota 3</th>
-                  <th>Nota 4</th>
-                  <th>Nota 5</th>
-                  <th>Nota 6</th>
-                  <th>Promedio</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (est of estudiantesOrdenados; track est.id) {
-                  @let notaEst = getNotaEstudiante(est.id!);
+          @if (cursoTab() === 'notas') {
+            <!-- Notas de Estudiantes -->
+            <h4 class="subsection-title">
+              <span class="material-icons">grade</span>
+              Notas de Alumnos ({{ anoEscolar }})
+            </h4>
+            
+            <div class="notas-table-wrapper">
+              <table class="notas-table">
+                <thead>
                   <tr>
-                    <td class="alumno-cell">
-                      {{ est.apellido }} {{ est.nombre }}
-                    </td>
-                    <td>
-                      <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota1')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota1', $any($event.target).value)" [disabled]="notaEst?.cerrado">
-                    </td>
-                    <td>
-                      <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota2')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota2', $any($event.target).value)" [disabled]="notaEst?.cerrado">
-                    </td>
-                    <td>
-                      <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota3')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota3', $any($event.target).value)" [disabled]="notaEst?.cerrado">
-                    </td>
-                    <td>
-                      <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota4')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota4', $any($event.target).value)" [disabled]="notaEst?.cerrado">
-                    </td>
-                    <td>
-                      <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota5')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota5', $any($event.target).value)" [disabled]="notaEst?.cerrado">
-                    </td>
-                    <td>
-                      <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota6')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota6', $any($event.target).value)" [disabled]="notaEst?.cerrado">
-                    </td>
-                    <td class="promedio-cell">
-                      {{ notaEst?.nota_final || '-' }}
-                    </td>
+                    <th>Alumno</th>
+                    <th>Nota 1</th>
+                    <th>Nota 2</th>
+                    <th>Nota 3</th>
+                    <th>Nota 4</th>
+                    <th>Nota 5</th>
+                    <th>Nota 6</th>
+                    <th>Promedio</th>
                   </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  @for (est of estudiantesOrdenados; track est.id) {
+                    @let notaEst = getNotaEstudiante(est.id!);
+                    <tr>
+                      <td class="alumno-cell">
+                        {{ est.apellido }} {{ est.nombre }}
+                      </td>
+                      <td>
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota1')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota1', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                      </td>
+                      <td>
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota2')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota2', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                      </td>
+                      <td>
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota3')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota3', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                      </td>
+                      <td>
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota4')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota4', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                      </td>
+                      <td>
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota5')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota5', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                      </td>
+                      <td>
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota6')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota6', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                      </td>
+                      <td class="promedio-cell">
+                        {{ notaEst?.nota_final || '-' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            <p class="help-text">
+              <span class="material-icons">info</span>
+              Las notas se guardan automáticamente al salir del campo. Cada curso tiene 6 notas anuales.
+            </p>
+          }
           
-          <p class="help-text">
-            <span class="material-icons">info</span>
-            Las notas se guardan automáticamente al salir del campo. Cada curso tiene 6 notas anuales.
-          </p>
+          @if (cursoTab() === 'asistencia') {
+            <!-- Asistencia del Curso -->
+            <h4 class="subsection-title">
+              <span class="material-icons">how_to_reg</span>
+              Asistencia - {{ fechaAsistenciaHoy }}
+            </h4>
+            
+            <div class="notas-table-wrapper">
+              <table class="notas-table">
+                <thead>
+                  <tr>
+                    <th>Alumno</th>
+                    <th>Presente</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (est of estudiantesOrdenados; track est.id) {
+                    <tr>
+                      <td class="alumno-cell">
+                        {{ est.apellido }} {{ est.nombre }}
+                      </td>
+                      <td>
+                        <input type="checkbox" [checked]="asistenciaHoy[est.id!] === true" (change)="toggleAsistenciaEstudiante(est.id!)">
+                      </td>
+                      <td [class.asistencia-presente]="asistenciaHoy[est.id!] === true" [class.asistencia-ausente]="asistenciaHoy[est.id!] === false">
+                        {{ asistenciaHoy[est.id!] === true ? 'Presente' : asistenciaHoy[est.id!] === false ? 'Ausente' : 'Sin registro' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="help-text" style="margin-top: 16px;">
+              <button class="btn btn-primary" (click)="guardarAsistenciaHoy()" [disabled]="saving()">
+                <span class="material-icons">save</span>
+                Guardar Asistencia de Hoy
+              </button>
+            </div>
+          }
         </div>
       </div>
     }
