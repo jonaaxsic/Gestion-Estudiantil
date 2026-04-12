@@ -1935,3 +1935,176 @@
     font-size: 0.95rem;
   }
 }
+
+/* ── SEMÁFORO DE NOTAS ──────────────────────────────────── */
+.nota-value.rojo {
+  color: #ef4444;
+  background: #fee2e2;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.nota-value.amarillo {
+  color: #f59e0b;
+  background: #fef3c7;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.nota-value.verde {
+  color: #10b981;
+  background: #dcfce7;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+/* Promedio general */
+.promedio-general {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.promedio-general.bajo {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.promedio-general.medio {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.promedio-general.alto {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.promedio-general .promedio-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.promedio-general .promedio-valor {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.promedio-general.bajo .promedio-valor {
+  color: #ef4444;
+}
+
+.promedio-general.medio .promedio-valor {
+  color: #f59e0b;
+}
+
+.promedio-general.alto .promedio-valor {
+  color: #10b981;
+}
+
+.promedio-alerta {
+  font-size: 0.85rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* ── ASISTENCIA MEJORADA ───────────────────────────────── */
+.asistencia-porcentaje {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.asistencia-porcentaje.bajo {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.asistencia-porcentaje.medio {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.asistencia-porcentaje.alto {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+
+.porcentaje-circulo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  border: 3px solid var(--border);
+}
+
+.asistencia-porcentaje.bajo .porcentaje-circulo {
+  border-color: #ef4444;
+}
+
+.asistencia-porcentaje.medio .porcentaje-circulo {
+  border-color: #f59e0b;
+}
+
+.asistencia-porcentaje.alto .porcentaje-circulo {
+  border-color: #10b981;
+}
+
+.porcentaje-valor {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.asistencia-porcentaje.bajo .porcentaje-valor {
+  color: #ef4444;
+}
+
+.asistencia-porcentaje.medio .porcentaje-valor {
+  color: #f59e0b;
+}
+
+.asistencia-porcentaje.alto .porcentaje-valor {
+  color: #10b981;
+}
+
+.porcentaje-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.porcentaje-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.porcentaje-alerta {
+  font-size: 0.85rem;
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.stat-num.success {
+  color: #10b981;
+}
+
+.stat-num.danger {
+  color: #ef4444;
+}

@@ -181,6 +181,13 @@ export class DashboardApoderadoPage implements OnInit {
     return this.asistencia().length;
   }
   
+  getPorcentajeAsistencia(): number {
+    const total = this.getTotalAsistencias();
+    if (total === 0) return 100;
+    const presentes = this.getPresentes();
+    return Math.round((presentes / total) * 100);
+  }
+
   getAnotacionesPositivas(): number {
     return this.anotaciones().filter(a => a.tipo === 'positiva').length;
   }
@@ -223,6 +230,40 @@ export class DashboardApoderadoPage implements OnInit {
   isNotaVacia(notas: any, num: string): boolean {
     if (!notas) return true;
     return notas[num] === undefined || notas[num] === null;
+  }
+  
+  // Semáforo de notas
+  getNotaValorNumber(notas: any, num: string): number {
+    if (!notas) return 0;
+    const val = notas[num];
+    return val !== undefined && val !== null ? Number(val) : 0;
+  }
+  
+  esNotaBaja(valor: number): boolean {
+    return valor > 0 && valor < 4;
+  }
+  
+  esNotaMedia(valor: number): boolean {
+    return valor >= 4 && valor < 5;
+  }
+  
+  esNotaAlta(valor: number): boolean {
+    return valor >= 5;
+  }
+  
+  // Promedio general
+  getPromedioGeneral(): number {
+    const notasDelEstudiante = this.notas();
+    if (notasDelEstudiante.length === 0) return 0;
+    
+    const promedios = notasDelEstudiante
+      .map(n => n.nota_final)
+      .filter(p => p !== undefined && p !== null && p > 0);
+    
+    if (promedios.length === 0) return 0;
+    
+    const suma = promedios.reduce((acc, curr) => acc + curr, 0);
+    return suma / promedios.length;
   }
   
   logout(): void {

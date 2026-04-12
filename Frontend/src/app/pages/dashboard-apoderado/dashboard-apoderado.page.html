@@ -251,7 +251,7 @@
     </div>
   </div>
   }
-
+  
   <!-- Vista de Notas -->
   @if (activeSection() === 'notas') {
   <div class="notas-view">
@@ -263,55 +263,66 @@
         </h3>
       </div>
       <div class="card-body">
-        @if (notas().length === 0) {
+          @if (notas().length === 0) {
           <div class="empty-state">
             <span class="material-icons">info</span>
             <p>No hay notas registradas</p>
           </div>
         } @else {
+          <!-- Promedio general -->
+          @if (getPromedioGeneral() > 0) {
+            <div class="promedio-general" [class.bajo]="getPromedioGeneral() < 4" [class.medio]="getPromedioGeneral() >= 4 && getPromedioGeneral() < 5" [class.alto]="getPromedioGeneral() >= 5">
+              <span class="promedio-label">Promedio General</span>
+              <span class="promedio-valor">{{ getPromedioGeneral() | number:'1.1-1' }}</span>
+              @if (getPromedioGeneral() < 4) {
+                <span class="promedio-alerta">⚠️ Requiere atención</span>
+              }
+            </div>
+          }
+          
           @for (nota of notas(); track nota.id) {
             <div class="nota-asignatura">
               <h4 class="asignatura-titulo">{{ nota.asignatura }}</h4>
               <div class="notas-grid">
                 <div class="nota-item">
                   <span class="nota-label">Nota 1</span>
-                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota1')">
+                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota1')" [class.rojo]="esNotaBaja(getNotaValorNumber(nota.notas, 'nota1'))" [class.amarillo]="esNotaMedia(getNotaValorNumber(nota.notas, 'nota1'))" [class.verde]="esNotaAlta(getNotaValorNumber(nota.notas, 'nota1'))">
                     {{ getNotaDisplay(nota.notas, 'nota1') }}
                   </span>
                 </div>
                 <div class="nota-item">
                   <span class="nota-label">Nota 2</span>
-                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota2')">
+                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota2')" [class.rojo]="esNotaBaja(getNotaValorNumber(nota.notas, 'nota2'))" [class.amarillo]="esNotaMedia(getNotaValorNumber(nota.notas, 'nota2'))" [class.verde]="esNotaAlta(getNotaValorNumber(nota.notas, 'nota2'))">
                     {{ getNotaDisplay(nota.notas, 'nota2') }}
                   </span>
                 </div>
                 <div class="nota-item">
                   <span class="nota-label">Nota 3</span>
-                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota3')">
+                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota3')" [class.rojo]="esNotaBaja(getNotaValorNumber(nota.notas, 'nota3'))" [class.amarillo]="esNotaMedia(getNotaValorNumber(nota.notas, 'nota3'))" [class.verde]="esNotaAlta(getNotaValorNumber(nota.notas, 'nota3'))">
                     {{ getNotaDisplay(nota.notas, 'nota3') }}
                   </span>
                 </div>
                 <div class="nota-item">
                   <span class="nota-label">Nota 4</span>
-                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota4')">
+                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota4')" [class.rojo]="esNotaBaja(getNotaValorNumber(nota.notas, 'nota4'))" [class.amarillo]="esNotaMedia(getNotaValorNumber(nota.notas, 'nota4'))" [class.verde]="esNotaAlta(getNotaValorNumber(nota.notas, 'nota4'))">
                     {{ getNotaDisplay(nota.notas, 'nota4') }}
                   </span>
                 </div>
                 <div class="nota-item">
                   <span class="nota-label">Nota 5</span>
-                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota5')">
+                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota5')" [class.rojo]="esNotaBaja(getNotaValorNumber(nota.notas, 'nota5'))" [class.amarillo]="esNotaMedia(getNotaValorNumber(nota.notas, 'nota5'))" [class.verde]="esNotaAlta(getNotaValorNumber(nota.notas, 'nota5'))">
                     {{ getNotaDisplay(nota.notas, 'nota5') }}
                   </span>
                 </div>
                 <div class="nota-item">
                   <span class="nota-label">Nota 6</span>
-                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota6')">
+                  <span class="nota-value" [class.vacio]="isNotaVacia(nota.notas, 'nota6')" [class.rojo]="esNotaBaja(getNotaValorNumber(nota.notas, 'nota6'))" [class.amarillo]="esNotaMedia(getNotaValorNumber(nota.notas, 'nota6'))" [class.verde]="esNotaAlta(getNotaValorNumber(nota.notas, 'nota6'))">
                     {{ getNotaDisplay(nota.notas, 'nota6') }}
                   </span>
                 </div>
                 <div class="nota-item promedio">
                   <span class="nota-label">Promedio</span>
-                  <span class="nota-value">{{ nota.nota_final || '-' }}</span>
+                  <span class="nota-value" [class.rojo]="(nota.nota_final || 0) < 4" [class.amarillo]="(nota.nota_final || 0) >= 4 && (nota.nota_final || 0) < 5" [class.verde]="(nota.nota_final || 0) >= 5">{{ nota.nota_final || '-' }}</span>
                 </div>
               </div>
             </div>
@@ -333,20 +344,34 @@
         </h3>
       </div>
       <div class="card-body">
+        <!-- Porcentaje de asistencia -->
+        <div class="asistencia-porcentaje" [class.bajo]="getPorcentajeAsistencia() < 85" [class.medio]="getPorcentajeAsistencia() >= 85 && getPorcentajeAsistencia() < 95" [class.alto]="getPorcentajeAsistencia() >= 95">
+          <div class="porcentaje-circulo">
+            <span class="porcentaje-valor">{{ getPorcentajeAsistencia() }}%</span>
+          </div>
+          <div class="porcentaje-info">
+            <span class="porcentaje-label">Asistencia General</span>
+            @if (getPorcentajeAsistencia() < 85) {
+              <span class="porcentaje-alerta">⚠️ Bajo el 85% - Mínimo legal</span>
+            }
+          </div>
+        </div>
+        
         <div class="stats-row">
           <div class="stat-item">
-            <span class="stat-num">{{ getPresentes() }}</span>
+            <span class="stat-num success">{{ getPresentes() }}</span>
             <span class="stat-text">Presentes</span>
           </div>
           <div class="stat-item">
-            <span class="stat-num">{{ getTotalAsistencias() - getPresentes() }}</span>
+            <span class="stat-num danger">{{ getTotalAsistencias() - getPresentes() }}</span>
             <span class="stat-text">Ausentes</span>
           </div>
           <div class="stat-item">
             <span class="stat-num">{{ getTotalAsistencias() }}</span>
-            <span class="stat-text">Total</span>
+            <span class="stat-text">Total Días</span>
           </div>
         </div>
+        
         @if (asistencia().length === 0) {
           <div class="empty-state">
             <span class="material-icons">info</span>

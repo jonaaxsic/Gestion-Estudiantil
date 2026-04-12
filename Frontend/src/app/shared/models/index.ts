@@ -10,6 +10,7 @@ export interface Usuario {
   nombre: string;
   apellido: string;
   telefono?: string;
+  direccion?: string;
   activo: boolean;
   created_at?: string;
   updated_at?: string;
