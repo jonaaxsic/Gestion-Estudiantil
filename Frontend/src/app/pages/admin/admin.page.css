@@ -469,6 +469,38 @@
   border-color: var(--brand);
 }
 
+/* ── SEARCH INPUT ───────────────────────────────────────── */
+.search-input {
+  padding: 9px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  min-width: 200px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── STAT ICONS COLORS ─────────────────────────────────── */
+.stat-icon.warning {
+  background: var(--warning);
+}
+
+.stat-icon .material-icons {
+  color: #fff;
+  font-size: 24px;
+}
+
 /* ── DIALOG ─────────────────────────────────────────────── */
 .dialog-overlay {
   position: fixed;

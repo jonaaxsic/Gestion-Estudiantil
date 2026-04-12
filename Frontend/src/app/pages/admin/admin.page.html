@@ -62,208 +62,34 @@
         </button>
       </div>
     </div>
-  </div>
-}
-
-<!-- Side Panel de Cursos -->
-@if (showCursosPanel()) {
-  <div class="side-panel">
-    <div class="side-panel-header">
-      <h3><span class="material-icons">class</span> Cursos</h3>
-      <button class="close-btn" (click)="toggleCursosPanel()">
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div class="side-panel-body">
-      <button class="btn btn-primary full-width" (click)="activeTab.set('cursos')">
-        <span class="material-icons">add</span>
-        Crear Nuevo Curso
-      </button>
-      @for (curso of cursos(); track curso.id) {
-        <div class="course-item" (click)="selectCurso(curso)">
-          <div class="course-icon">
-            <span class="material-icons">school</span>
-          </div>
-          <div class="course-info">
-            <span class="course-name">{{ curso.nivel }} {{ curso.nombre }}</span>
-            <span class="course-students">{{ getEstudiantesCount(curso.id) }} estudiantes</span>
-          </div>
-        </div>
-      }
-    </div>
-  </div>
-}
-
-<div class="page-container" [class.with-panel]="showCursosPanel()">
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab" [class.active]="activeTab() === 'usuarios'" (click)="activeTab.set('usuarios')">
-      <span class="material-icons">people</span>
-      Usuarios
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'estudiantes'" (click)="activeTab.set('estudiantes')">
-      <span class="material-icons">school</span>
-      Estudiantes
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'cursos'" (click)="activeTab.set('cursos')">
-      <span class="material-icons">class</span>
-      Cursos
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'docentes'" (click)="activeTab.set('docentes')">
-      <span class="material-icons">co_present</span>
-      Docentes
-    </button>
-  </div>
-  
-  <!-- USUARIOS TAB -->
-  @if (activeTab() === 'usuarios') {
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon users">
-          <span class="material-icons">people</span>
-        </div>
-        <div class="stat-value">{{ usuarios().length }}</div>
-        <div class="stat-label">Usuarios Totales</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon admins">
-          <span class="material-icons">shield</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('administrador') }}</div>
-        <div class="stat-label">Administradores</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon docentes">
-          <span class="material-icons">school</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('docente') }}</div>
-        <div class="stat-label">Docentes</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon apoderados">
-          <span class="material-icons">family_restroom</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('apoderado') }}</div>
-        <div class="stat-label">Apoderados</div>
-      </div>
-    </div>
-    
-    <!-- Users Table -->
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">person</span>
-            Gestión de Usuarios
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <select class="filter-select" [(ngModel)]="rolFilter" (ngModelChange)="applyFilter()">
-            <option value="">Todos los roles</option>
-            <option value="administrador">Administrador</option>
-            <option value="docente">Docente</option>
-            <option value="apoderado">Apoderado</option>
-          </select>
-          <button class="btn-new" (click)="openUserDialog()">
-            <span class="material-icons">add</span>
-            Nuevo Usuario
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (user of usuarios(); track user.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar">{{ user.nombre.charAt(0) }}{{ user.apellido.charAt(0) }}</div>
-                    <div class="user-info">
-                      <span class="user-name-table">{{ user.nombre }} {{ user.apellido }}</span>
-                      <span class="user-username">&#64;{{ user.username }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>{{ user.email }}</td>
-                <td>
-                  <span class="badge badge-{{ user.rol }}">{{ user.rol }}</span>
-                </td>
-                <td>
-                  <span class="badge" [class.badge-activo]="user.activo" [class.badge-inactivo]="!user.activo">
-                    {{ user.activo ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openUserDialog(user)" title="Editar">
-                      <span class="material-icons">edit</span>
-                    </button>
-                    <button class="btn-icon delete" (click)="deleteUsuario(user)" title="Eliminar">
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        
-        @if (usuarios().length === 0) {
-          <div class="empty-state">
-            <span class="material-icons">person_off</span>
-            <p>No hay usuarios registrados</p>
-          </div>
-        }
-      </div>
     </div>
   }
   
-  <!-- ESTUDIANTES TAB -->
-  @if (activeTab() === 'estudiantes') {
+  <!-- APODERADOS TAB -->
+  @if (activeTab() === 'apoderados') {
+    <!-- Stats de apoderados -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon students">
-          <span class="material-icons">school</span>
-        </div>
-        <div class="stat-value">{{ estudiantes().length }}</div>
-        <div class="stat-label">Total Estudiantes</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon courses">
-          <span class="material-icons">class</span>
-        </div>
-        <div class="stat-value">{{ cursos().length }}</div>
-        <div class="stat-label">Cursos</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon guardian">
+        <div class="stat-icon">
           <span class="material-icons">family_restroom</span>
         </div>
-        <div class="stat-value">{{ getEstudiantesConApoderado() }}</div>
-        <div class="stat-label">Con Apoderado</div>
+        <div class="stat-value">{{ usuarios().filter(u => u.rol === 'apoderado').length }}</div>
+        <div class="stat-label">Total Apoderados</div>
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon no-guardian">
-          <span class="material-icons">person_off</span>
+        <div class="stat-icon">
+          <span class="material-icons">check_circle</span>
         </div>
-        <div class="stat-value">{{ estudiantes().length - getEstudiantesConApoderado() }}</div>
+        <div class="stat-value">{{ getEstudiantesConApoderado() }}</div>
+        <div class="stat-label">Estudiantes con Apoderado</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon warning">
+          <span class="material-icons">warning</span>
+        </div>
+        <div class="stat-value">{{ getEstudiantesSinApoderado().length }}</div>
         <div class="stat-label">Sin Apoderado</div>
       </div>
     </div>
@@ -272,14 +98,15 @@
       <div class="card-header">
         <div class="card-header-left">
           <h3 class="card-title">
-            <span class="material-icons">school</span>
-            Gestión de Estudiantes
+            <span class="material-icons">family_restroom</span>
+            Gestión de Apoderados
           </h3>
         </div>
         <div class="card-header-right">
-          <button class="btn-new" (click)="openStudentDialog()">
+          <input type="text" class="search-input" placeholder="Buscar por nombre o RUT..." [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
+          <button class="btn-new" (click)="openUserDialog()">
             <span class="material-icons">add</span>
-            Nuevo Estudiante
+            Nuevo Apoderado
           </button>
         </div>
       </div>
@@ -288,186 +115,62 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Estudiante</th>
-              <th>RUT</th>
-              <th>Curso</th>
               <th>Apoderado</th>
+              <th>RUT</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th>Pupilo Asignado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            @for (est of estudiantes(); track est.id) {
+            @for (apoderado of getApoderadosConUsuario(); track apod
+ero.id) {
               <tr>
                 <td>
                   <div class="user-cell">
-                    <div class="user-avatar student">{{ est.nombre.charAt(0) }}{{ est.apellido.charAt(0) }}</div>
+                    <div class="user-avatar">{{ apod
+ero.nombre?.charAt(0) }}{{ apodero.apellido?.charAt(0) }}</div>
                     <div class="user-info">
-                      <span class="user-name-table">{{ est.nombre }} {{ est.apellido }}</span>
+                      <span class="user-name-table">{{ apodero.nombre }} {{ apodero.apellido }}</span>
                     </div>
                   </div>
                 </td>
-                <td>{{ est.rut }}</td>
+                <td>{{ apodero.rut || '-' }}</td>
+                <td>{{ apodero.telefono || '-' }}</td>
+                <td>{{ apodero.email || '-' }}</td>
                 <td>
-                  <span class="badge badge-curso">{{ getCursoNombreDisplay(est.curso_id) }}</span>
-                </td>
-                <td>
-                  @if (est.apoderado_id) {
-                    <span class="badge badge-activo">Asignado</span>
+                  @if (getPupiloNombre(apoderado.id!) !== 'Sin pupilo') {
+                    <span class="badge badge-activo">{{ getPupiloNombre(apoderado.id!) }}</span>
                   } @else {
-                    <span class="badge badge-inactivo">Sin asignar</span>
+                    <span class="badge badge-inactivo">Sin pupilo</span>
                   }
                 </td>
                 <td>
                   <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openStudentDialog(est)" title="Editar">
+                    <button class="btn-icon edit" (click)="openUserDialog(apoderado)" title="Editar">
                       <span class="material-icons">edit</span>
                     </button>
-                    <button class="btn-icon delete" (click)="deleteEstudiante(est)" title="Eliminar">
+                    <button class="btn-icon delete" (click)="deleteApoderado(apoderado)" title="Eliminar">
                       <span class="material-icons">delete</span>
                     </button>
                   </div>
                 </td>
               </tr>
             }
+            @if (getApoderadosConUsuario().length === 0) {
+              <tr>
+                <td colspan="6" class="text-center">No hay apoderados registrados</td>
+              </tr>
+            }
           </tbody>
         </table>
-        
-        @if (estudiantes().length === 0) {
-          <div class="empty-state">
-            <span class="material-icons">school</span>
-            <p>No hay estudiantes registrados</p>
-          </div>
-        }
       </div>
     </div>
   }
   
-  <!-- CURSOS TAB -->
-  @if (activeTab() === 'cursos') {
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">class</span>
-            Gestión de Cursos
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <button class="btn-new" (click)="openCursoDialog()">
-            <span class="material-icons">add</span>
-            Nuevo Curso
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Curso</th>
-              <th>Nivel</th>
-              <th>Año</th>
-              <th>Estudiantes</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (curso of cursos(); track curso.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar course">{{ curso.nombre.charAt(0) }}</div>
-                    <span class="user-name-table">{{ curso.nombre }}</span>
-                  </div>
-                </td>
-                <td>{{ curso.nivel }}</td>
-                <td>{{ curso.ano }}</td>
-                <td>{{ getEstudiantesCount(curso.id) }}</td>
-                <td>
-                  <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openCursoDialog(curso)" title="Editar">
-                      <span class="material-icons">edit</span>
-                    </button>
-                    <button class="btn-icon delete" (click)="deleteCurso(curso)" title="Eliminar">
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        
-        @if (cursos().length === 0) {
-          <div class="empty-state">
-            <span class="material-icons">class</span>
-            <p>No hay cursos registrados</p>
-          </div>
-        }
-      </div>
-    </div>
-  }
-  
-  <!-- DOCENTES TAB - Asignaciones Docente-Curso-Asignatura -->
-  @if (activeTab() === 'docentes') {
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">co_present</span>
-            Asignación de Docentes a Cursos
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <button class="btn-new" (click)="openAsignacionDocenteDialog()">
-            <span class="material-icons">add</span>
-            Nueva Asignación
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Docente</th>
-              <th>Curso</th>
-              <th>Asignatura</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (asignacion of asignacionesDocente(); track asignacion.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar">{{ getDocenteNombre(asignacion.docente_id).charAt(0) }}</div>
-                    <span class="user-name-table">{{ getDocenteNombre(asignacion.docente_id) }}</span>
-                  </div>
-                </td>
-                <td>{{ getCursoNombreDisplay(asignacion.curso_id) }}</td>
-                <td>
-                  <span class="badge">{{ asignacion.asignatura }}</span>
-                </td>
-                <td>
-                  <button class="btn-icon" (click)="deleteAsignacionDocente(asignacion)" title="Eliminar">
-                    <span class="material-icons">delete</span>
-                  </button>
-                </td>
-              </tr>
-            }
-            @if (asignacionesDocente().length === 0) {
-              <tr>
-                <td colspan="4" class="text-center">No hay asignaciones registradas</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-    
-    <!-- Recordatorios Section -->
-    <div class="content-card" style="margin-top: 24px;">
+  <!-- Recordatorios Section -->
+  <div class="content-card" style="margin-top: 24px;">
       <div class="card-header">
         <div class="card-header-left">
           <h3 class="card-title">

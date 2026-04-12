@@ -6,7 +6,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente } from '../../shared/models';
+import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado } from '../../shared/models';
 
 @Component({
   selector: 'app-admin',
@@ -27,9 +27,10 @@ export class AdminPage implements OnInit {
   cursos = signal<Curso[]>([]);
   recordatorios = signal<Recordatorio[]>([]);
   asignacionesDocente = signal<AsignacionDocente[]>([]);
+  apoderados = signal<Apoderado[]>([]);
   
   // Tab state
-  activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes'>('usuarios');
+  activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados'>('usuarios');
   
   // Mobile menu state
   showMobileMenu = signal(false);
@@ -50,6 +51,35 @@ export class AdminPage implements OnInit {
   
   // Filters
   rolFilter = '';
+  searchTerm = signal('');
+  cursoFilter = signal('');
+  
+  // Computed filtered lists
+  get filteredUsuarios(): Usuario[] {
+    const term = this.searchTerm().toLowerCase();
+    const rol = this.rolFilter;
+    return this.usuarios().filter(u => {
+      const matchesSearch = !term || 
+        u.nombre?.toLowerCase().includes(term) || 
+        u.apellido?.toLowerCase().includes(term) ||
+        u.rut?.toLowerCase().includes(term);
+      const matchesRol = !rol || u.rol === rol;
+      return matchesSearch && matchesRol;
+    });
+  }
+  
+  get filteredEstudiantes(): Estudiante[] {
+    const term = this.searchTerm().toLowerCase();
+    const cursoId = this.cursoFilter();
+    return this.estudiantes().filter(e => {
+      const matchesSearch = !term || 
+        e.nombre?.toLowerCase().includes(term) || 
+        e.apellido?.toLowerCase().includes(term) ||
+        e.rut?.toLowerCase().includes(term);
+      const matchesCurso = !cursoId || e.curso_id === cursoId;
+      return matchesSearch && matchesCurso;
+    });
+  }
   
   // Form data
   userForm: Partial<Usuario> = {
@@ -124,6 +154,50 @@ export class AdminPage implements OnInit {
       next: (data) => this.asignacionesDocente.set(data),
       error: () => {}
     });
+  }
+  
+  loadApoderados(): void {
+    this.api.getApoderados().subscribe({
+      next: (data) => this.apoderados.set(data),
+      error: () => this.showMessage('Error al cargar apoderados')
+    });
+  }
+  
+  // Get estudiantes sin apoderado
+  getEstudiantesSinApoderado(): Estudiante[] {
+    return this.estudiantes().filter(e => !e.apoderado_id);
+  }
+  
+  // Get nombre del pupilo
+  getPupiloNombre(apoderadoId: string): string {
+    const estudiante = this.estudiantes().find(e => e.apoderado_id === apoderadoId);
+    return estudiante ? `${estudiante.nombre} ${estudiante.apellido}` : 'Sin pupilo';
+  }
+  
+  // Get nombre del estudiante por ID
+  getEstudianteNombre(estudianteId: string): string {
+    const estudiante = this.estudiantes().find(e => e.id === estudianteId);
+    return estudiante ? `${estudiante.nombre} ${estudiante.apellido}` : 'Sin estudiante';
+  }
+  
+  // Get apoderados from usuarios con rol apoderado
+  getApoderadosConUsuario(): Usuario[] {
+    return this.usuarios().filter(u => u.rol === 'apoderado');
+  }
+  
+  // Delete apoderado (usuario con rol apoderado)
+  deleteApoderado(apoderado: Usuario): void {
+    if (confirm(`¿Estás seguro de eliminar al apoderado ${apoderado.nombre}?`)) {
+      if (apoderado.id) {
+        this.api.deleteUsuario(apoderado.id).subscribe({
+          next: () => {
+            this.showMessage('Apoderado eliminado correctamente');
+            this.loadUsuarios();
+          },
+          error: () => this.showMessage('Error al eliminar apoderado')
+        });
+      }
+    }
   }
   
   // Toggle panel lateral

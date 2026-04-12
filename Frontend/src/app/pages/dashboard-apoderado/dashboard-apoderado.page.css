@@ -3,6 +3,291 @@
    Usa las variables globales de styles.css
    ============================================================ */
 
+/* ══════════════════════════════════════════════════════════
+   TABS DE NAVEGACIÓN PRINCIPAL
+   ══════════════════════════════════════════════════════════ */
+.main-tabs {
+  display: flex;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  gap: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.main-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.main-tab:hover {
+  color: var(--brand);
+  background: var(--bg-hover);
+}
+
+.main-tab.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+}
+
+.main-tab .material-icons {
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .main-tabs {
+    padding: 0 12px;
+    gap: 2px;
+  }
+
+  .main-tab {
+    padding: 12px 14px;
+    font-size: 0.8rem;
+  }
+
+  .main-tab .material-icons {
+    font-size: 18px;
+  }
+
+  .main-tab span:not(.material-icons) {
+    display: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   VISTAS NUEVAS
+   ══════════════════════════════════════════════════════════ */
+
+/* Avisos */
+.avisos-view {
+  padding: 20px;
+}
+
+.aviso-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.aviso-card.urgente {
+  border-left: 4px solid var(--danger);
+}
+
+.aviso-card.informativo {
+  border-left: 4px solid var(--brand);
+}
+
+.aviso-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.aviso-titulo {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.aviso-fecha {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.aviso-mensaje {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.aviso-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.aviso-badge.urgente {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.aviso-badge.informativo {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Solicitudes */
+.solicitudes-view {
+  padding: 20px;
+}
+
+.solicitud-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.solicitud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.solicitud-tipo {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.solicitud-estado {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.solicitud-estado.pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.solicitud-estado.en_proceso {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.solicitud-estado.listo_para_retiro {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.solicitud-fecha {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.solicitud-btn {
+  margin-top: 12px;
+}
+
+/* Perfil */
+.perfil-view {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.perfil-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.perfil-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.perfil-card h3 .material-icons {
+  color: var(--brand);
+}
+
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perfil-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfil-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.perfil-field input {
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+
+.perfil-field input:focus {
+  outline: none;
+  border-color: var(--brand);
+  background: var(--bg-card);
+}
+
+.perfil-readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfil-readonly label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.perfil-readonly span {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  padding: 10px 0;
+}
+
+/* Semantic Colors */
+:root {
+  --stat-icon-1: #10b981;
+  --stat-icon-2: #f59e0b;
+  --stat-icon-3: #3b82f6;
+  --stat-icon-4: #8b5cf6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --brand: #6366f1;
+  --brand-muted: #818cf8;
+}
+
 /* ── HEADER ────────────────────────────────────────────── */
 .header-bar {
   display: flex;

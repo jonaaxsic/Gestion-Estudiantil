@@ -29,7 +29,7 @@ export class DashboardApoderadoPage implements OnInit {
   notas = signal<Nota[]>([]);
   
   // Vista activa
-  activeSection = signal<'inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones'>('inicio');
+  activeSection = signal<'inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones' | 'avisos' | 'solicitudes' | 'perfil'>('inicio');
   anoEscolar = new Date().getFullYear();
   
   // Modal state
@@ -94,7 +94,7 @@ export class DashboardApoderadoPage implements OnInit {
   }
   
   // Navigation
-  setSection(section: 'inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones'): void {
+  setSection(section: 'inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones' | 'avisos' | 'solicitudes' | 'perfil'): void {
     this.activeSection.set(section);
     this.closeMobileMenu();
   }
