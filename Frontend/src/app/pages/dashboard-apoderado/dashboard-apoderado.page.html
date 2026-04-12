@@ -7,10 +7,6 @@
     <h1 class="header-title">Panel del Apoderado</h1>
   </div>
   <div class="header-right">
-    <button class="btn-primary" (click)="openRecordatorioDialog()">
-      <span class="material-icons">add_alert</span>
-      <span class="btn-text">Recordatorio</span>
-    </button>
     <button class="btn-theme-toggle" (click)="theme.toggle()" [title]="theme.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
       <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
     </button>
@@ -117,6 +113,8 @@
 </div>
 
 <div class="page-container">
+  <!-- Solo mostrar tarjetas de info y stats en vista Inicio -->
+  @if (activeSection() === 'inicio') {
   <div class="cards-row">
     <!-- Apoderado Info Card - Blue -->
     <div class="info-card azul">
@@ -217,6 +215,7 @@
       <div class="stat-label">Anot. Negativas</div>
     </div>
   </div>
+  }
   
   <!-- Content Grid - Solo mostrar en vista inicio -->
   @if (activeSection() === 'inicio') {

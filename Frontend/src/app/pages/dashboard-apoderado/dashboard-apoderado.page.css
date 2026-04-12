@@ -293,59 +293,72 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 28px;
+  padding: 12px 20px;
   background: var(--bg-header);
   border-bottom: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: 12px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .header-icon {
   color: var(--brand);
-  font-size: 28px;
+  font-size: 26px;
 }
 
 .header-title {
-  font-size: 1.35rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.3px;
+  white-space: nowrap;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex-wrap: nowrap;
-  overflow: hidden;
-  min-width: 0;
 }
 
 .user-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  min-width: 0;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .user-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .user-name {
+    font-size: 0.8rem;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-rut {
+    display: none;
+  }
 }
 
 .user-name {
   color: var(--text-primary);
   font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.user-rut {
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
 }
 
 /* ── BUTTONS ────────────────────────────────────────────── */

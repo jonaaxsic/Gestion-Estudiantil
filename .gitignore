@@ -101,6 +101,8 @@ docker-compose.override.yml
 #--------otros-----
 Backend.err
 conexion-mongodb.txt
+advertencias-deploy-cloudflare.txt
+correciones-dashboar-apoderado.md
 
 #--------referencias visuales------
 imagenes/

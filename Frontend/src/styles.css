@@ -188,21 +188,7 @@ body.dark {
   --toggle-border: #2e3148;
 }
 
-  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.55);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.65);
-
-  --toggle-bg:     #2C2C2E;
-  --toggle-icon:   #8AB4F8;
-  --toggle-border: #3C3C3C;
-  
-  /* Radios */
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
-  --radius-pill: 999px;
-}
+/* Dark mode styles are now handled by the :root.dark class above */
 
 /* ══════════════════════════════════════════════════════════
     BASE
