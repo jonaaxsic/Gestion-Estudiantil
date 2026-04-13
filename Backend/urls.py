@@ -13,8 +13,26 @@ def api_root(request):
     return JsonResponse({"status": "ok", "message": "Servidor backend corriendo"})
 
 
+def health_check(request):
+    """Endpoint de health check para servicios de ping (cron-job.org)
+    Ligero y rápido para evitar que el servidor se duerma"""
+    from core.database import is_connected
+
+    mongo_status = "connected" if is_connected() else "disconnected"
+    return JsonResponse(
+        {
+            "status": "ok",
+            "mongo": mongo_status,
+            "timestamp": str(datetime.now().isoformat()),
+        }
+    )
+
+
+from datetime import datetime
+
 urlpatterns = [
     path("", api_root, name="api-root"),
+    path("health", health_check, name="health-check"),  # Health check para ping
     # Authentication
     path("auth/login", views.login_view, name="login"),
     path("auth/create-test-user", views.create_test_user, name="create-test-user"),
