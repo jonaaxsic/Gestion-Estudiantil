@@ -5,12 +5,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { SharedTabsComponent, SharedCardComponent, TabItem } from '../../shared/components';
 import { Estudiante, Asistencia, Evaluacion, Anotacion, Curso, Recordatorio, Reunione, Nota } from '../../shared/models';
 
 @Component({
   selector: 'app-dashboard-apoderado',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, SharedTabsComponent, SharedCardComponent],
   templateUrl: './dashboard-apoderado.page.html',
   styleUrls: ['./dashboard-apoderado.page.css']
 })
@@ -30,6 +31,36 @@ export class DashboardApoderadoPage implements OnInit {
   
   // Vista activa
   activeSection = signal<'inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones' | 'avisos' | 'solicitudes' | 'perfil'>('inicio');
+  
+  // Tab index para el componente compartido
+  get tabIndex(): number {
+    const sections = ['inicio', 'notas', 'asistencia', 'anotaciones', 'reuniones', 'avisos', 'solicitudes', 'perfil'];
+    return sections.indexOf(this.activeSection());
+  }
+  
+  set tabIndex(index: number) {
+    const sections: ('inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones' | 'avisos' | 'solicitudes' | 'perfil')[] = ['inicio', 'notas', 'asistencia', 'anotaciones', 'reuniones', 'avisos', 'solicitudes', 'perfil'];
+    if (index >= 0 && index < sections.length) {
+      this.activeSection.set(sections[index]);
+    }
+  }
+  
+  // Tabs para el componente compartido
+  apoderadoTabs: TabItem[] = [
+    { id: 'inicio', label: 'Inicio', icon: 'home' },
+    { id: 'notas', label: 'Notas', icon: 'grade' },
+    { id: 'asistencia', label: 'Asistencia', icon: 'check_circle' },
+    { id: 'anotaciones', label: 'Anotaciones', icon: 'note' },
+    { id: 'reuniones', label: 'Reuniones', icon: 'event' },
+    { id: 'avisos', label: 'Avisos', icon: 'campaign' },
+    { id: 'solicitudes', label: 'Solicitudes', icon: 'description' },
+    { id: 'perfil', label: 'Perfil', icon: 'person' }
+  ];
+  
+  onApoderadoTabChanged(tabId: string): void {
+    this.activeSection.set(tabId as any);
+  }
+  
   anoEscolar = new Date().getFullYear();
   
   // Formulario de solicitudes

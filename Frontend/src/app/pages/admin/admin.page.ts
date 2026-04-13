@@ -3,15 +3,30 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { SharedTabsComponent, SharedHeaderComponent, SharedCardComponent, TabItem } from '../../shared/components';
 import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado } from '../../shared/models';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatSnackBarModule],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    MatIconModule, 
+    MatSnackBarModule,
+    MatButtonModule,
+    MatCardModule,
+    MatTabsModule,
+    SharedTabsComponent,
+    SharedHeaderComponent,
+    SharedCardComponent
+  ],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.css']
 })
@@ -31,6 +46,19 @@ export class AdminPage implements OnInit {
   
   // Tab state
   activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados'>('usuarios');
+  
+  // Tab index para el componente SharedTabs
+  get tabIndex(): number {
+    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados'];
+    return tabs.indexOf(this.activeTab());
+  }
+  
+  set tabIndex(index: number) {
+    const tabs: ('usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados')[] = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados'];
+    if (index >= 0 && index < tabs.length) {
+      this.activeTab.set(tabs[index]);
+    }
+  }
   
   // Mobile menu state
   showMobileMenu = signal(false);
@@ -126,6 +154,19 @@ export class AdminPage implements OnInit {
   };
   
   saving = signal(false);
+  
+  // Tabs para el componente compartido
+  adminTabs: TabItem[] = [
+    { id: 'usuarios', label: 'Usuarios', icon: 'people' },
+    { id: 'estudiantes', label: 'Estudiantes', icon: 'school' },
+    { id: 'cursos', label: 'Cursos', icon: 'class' },
+    { id: 'docentes', label: 'Docentes', icon: 'co_present' },
+    { id: 'apoderados', label: 'Apoderados', icon: 'family_restroom' }
+  ];
+  
+  onTabChanged(tabId: string): void {
+    this.activeTab.set(tabId as any);
+  }
 
   ngOnInit(): void {
     this.loadAll();

@@ -95,29 +95,12 @@
 }
 
 <div class="page-container" [class.with-panel]="showCursosPanel()">
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab" [class.active]="activeTab() === 'usuarios'" (click)="activeTab.set('usuarios')">
-      <span class="material-icons">people</span>
-      Usuarios
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'estudiantes'" (click)="activeTab.set('estudiantes')">
-      <span class="material-icons">school</span>
-      Estudiantes
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'cursos'" (click)="activeTab.set('cursos')">
-      <span class="material-icons">class</span>
-      Cursos
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'docentes'" (click)="activeTab.set('docentes')">
-      <span class="material-icons">co_present</span>
-      Docentes
-    </button>
-    <button class="tab" [class.active]="activeTab() === 'apoderados'" (click)="activeTab.set('apoderados')">
-      <span class="material-icons">family_restroom</span>
-      Apoderados
-    </button>
-  </div>
+  <!-- Tabs usando componente compartido -->
+  <app-shared-tabs
+    [tabs]="adminTabs"
+    [selectedIndex]="tabIndex"
+    (tabChanged)="onTabChanged($event)">
+  </app-shared-tabs>
   
   <!-- USUARIOS TAB -->
   @if (activeTab() === 'usuarios') {

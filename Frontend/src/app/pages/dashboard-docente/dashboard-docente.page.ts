@@ -12,6 +12,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { SharedTabsComponent, SharedCardComponent, TabItem } from '../../shared/components';
 import { Curso, Evaluacion, Anotacion, Estudiante, Asistencia, Reunione, Recordatorio, AsignacionDocente, Nota } from '../../shared/models';
 
 interface CursoAsignado extends Curso {
@@ -33,6 +34,8 @@ interface CursoAsignado extends Curso {
     MatDatepickerModule,
     MatNativeDateModule,
     MatCheckboxModule,
+    SharedTabsComponent,
+    SharedCardComponent,
   ],
   templateUrl: './dashboard-docente.page.html',
   styleUrls: ['./dashboard-docente.page.css']
@@ -59,6 +62,33 @@ export class DashboardDocentePage implements OnInit {
   
   // Vista actual
   activeView = signal<'dashboard' | 'cursos' | 'asistencia' | 'evaluaciones' | 'anotaciones' | 'reuniones' | 'notas'>('dashboard');
+  
+  // Tab index para el componente compartido
+  get tabIndex(): number {
+    const tabs = ['dashboard', 'cursos', 'asistencia', 'evaluaciones', 'anotaciones', 'reuniones'];
+    return tabs.indexOf(this.activeView());
+  }
+  
+  set tabIndex(index: number) {
+    const views: ('dashboard' | 'cursos' | 'asistencia' | 'evaluaciones' | 'anotaciones' | 'reuniones' | 'notas')[] = ['dashboard', 'cursos', 'asistencia', 'evaluaciones', 'anotaciones', 'reuniones', 'notas'];
+    if (index >= 0 && index < views.length) {
+      this.activeView.set(views[index]);
+    }
+  }
+  
+  // Tabs para el componente compartido
+  docenteTabs: TabItem[] = [
+    { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+    { id: 'cursos', label: 'Cursos', icon: 'class' },
+    { id: 'asistencia', label: 'Asistencia', icon: 'how_to_reg' },
+    { id: 'evaluaciones', label: 'Evaluaciones', icon: 'assignment' },
+    { id: 'anotaciones', label: 'Anotaciones', icon: 'note_add' },
+    { id: 'reuniones', label: 'Reuniones', icon: 'event' }
+  ];
+  
+  onDocenteTabChanged(tabId: string): void {
+    this.activeView.set(tabId as any);
+  }
   
   // Panel states para mostrar listados con opción de crear
   showAsistenciaList = signal(false);

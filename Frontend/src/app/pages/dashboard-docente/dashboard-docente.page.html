@@ -69,33 +69,12 @@
 }
 
 <div class="page-container">
-  <!-- Tabs de navegación -->
-  <div class="tabs">
-    <button class="tab" [class.active]="activeView() === 'dashboard'" (click)="setView('dashboard')">
-      <span class="material-icons">dashboard</span>
-      Dashboard
-    </button>
-    <button class="tab" [class.active]="activeView() === 'cursos'" (click)="setView('cursos')">
-      <span class="material-icons">class</span>
-      Cursos
-    </button>
-    <button class="tab" [class.active]="activeView() === 'asistencia'" (click)="openAsistenciaList()">
-      <span class="material-icons">how_to_reg</span>
-      Asistencia
-    </button>
-    <button class="tab" [class.active]="activeView() === 'evaluaciones'" (click)="openEvaluacionesList()">
-      <span class="material-icons">assignment</span>
-      Evaluaciones
-    </button>
-    <button class="tab" [class.active]="activeView() === 'anotaciones'" (click)="openAnotacionesList()">
-      <span class="material-icons">note_add</span>
-      Anotaciones
-    </button>
-    <button class="tab" [class.active]="activeView() === 'reuniones'" (click)="openReunionesList()">
-      <span class="material-icons">event</span>
-      Reuniones
-    </button>
-  </div>
+  <!-- Tabs de navegación usando componente compartido -->
+  <app-shared-tabs
+    [tabs]="docenteTabs"
+    [selectedIndex]="tabIndex"
+    (tabChanged)="onDocenteTabChanged($event)">
+  </app-shared-tabs>
 
   <!-- Dashboard View -->
   @if (activeView() === 'dashboard') {

@@ -76,41 +76,12 @@
   </div>
 }
 
-<!-- Tabs de Navegación Principal -->
-<div class="tabs">
-  <button class="tab" [class.active]="activeSection() === 'inicio'" (click)="setSection('inicio')">
-    <span class="material-icons">home</span>
-    Inicio
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'notas'" (click)="setSection('notas')">
-    <span class="material-icons">grade</span>
-    Notas
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'asistencia'" (click)="setSection('asistencia')">
-    <span class="material-icons">check_circle</span>
-    Asistencia
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'anotaciones'" (click)="setSection('anotaciones')">
-    <span class="material-icons">note</span>
-    Anotaciones
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'reuniones'" (click)="setSection('reuniones')">
-    <span class="material-icons">event</span>
-    Reuniones
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'avisos'" (click)="setSection('avisos')">
-    <span class="material-icons">campaign</span>
-    Avisos
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'solicitudes'" (click)="setSection('solicitudes')">
-    <span class="material-icons">description</span>
-    Solicitudes
-  </button>
-  <button class="tab" [class.active]="activeSection() === 'perfil'" (click)="setSection('perfil')">
-    <span class="material-icons">person</span>
-    Perfil
-  </button>
-</div>
+<!-- Tabs usando componente compartido -->
+<app-shared-tabs
+  [tabs]="apoderadoTabs"
+  [selectedIndex]="tabIndex"
+  (tabChanged)="onApoderadoTabChanged($event)">
+</app-shared-tabs>
 
 <div class="page-container">
   <!-- Solo mostrar tarjetas de info y stats en vista Inicio -->
