@@ -1,0 +1,37 @@
+# Cloudflare Pages Headers Configuration
+# Optimizado para rendimiento y cache
+
+# Cachear recursos estáticos por más tiempo
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Recursos estáticos con cache largo
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# API calls - no cachear, pero permitir compression
+/api/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  X-Content-Type-Options: nosniff
+
+# Pages - cachear por 1 hora
+/*.html
+  Cache-Control: public, max-age=3600
+
+# JSON y datos
+/*.json
+  Cache-Control: no-cache
+
+# Fonts
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images
+/*.svg
+  Cache-Control: public, max-age=86400
+/*.png
+  Cache-Control: public, max-age=86400
+/*.jpg
+  Cache-Control: public, max-age=86400

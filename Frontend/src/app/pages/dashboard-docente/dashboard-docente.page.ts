@@ -161,26 +161,56 @@ export class DashboardDocentePage implements OnInit {
   }
   
   loadData(): void {
-    // Optimizado: cargar solo datos esenciales primero (cursos + asignaciones)
-    // Los datos adicionales (estudiantes, evaluaciones, etc) se cargan bajo demanda
-    
-    // 1. Cargar cursos (cached en backend)
-    this.api.getCursos().subscribe(data => this.cursos.set(data));
-    
-    // 2. Cargar asignaciones del docente (cached en backend)
+    // Usar endpoint optimizado de dashboard - una sola llamada para todos los datos
+    const userId = this.auth.user()?.id;
+    if (userId) {
+      // Cargar dashboard optimizado (todos los datos en una llamada)
+      this.api.getDashboardDocente(userId).subscribe({
+        next: (dashboard) => {
+          // Setear datos del dashboard
+          if (dashboard.cursos) {
+            this.cursos.set(dashboard.cursos.map((c: any) => ({
+              id: c.id,
+              nombre: c.nombre,
+              nivel: c.nombre.split(' ')[0] || '',
+              asignatura: c.asignatura
+            })));
+            this.cursosAsignados.set(dashboard.cursos.map((c: any) => ({
+              id: c.id,
+              nombre: c.nombre,
+              nivel: c.nombre.split(' ')[0] || '',
+              asignatura: c.asignatura
+            })));
+          }
+          if (dashboard.recordatorios) {
+            this.recordatorios.set(dashboard.recordatorios);
+          }
+          // Las evaluaciones y reuniones se cargan bajo demanda
+        },
+        error: (err) => {
+          console.error('Error cargando dashboard:', err);
+          // Fallback al método anterior si falla
+          this.loadDataFallback();
+        }
+      });
+      
+      // También cargar reuniones de forma inmediata (son importantes para el usuario)
+      this.api.getReuniones().subscribe(data => this.reuniones.set(data));
+    }
+  }
+  
+  // Fallback si el dashboard optimizado falla
+  loadDataFallback(): void {
     const userId = this.auth.user()?.id;
     if (userId) {
       this.api.getAsignacionesDocente(userId).subscribe(data => {
         this.asignacionesDocente.set(data);
         this.cargarCursosAsignados();
-        // Solo cargar evaluaciones/anotaciones/reuniones si hay cursos asignados
         if (this.cursosAsignados().length > 0) {
           this.cargarEvaluacionesFiltradas();
-          this.cargarReunionesFiltradas(); // Cargar reuniones al inicio
+          this.cargarReunionesFiltradas();
         }
       });
-      
-      // Cargar recordatorios (datos pequeños, rápido)
       this.api.getRecordatorios(userId).subscribe(data => this.recordatorios.set(data));
     }
   }

@@ -345,4 +345,13 @@ export class ApiService {
   }): Observable<Nota> {
     return this.http.post<Nota>(`${this.baseUrl}/notas/actualizar`, data, { headers: this.jsonHeaders });
   }
+
+  // ============ DASHBOARD ============
+  getDashboardDocente(docenteId: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dashboard/docente?docente_id=${docenteId}`, { headers: this.jsonHeaders });
+  }
+
+  getDashboardApoderado(estudianteId: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/dashboard/apoderado?estudiante_id=${estudianteId}`, { headers: this.jsonHeaders });
+  }
 }

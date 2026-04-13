@@ -807,7 +807,7 @@ class ApoderadoDetail(APIView, MongoObjectIdMixin):
 # ============ DASHBOARD ============
 @api_view(["GET"])
 def dashboard_docente(request):
-    """Dashboard para docente"""
+    """Dashboard para docente - endpoint optimizado con todos los datos en una sola llamada"""
     docente_id = request.query_params.get("docente_id")
 
     if not docente_id:
@@ -815,10 +815,101 @@ def dashboard_docente(request):
             {"error": "docente_id requerido"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Aquí puedes agregar lógica para obtener datos del dashboard
-    # Por ejemplo: total estudiantes, asistencia hoy, evaluaciones próximas, etc.
+    try:
+        # 1. Obtener cursos asignados al docente
+        asignaciones = AsignacionDocente.find({"docente_id": docente_id})
+        curso_ids = [a.curso_id for a in asignaciones if a.curso_id]
 
-    return Response({"message": "Dashboard docente - implementa la lógica aquí"})
+        # 2. Obtener datos de cursos
+        cursos = []
+        total_estudiantes = 0
+        for cid in curso_ids:
+            curso = Curso.find_one({"_id": ObjectId(cid)})
+            if curso:
+                # Contar estudiantes del curso
+                estudiantes_count = Estudiante.count({"curso_id": cid})
+                cursos.append(
+                    {
+                        "id": str(curso._id) if curso._id else None,
+                        "nombre": curso.nivel + " " + curso.nombre,
+                        "asignatura": getattr(curso, "asignatura", ""),
+                        "estudiantes_count": estudiantes_count,
+                    }
+                )
+                total_estudiantes += estudiantes_count
+
+        # 3. Obtener evaluaciones próximas (próximos 7 días)
+        from datetime import datetime, timedelta
+
+        fecha_limite = (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d")
+        evaluaciones_proximas = []
+        for cid in curso_ids:
+            evals = Evaluacion.find(
+                {"curso_id": cid, "fecha": {"$lte": fecha_limite}},
+                limit=3,
+                sort=[("fecha", 1)],
+            )
+            for e in evals:
+                evaluaciones_proximas.append(
+                    {
+                        "id": str(e._id) if e._id else None,
+                        "titulo": e.titulo,
+                        "fecha": e.fecha,
+                        "curso_id": e.curso_id,
+                    }
+                )
+
+        # 4. Obtener reuniones próximas
+        reuniones_proximas = []
+        for cid in curso_ids:
+            reuns = Reunione.find({"curso_id": cid}, limit=3, sort=[("fecha", 1)])
+            for r in reuns:
+                reuniones_proximas.append(
+                    {
+                        "id": str(r._id) if r._id else None,
+                        "lugar": r.lugar,
+                        "fecha": r.fecha,
+                        "hora": r.hora,
+                        "curso_id": r.curso_id,
+                    }
+                )
+
+        # 5. Contar anotaciones recientes
+        anotaciones_count = Anotacion.count({"curso_id": {"$in": curso_ids}})
+
+        # 6. Obtener recordatorios del docente
+        recordatorios = []
+        recs = Recordatorio.find(
+            {"usuario_id": docente_id}, limit=5, sort=[("fecha_limite", 1)]
+        )
+        for rec in recs:
+            recordatorios.append(
+                {
+                    "id": str(rec._id) if rec._id else None,
+                    "titulo": rec.titulo,
+                    "descripcion": rec.descripcion,
+                    "fecha_limite": rec.fecha_limite,
+                    "completada": rec.completada,
+                }
+            )
+
+        return Response(
+            {
+                "cursos": cursos,
+                "total_estudiantes": total_estudiantes,
+                "total_cursos": len(cursos),
+                "evaluaciones_proximas": evaluaciones_proximas[:5],
+                "reuniones_proximas": reuniones_proximas[:5],
+                "anotaciones_recientes": anotaciones_count,
+                "recordatorios": recordatorios,
+            }
+        )
+    except Exception as e:
+        import traceback
+
+        print(f"Error in dashboard_docente: {str(e)}")
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(["GET"])
