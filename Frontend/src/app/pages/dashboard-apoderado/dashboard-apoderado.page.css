@@ -1249,41 +1249,36 @@
 
 /* Vista de Asistencia */
 .asistencia-view {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
   max-width: 800px;
   margin: 0 auto;
+  padding: 20px;
 }
 
 .asistencia-porcentaje {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px 24px;
-  background: var(--bg-subtle);
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   margin-bottom: 16px;
-  margin-top: 16px;
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
 .porcentaje-circulo {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--success);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 3px solid var(--bg-card);
+  border: 3px solid var(--bg-subtle);
 }
 
 .porcentaje-valor {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: white;
 }
@@ -1291,19 +1286,20 @@
 .porcentaje-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  flex: 1;
 }
 
 .porcentaje-label {
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .porcentaje-alerta {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--danger);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .asistencia-porcentaje.bajo .porcentaje-circulo { background: var(--danger); }
@@ -1313,25 +1309,104 @@
 .stats-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
-  max-width: 100%;
-  box-sizing: border-box;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 12px;
+  padding: 12px 10px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
 
 .stat-num {
-  font-size: 1.4rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stat-num.success { color: var(--success); }
+.stat-num.danger { color: var(--danger); }
+
+.stat-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* ── ASISTENCIA LISTA ─────────────────────────────────────── */
+.asistencia-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.asistencia-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.asistencia-item:hover {
+  border-color: var(--brand);
+  background: var(--bg-hover);
+}
+
+.asistencia-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.asistencia-icon .material-icons {
+  font-size: 18px;
+  color: white;
+}
+
+.asistencia-icon.presente { background: var(--success); }
+.asistencia-icon.falta { background: var(--danger); }
+
+.asistencia-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.asistencia-fecha {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.asistencia-estado {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.asistencia-estado.presente { color: var(--success); }
+.asistencia-estado.falta { color: var(--danger); }
+
+/* Responsive móvil para asistencia */
+@media (max-width: 768px) {
   color: var(--text-primary);
 }
 
@@ -1428,25 +1503,55 @@
 
 /* Responsive móvil para asistencia */
 @media (max-width: 768px) {
+  .asistencia-view {
+    padding: 12px;
+  }
+  
   .asistencia-porcentaje {
     flex-direction: column;
     text-align: center;
-    padding: 16px;
+    padding: 14px;
+    gap: 12px;
+  }
+  
+  .porcentaje-circulo {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .porcentaje-valor {
+    font-size: 1rem;
   }
   
   .stats-row {
-    flex-direction: column;
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
   
   .stat-item {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 12px 16px;
+    padding: 10px 8px;
   }
   
   .stat-num {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .stat-text {
+    font-size: 0.65rem;
+  }
+  
+  .asistencia-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  
+  .asistencia-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .asistencia-icon .material-icons {
+    font-size: 16px;
   }
 }
 
