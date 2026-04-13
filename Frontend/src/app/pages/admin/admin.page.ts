@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
@@ -22,7 +21,6 @@ import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado 
     MatSnackBarModule,
     MatButtonModule,
     MatCardModule,
-    MatTabsModule,
     SharedTabsComponent,
   ],
   templateUrl: './admin.page.html',

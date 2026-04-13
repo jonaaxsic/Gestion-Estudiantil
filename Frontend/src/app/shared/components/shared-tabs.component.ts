@@ -1,7 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
+// shared-tabs.component.ts – NUEVA VERSIÓN SIN MATERIAL
+import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
 export interface TabItem {
   id: string;
@@ -10,117 +9,144 @@ export interface TabItem {
 }
 
 @Component({
-  selector: 'app-shared-tabs',
+  selector: "app-shared-tabs",
   standalone: true,
-  imports: [CommonModule, MatTabsModule, MatIconModule],
+  imports: [CommonModule],
   template: `
-    <mat-tab-group 
-      [(selectedIndex)]="selectedIndex"
-      (selectedIndexChange)="onTabChange($event)"
-      class="shared-tabs"
-      [animationDuration]="animationDuration">
-      
-      @for (tab of tabs; track tab.id) {
-        <mat-tab>
-          <ng-template mat-tab-label>
+    <div class="ge-tabs-wrapper">
+      <div class="ge-tabs" role="tablist">
+        @for (tab of tabs; track tab.id) {
+          <button
+            class="ge-tab"
+            [class.active]="isActive(tab.id)"
+            role="tab"
+            [attr.aria-selected]="isActive(tab.id)"
+            (click)="selectTab(tab.id)"
+          >
             @if (tab.icon) {
-              <mat-icon class="tab-icon">{{ tab.icon }}</mat-icon>
+              <span class="material-icons ge-tab-icon">{{ tab.icon }}</span>
             }
-            <span class="tab-label">{{ tab.label }}</span>
-          </ng-template>
-        </mat-tab>
-      }
-    </mat-tab-group>
+            <span class="ge-tab-label">{{ tab.label }}</span>
+          </button>
+        }
+      </div>
+    </div>
   `,
-  styles: [`
-    .shared-tabs {
-      width: 100%;
-    }
-    
-    :host ::ng-deep .mat-mdc-tab-group {
-      --mdc-tab-indicator-active-indicator-color: var(--brand, #3d6fe8);
-      --mat-tab-header-active-label-text-color: var(--brand, #3d6fe8);
-      --mat-tab-header-active-focus-label-text-color: var(--brand, #3d6fe8);
-      --mat-tab-header-active-hover-label-text-color: var(--brand, #3d6fe8);
-      --mat-tab-header-inactive-label-text-color: var(--text-secondary, #5a6380);
-      --mat-tab-header-label-text-font: 'DM Sans', sans-serif;
-      --mat-tab-header-label-text-size: 0.875rem;
-      --mat-tab-header-label-text-weight: 600;
-    }
-    
-    :host ::ng-deep .mat-mdc-tab {
-      --mdc-tab-label-label-text-font: 'DM Sans', sans-serif;
-      --mdc-tab-label-label-text-size: 0.875rem;
-      --mdc-tab-label-label-text-weight: 600;
-      min-width: auto;
-      padding: 0 20px;
-      height: 48px;
-    }
-    
-    :host ::ng-deep .mat-mdc-tab-labels {
-      gap: 4px;
-      background: var(--bg-card, #fff);
-      padding: 4px;
-      border-radius: 16px;
-      border: 1px solid var(--border, #dde3f0);
-    }
-    
-    :host ::ng-deep .mat-mdc-tab.mdc-tab {
-      border-radius: 12px;
-      margin: 0 2px;
-    }
-    
-    :host ::ng-deep .mat-mdc-tab-body-content {
-      padding: 0;
-      overflow: hidden;
-    }
-    
-    .tab-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-      margin-right: 6px;
-    }
-    
-    .tab-label {
-      white-space: nowrap;
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      :host ::ng-deep .mat-mdc-tab {
-        min-width: 72px;
-        padding: 0 12px;
-        height: 40px;
+  styles: [
+    `
+      .ge-tabs-wrapper {
+        padding: 16px 20px 0;
+        background: transparent;
       }
-      
-      :host ::ng-deep .mat-mdc-tab-labels {
-        padding: 4px;
-        gap: 2px;
-        border-radius: 12px;
+
+      .ge-tabs {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 5px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        margin-bottom: 0;
       }
-      
-      .tab-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        margin-right: 4px;
+
+      .ge-tabs::-webkit-scrollbar {
+        display: none;
       }
-      
-      :host ::ng-deep .mat-mdc-tab-label-label-text-size: 0.75rem;
-    }
-  `]
+
+      .ge-tab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 16px;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: transparent;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-family: inherit;
+        line-height: 1;
+      }
+
+      .ge-tab:hover {
+        background: var(--tab-hover-bg);
+        color: var(--tab-hover-txt);
+      }
+
+      .ge-tab.active {
+        background: var(--tab-active-bg);
+        color: var(--tab-active-txt);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      }
+
+      .ge-tab-icon {
+        font-size: 17px;
+        line-height: 1;
+      }
+
+      .ge-tab-label {
+        line-height: 1;
+      }
+
+      @media (max-width: 768px) {
+        .ge-tabs-wrapper {
+          padding: 12px 14px 0;
+        }
+
+        .ge-tabs {
+          padding: 4px;
+          gap: 2px;
+          border-radius: var(--radius-sm);
+        }
+
+        .ge-tab {
+          padding: 9px 14px;
+          font-size: 0.82rem;
+        }
+
+        .ge-tab-icon {
+          font-size: 15px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .ge-tab {
+          padding: 8px 11px;
+          font-size: 0.78rem;
+        }
+
+        .ge-tab-icon {
+          display: none;
+        }
+      }
+    `,
+  ],
 })
 export class SharedTabsComponent {
   @Input() tabs: TabItem[] = [];
   @Input() selectedIndex = 0;
-  @Input() animationDuration = '200ms';
   @Output() tabChanged = new EventEmitter<string>();
 
-  onTabChange(index: number): void {
-    const selectedTab = this.tabs[index];
-    if (selectedTab) {
-      this.tabChanged.emit(selectedTab.id);
+  isActive(tabId: string): boolean {
+    return this.tabs[this.selectedIndex]?.id === tabId;
+  }
+
+  selectTab(tabId: string): void {
+    const index = this.tabs.findIndex((t) => t.id === tabId);
+    if (index !== -1) {
+      this.selectedIndex = index;
+      this.tabChanged.emit(tabId);
     }
   }
 }

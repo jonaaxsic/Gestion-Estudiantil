@@ -100,8 +100,7 @@ docker-compose.override.yml
 
 #--------otros-----
 Backend.err
-observacionesAlsitema.md
-mejorasAlSitema.md
+PLAN_MEJORAS.md
 
 #--------referencias visuales------
 imagenes/
