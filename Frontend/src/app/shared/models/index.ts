@@ -12,6 +12,7 @@ export interface Usuario {
   telefono?: string;
   direccion?: string;
   activo: boolean;
+  token?: string;
   created_at?: string;
   updated_at?: string;
 }

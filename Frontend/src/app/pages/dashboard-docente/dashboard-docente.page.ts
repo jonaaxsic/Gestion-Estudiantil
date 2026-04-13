@@ -60,6 +60,12 @@ export class DashboardDocentePage implements OnInit {
   // Vista actual
   activeView = signal<'dashboard' | 'cursos' | 'asistencia' | 'evaluaciones' | 'anotaciones' | 'reuniones' | 'notas'>('dashboard');
   
+  // Panel states para mostrar listados con opción de crear
+  showAsistenciaList = signal(false);
+  showEvaluacionesList = signal(false);
+  showAnotacionesList = signal(false);
+  showReunionesList = signal(false);
+  
   // Modal states
   showAsistenciaModal = signal(false);
   showEvaluacionModal = signal(false);
@@ -570,7 +576,56 @@ export class DashboardDocentePage implements OnInit {
   // Cambiar vista
   setView(view: 'dashboard' | 'cursos' | 'asistencia' | 'evaluaciones' | 'anotaciones' | 'reuniones' | 'notas'): void {
     this.activeView.set(view);
+    // Cerrar cualquier panel de lista cuando se cambia de vista
+    this.showAsistenciaList.set(false);
+    this.showEvaluacionesList.set(false);
+    this.showAnotacionesList.set(false);
+    this.showReunionesList.set(false);
     this.closeMobileMenu();
+  }
+  
+  // Abrir panel de lista de asistencia
+  openAsistenciaList(): void {
+    this.showAsistenciaList.set(true);
+    this.setView('asistencia');
+  }
+  
+  // Cerrar panel de lista de asistencia
+  closeAsistenciaList(): void {
+    this.showAsistenciaList.set(false);
+  }
+  
+  // Abrir panel de lista de evaluaciones
+  openEvaluacionesList(): void {
+    this.showEvaluacionesList.set(true);
+    this.setView('evaluaciones');
+  }
+  
+  // Cerrar panel de lista de evaluaciones
+  closeEvaluacionesList(): void {
+    this.showEvaluacionesList.set(false);
+  }
+  
+  // Abrir panel de lista de anotaciones
+  openAnotacionesList(): void {
+    this.showAnotacionesList.set(true);
+    this.setView('anotaciones');
+  }
+  
+  // Cerrar panel de lista de anotaciones
+  closeAnotacionesList(): void {
+    this.showAnotacionesList.set(false);
+  }
+  
+  // Abrir panel de lista de reuniones
+  openReunionesList(): void {
+    this.showReunionesList.set(true);
+    this.setView('reuniones');
+  }
+  
+  // Cerrar panel de lista de reuniones
+  closeReunionesList(): void {
+    this.showReunionesList.set(false);
   }
 
   // Seleccionar curso para ver detalle

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard } from './core/guards/admin.guard';
+import { adminGuard, docenteGuard, apoderadoGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -23,9 +23,11 @@ export const routes: Routes = [
   {
     path: 'dashboard-docente',
     loadComponent: () => import('./pages/dashboard-docente/dashboard-docente.page').then(m => m.DashboardDocentePage),
+    canActivate: [docenteGuard],
   },
   {
     path: 'dashboard-apoderado',
     loadComponent: () => import('./pages/dashboard-apoderado/dashboard-apoderado.page').then(m => m.DashboardApoderadoPage),
+    canActivate: [apoderadoGuard],
   },
 ];

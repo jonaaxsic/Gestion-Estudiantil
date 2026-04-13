@@ -238,21 +238,23 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-txt);
-  border: 2px solid var(--btn-secondary-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  padding: 10px 14px;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
+  white-space: nowrap;
 }
 
 .btn-logout:hover {
-  background: var(--btn-secondary-hover);
-  border-color: var(--brand-muted);
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
 }
 
 .btn-logout .material-icons { font-size: 18px; }
@@ -1741,4 +1743,39 @@
     background: var(--border);
     border-radius: 3px;
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+    PANEL VIEW - Nuevo layout para secciones del docente
+    ══════════════════════════════════════════════════════════ */
+.panel-view {
+  margin-bottom: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.panel-title .material-icons {
+  color: var(--brand);
+  font-size: 28px;
+}
+
+.panel-content {
+  margin-top: 16px;
 }
