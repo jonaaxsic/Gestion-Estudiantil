@@ -62,8 +62,6 @@ Gestion-Estudiantil/
 | **Frontend** | Cloudflare Pages |
 | **API** | Cloudflare Workers → Render |
 
-> ⚠️ **Nota**: El backend en Render (plan free) entra en modo sleep tras 15 min de inactividad. Se recomienda configurar un servicio de ping (cron-job.org) cada 15 min para mantenerlo activo.
-
 ---
 
 ## 🎯 Soluciones Entregadas
