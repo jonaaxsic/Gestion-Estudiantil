@@ -9,7 +9,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, SharedHeaderComponent, SharedCardComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, TabItem } from '../../shared/components';
 import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado } from '../../shared/models';
 
 @Component({
@@ -24,8 +24,6 @@ import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado 
     MatCardModule,
     MatTabsModule,
     SharedTabsComponent,
-    SharedHeaderComponent,
-    SharedCardComponent
   ],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.css']

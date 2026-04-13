@@ -12,7 +12,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, SharedCardComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, TabItem } from '../../shared/components';
 import { Curso, Evaluacion, Anotacion, Estudiante, Asistencia, Reunione, Recordatorio, AsignacionDocente, Nota } from '../../shared/models';
 
 interface CursoAsignado extends Curso {
@@ -35,7 +35,6 @@ interface CursoAsignado extends Curso {
     MatNativeDateModule,
     MatCheckboxModule,
     SharedTabsComponent,
-    SharedCardComponent,
   ],
   templateUrl: './dashboard-docente.page.html',
   styleUrls: ['./dashboard-docente.page.css']
@@ -935,5 +934,31 @@ export class DashboardDocentePage implements OnInit {
   
   getAnotacionesNegativasEstudiante(estudianteId: string): number {
     return this.anotaciones().filter(a => a.estudiante_id === estudianteId && a.tipo === 'negativa').length;
+  }
+  
+  // Eliminar anotación
+  deleteAnotacion(anotacion: Anotacion): void {
+    if (anotacion.id && confirm('¿Eliminar esta anotación?')) {
+      this.api.deleteAnotacion(anotacion.id).subscribe({
+        next: () => {
+          this.showSuccess('Anotación eliminada');
+          this.loadData();
+        },
+        error: () => alert('Error al eliminar anotación')
+      });
+    }
+  }
+  
+  // Eliminar reunión
+  deleteReunion(reunion: Reunione): void {
+    if (reunion.id && confirm('¿Eliminar esta reunión?')) {
+      this.api.deleteReunion(reunion.id).subscribe({
+        next: () => {
+          this.showSuccess('Reunión eliminada');
+          this.loadData();
+        },
+        error: () => alert('Error al eliminar reunión')
+      });
+    }
   }
 }

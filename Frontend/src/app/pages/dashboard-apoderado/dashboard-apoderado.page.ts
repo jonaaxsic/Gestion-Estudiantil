@@ -5,13 +5,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, SharedCardComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, TabItem } from '../../shared/components';
 import { Estudiante, Asistencia, Evaluacion, Anotacion, Curso, Recordatorio, Reunione, Nota } from '../../shared/models';
 
 @Component({
   selector: 'app-dashboard-apoderado',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, SharedTabsComponent, SharedCardComponent],
+  imports: [CommonModule, FormsModule, MatIconModule, SharedTabsComponent],
   templateUrl: './dashboard-apoderado.page.html',
   styleUrls: ['./dashboard-apoderado.page.css']
 })
