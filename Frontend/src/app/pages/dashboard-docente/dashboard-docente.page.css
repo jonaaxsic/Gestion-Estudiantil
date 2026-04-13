@@ -515,6 +515,7 @@
 
 .list-icon .material-icons { font-size: 20px; color: #fff; }
 .list-icon.eval      { background: var(--warning); }
+.list-icon.reunion   { background: var(--brand); }
 .list-icon.positiva  { background: var(--success); }
 .list-icon.negativa  { background: var(--danger); }
 .list-icon.completed { background: var(--success); }

@@ -173,9 +173,10 @@ export class DashboardDocentePage implements OnInit {
       this.api.getAsignacionesDocente(userId).subscribe(data => {
         this.asignacionesDocente.set(data);
         this.cargarCursosAsignados();
-        // Solo cargar evaluaciones/anotaciones si hay cursos asignados
+        // Solo cargar evaluaciones/anotaciones/reuniones si hay cursos asignados
         if (this.cursosAsignados().length > 0) {
           this.cargarEvaluacionesFiltradas();
+          this.cargarReunionesFiltradas(); // Cargar reuniones al inicio
         }
       });
       
@@ -640,6 +641,11 @@ export class DashboardDocentePage implements OnInit {
     this.showAnotacionesList.set(false);
     this.showReunionesList.set(false);
     this.closeMobileMenu();
+    
+    // Cargar datos según la vista seleccionada
+    if (view === 'reuniones') {
+      this.loadReunionesIfNeeded();
+    }
   }
   
   // Abrir panel de lista de asistencia

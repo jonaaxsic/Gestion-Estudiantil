@@ -186,6 +186,52 @@
         </div>
       </div>
       
+      <!-- Reuniones -->
+      <div class="content-card">
+        <div class="card-header">
+          <div class="card-header-left">
+            <h3 class="card-title">
+              <span class="material-icons">event</span>
+              Reuniones Programadas
+            </h3>
+          </div>
+          <div class="card-header-right">
+            <button class="btn-new" (click)="setView('reuniones')">
+              <span class="material-icons">visibility</span>
+              Ver Todas
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          @if (reuniones().length === 0) {
+            <div class="empty-state">
+              <span class="material-icons">event_busy</span>
+              <p>No hay reuniones programadas</p>
+            </div>
+          } @else {
+            @for (reunion of reuniones().slice(0, 3); track reunion.id) {
+              <div class="list-item">
+                <div class="list-icon reunion">
+                  <span class="material-icons">event</span>
+                </div>
+                <div class="list-content">
+                  <span class="title">{{ reunion.lugar }}</span>
+                  <span class="subtitle">{{ reunion.fecha }} - {{ reunion.hora }}</span>
+                  @if (reunion.descripcion) {
+                    <span class="subtitle">{{ reunion.descripcion }}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (reuniones().length > 3) {
+              <div class="view-more">
+                <button class="btn-link" (click)="setView('reuniones')">Ver más reuniones ({{ reuniones().length - 3 }} más)</button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+      
       <!-- Evaluaciones -->
       <div class="content-card">
         <div class="card-header">
