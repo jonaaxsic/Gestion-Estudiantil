@@ -613,7 +613,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-    MOBILE MENU
+    MOBILE MENU - Unificado con admin
     ══════════════════════════════════════════════════════════ */
 .mobile-menu-overlay {
   position: fixed;
@@ -621,6 +621,183 @@
   background: rgba(0, 0, 0, 0.55);
   z-index: 1000;
   backdrop-filter: blur(3px);
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-card);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  animation: slideInLeft 0.3s ease;
+  border-right: 1px solid var(--border);
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+.mobile-menu-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mobile-menu-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+
+.mobile-menu-item:hover {
+  background: var(--bg-hover);
+  color: var(--brand);
+}
+
+.mobile-menu-item .material-icons {
+  font-size: 22px;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.mobile-menu-item:hover .material-icons {
+  color: var(--brand);
+}
+
+.mobile-menu-item.logout {
+  color: var(--danger);
+  margin-top: 12px;
+  border-top: 2px solid var(--danger);
+  padding-top: 18px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.mobile-menu-item.logout .material-icons { 
+  color: var(--danger); 
+  font-size: 24px;
+}
+
+.mobile-menu-item.logout:hover { 
+  background: var(--danger);
+  color: white;
+}
+
+.mobile-menu-item.logout:hover .material-icons {
+  color: white;
+}
+
+.mobile-menu-btn { 
+  display: none; 
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-btn:hover {
+  background: var(--brand-light);
+  color: var(--brand);
+}
+
+.mobile-menu-btn .material-icons {
+  font-size: 24px;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════
+    RESPONSIVE - Unificado con admin
+    ══════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .mobile-menu-btn { display: flex; }
+  .btn-text { display: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .header-bar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  
+  .header-left { gap: 8px; }
+  .header-title { font-size: 1rem; }
+  .header-icon { font-size: 22px; }
+  .header-right { gap: 6px; }
+  
+  .user-rut { display: none; }
+  
+  .mobile-menu-btn { display: flex; }
+  
+  .btn-text { display: none; }
+  
+  .page-container { padding: 14px; }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .stat-card { padding: 16px 12px; }
+  .stat-value { font-size: 1.75rem; }
+  .stat-label { font-size: 0.7rem; }
+  .stat-icon { width: 40px; height: 40px; }
+  .stat-icon .material-icons { font-size: 20px; }
+  
+  .tabs {
+    padding: 4px;
+    gap: 4px;
+  }
+  
+  .tab {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .tab .material-icons { font-size: 16px; }
 }
 
 .mobile-menu {

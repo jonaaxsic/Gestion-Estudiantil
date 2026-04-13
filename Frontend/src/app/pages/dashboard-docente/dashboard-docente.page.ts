@@ -132,24 +132,56 @@ export class DashboardDocentePage implements OnInit {
   }
   
   loadData(): void {
-    this.api.getCursos().subscribe(data => this.cursos.set(data));
-    this.api.getEstudiantes().subscribe(data => this.estudiantes.set(data));
+    // Optimizado: cargar solo datos esenciales primero (cursos + asignaciones)
+    // Los datos adicionales (estudiantes, evaluaciones, etc) se cargan bajo demanda
     
-    // Cargar recordatorios del usuario actual
+    // 1. Cargar cursos (cached en backend)
+    this.api.getCursos().subscribe(data => this.cursos.set(data));
+    
+    // 2. Cargar asignaciones del docente (cached en backend)
     const userId = this.auth.user()?.id;
     if (userId) {
+      this.api.getAsignacionesDocente(userId).subscribe(data => {
+        this.asignacionesDocente.set(data);
+        this.cargarCursosAsignados();
+        // Solo cargar evaluaciones/anotaciones si hay cursos asignados
+        if (this.cursosAsignados().length > 0) {
+          this.cargarEvaluacionesFiltradas();
+        }
+      });
+      
+      // Cargar recordatorios (datos pequeños, rápido)
       this.api.getRecordatorios(userId).subscribe(data => this.recordatorios.set(data));
     }
+  }
+
+  // Cargar estudiantes SOLO cuando se necesita (lazy loading)
+  loadEstudiantesIfNeeded(): void {
+    if (this.estudiantes().length > 0) return; // Ya cargados
     
-    // Cargar asignaciones del docente
-    this.api.getAsignacionesDocente().subscribe(data => {
-      this.asignacionesDocente.set(data);
-      this.cargarCursosAsignados();
-      // Luego de cargar los cursos asignados, cargar evaluaciones y anotaciones filtradas
-      this.cargarEvaluacionesFiltradas();
-      this.cargarAnotacionesFiltradas();
-      this.cargarReunionesFiltradas();
-    });
+    const cursoIds = this.cursosAsignados().map(c => c.id).filter(id => id);
+    if (cursoIds.length > 0) {
+      // Cargar estudiantes del primer curso para el modal de asistencia
+      this.api.getEstudiantes(cursoIds[0]).subscribe(data => this.estudiantes.set(data));
+    }
+  }
+
+  // Cargar evaluaciones bajo demanda (solo cuando se necesita)
+  loadEvaluacionesIfNeeded(): void {
+    if (this.evaluaciones().length > 0) return;
+    this.cargarEvaluacionesFiltradas();
+  }
+
+  // Cargar anotaciones bajo demanda
+  loadAnotacionesIfNeeded(): void {
+    if (this.anotaciones().length > 0) return;
+    this.cargarAnotacionesFiltradas();
+  }
+
+  // Cargar reuniones bajo demanda
+  loadReunionesIfNeeded(): void {
+    if (this.reuniones().length > 0) return;
+    this.cargarReunionesFiltradas();
   }
 
   cargarEvaluacionesFiltradas(): void {
@@ -253,6 +285,9 @@ export class DashboardDocentePage implements OnInit {
   
   // Modal controls
   openAsistenciaDialog(): void {
+    // Lazy loading: cargar estudiantes solo cuando se abre el modal
+    this.loadEstudiantesIfNeeded();
+    
     this.asistenciaForm = {
       cursoId: '',
       fecha: new Date().toISOString().split('T')[0],
@@ -298,20 +333,9 @@ export class DashboardDocentePage implements OnInit {
   }
   
   openAnotacionDialog(): void {
-    // Si hay un curso seleccionado, cargar sus estudiantes primero
-    if (this.selectedCurso()?.id) {
-      this.api.getEstudiantes(this.selectedCurso()!.id).subscribe(data => {
-        this.estudiantes.set(data);
-      });
-    } else if (this.cursosAsignados().length > 0) {
-      // Cargar estudiantes del primer curso asignado
-      const primerCurso = this.cursosAsignados()[0];
-      if (primerCurso.id) {
-        this.api.getEstudiantes(primerCurso.id).subscribe(data => {
-          this.estudiantes.set(data);
-        });
-      }
-    }
+    // Lazy loading: cargar estudiantes solo cuando se necesita
+    this.loadEstudiantesIfNeeded();
+    
     this.anotacionForm = {
       estudianteId: '',
       tipo: 'negativa',

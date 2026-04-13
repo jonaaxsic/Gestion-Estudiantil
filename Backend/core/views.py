@@ -4,9 +4,11 @@ Implementan los endpoints de la aplicación
 """
 
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.throttling import AnonRateThrottle
+from django.core.cache import cache
 from bson import ObjectId
 from .models import (
     Usuario,
@@ -65,14 +67,23 @@ class UsuarioList(APIView, MongoObjectIdMixin):
     """Listar todos los usuarios o crear nuevo"""
 
     def get(self, request):
+        # Cache de 2 minutos para lista de usuarios
+        cache_key = "usuarios_list"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
         usuarios = Usuario.find(sort=[("created_at", -1)])
         serializer = UsuarioSerializer(usuarios, many=True)
+        cache.set(cache_key, serializer.data, 120)  # 2 minutos
         return Response(serializer.data)
 
     def post(self, request):
         serializer = UsuarioSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Invalidar cache de usuarios
+            cache.delete("usuarios_list")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,6 +134,16 @@ class AsignacionDocenteList(APIView, MongoObjectIdMixin):
         docente_id = request.query_params.get("docente_id")
         curso_id = request.query_params.get("curso_id")
 
+        # Cache específico por docente (2 minutos)
+        if docente_id:
+            cache_key = f"asignaciones_docente_{docente_id}"
+        else:
+            cache_key = "asignaciones_all"
+
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
         query = {"activo": True}
         if docente_id:
             query["docente_id"] = docente_id
@@ -131,6 +152,7 @@ class AsignacionDocenteList(APIView, MongoObjectIdMixin):
 
         asignaciones = AsignacionDocente.find(query, sort=[("created_at", -1)])
         serializer = AsignacionDocenteSerializer(asignaciones, many=True)
+        cache.set(cache_key, serializer.data, 120)  # 2 minutos
         return Response(serializer.data)
 
     def post(self, request):
@@ -293,18 +315,38 @@ class EstudianteList(APIView, MongoObjectIdMixin):
     """Listar estudiantes o crear nuevo"""
 
     def get(self, request):
+        curso_id = request.query_params.get("curso_id")
+
+        # Cache específico por curso (1 minuto)
+        if curso_id:
+            cache_key = f"estudiantes_curso_{curso_id}"
+        else:
+            cache_key = "estudiantes_all"
+
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
         query = {}
-        if request.query_params.get("curso_id"):
-            query["curso_id"] = request.query_params.get("curso_id")
+        if curso_id:
+            query["curso_id"] = curso_id
 
         estudiantes = Estudiante.find(query, sort=[("apellido", 1)])
         serializer = EstudianteSerializer(estudiantes, many=True)
+
+        # Cache de 1 minuto para estudiantes
+        cache.set(cache_key, serializer.data, 60)
         return Response(serializer.data)
 
     def post(self, request):
         serializer = EstudianteSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Invalidar cache de estudiantes
+            cache.delete("estudiantes_all")
+            curso_id = request.data.get("curso_id")
+            if curso_id:
+                cache.delete(f"estudiantes_curso_{curso_id}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -351,14 +393,23 @@ class CursoList(APIView, MongoObjectIdMixin):
     """Listar cursos o crear nuevo"""
 
     def get(self, request):
+        # Cache de 5 minutos para cursos (datos que cambian poco)
+        cache_key = "cursos_list"
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data)
+
         cursos = Curso.find(sort=[("nombre", 1)])
         serializer = CursoSerializer(cursos, many=True)
+        cache.set(cache_key, serializer.data, 300)  # 5 minutos
         return Response(serializer.data)
 
     def post(self, request):
         serializer = CursoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Invalidar cache de cursos
+            cache.delete("cursos_list")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
