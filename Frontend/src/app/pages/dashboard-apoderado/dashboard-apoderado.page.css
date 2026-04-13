@@ -47,11 +47,20 @@
   font-size: 20px;
 }
 
-@media (max-width: 768px) {
-  /* Ocultar tabs de navegación en móvil - usar menú hamburguesa */
+@media (max-width: 1024px) {
+  /* Ocultar tabs de navegación en tablet - usar menú hamburguesa */
   .main-tabs {
     display: none;
   }
+  
+  /* En tablet: mostrar menú móvil, ocultar elementos del header */
+  .mobile-menu-btn { display: flex; }
+  .header-right-desktop { display: none; }
+  .mobile-only { display: flex; }
+  
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid { grid-template-columns: 1fr; }
+  .content-card.full-width { grid-column: span 1; }
 }
 
 /* ══════════════════════════════════════════════════════════
