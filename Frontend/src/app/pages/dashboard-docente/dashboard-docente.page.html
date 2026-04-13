@@ -7,10 +7,6 @@
     <h1 class="header-title">Panel del Docente</h1>
   </div>
   <div class="header-right">
-    <button class="btn-primary" (click)="openRecordatorioDialog()">
-      <span class="material-icons">add_alert</span>
-      <span class="btn-text">Recordatorio</span>
-    </button>
     <button class="btn-theme-toggle" (click)="theme.toggle()" [title]="theme.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
       <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
     </button>
@@ -58,6 +54,10 @@
         <button class="mobile-menu-item" (click)="openReunionDialog(); closeMobileMenu()">
           <span class="material-icons">event_available</span>
           <span>Programar Reunión</span>
+        </button>
+        <button class="mobile-menu-item" (click)="openRecordatorioDialog(); closeMobileMenu()">
+          <span class="material-icons">add_alert</span>
+          <span>Recordatorio</span>
         </button>
         <button class="mobile-menu-item logout" (click)="logout()">
           <span class="material-icons">logout</span>

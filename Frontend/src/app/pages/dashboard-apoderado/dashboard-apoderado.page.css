@@ -683,13 +683,25 @@
 
 .mobile-menu-item.logout {
   color: var(--danger);
-  margin-top: 8px;
-  border-top: 1px solid var(--border);
-  padding-top: 16px;
+  margin-top: 12px;
+  border-top: 2px solid var(--danger);
+  padding-top: 18px;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: var(--radius-md);
+  font-weight: 700;
 }
 
-.mobile-menu-item.logout .material-icons { color: var(--danger); }
-.mobile-menu-item.logout:hover { background: #fee2e2; }
+.mobile-menu-item.logout .material-icons { 
+  color: var(--danger); 
+  font-size: 24px;
+}
+.mobile-menu-item.logout:hover { 
+  background: var(--danger);
+  color: white;
+}
+.mobile-menu-item.logout:hover .material-icons {
+  color: white;
+}
 
 .mobile-menu-btn { display: none; }
 
@@ -939,11 +951,41 @@
 /* Vista de Anotaciones */
 .anotaciones-view {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.anotaciones-view .stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.anotaciones-view .stat-card {
+  padding: 20px 16px;
+}
+
+.anotaciones-view .stat-icon {
+  width: 44px;
+  height: 44px;
+}
+
+.anotaciones-view .stat-value {
+  font-size: 1.8rem;
+}
+
+.anotaciones-view .content-card {
+  margin-bottom: 4px;
 }
 
 /* Vista de Asistencia */
 .asistencia-view {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .asistencia-porcentaje {
@@ -1201,6 +1243,58 @@
 /* Vista de Solicitudes */
 .solicitudes-view {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.solicitudes-view .form-group {
+  margin-bottom: 18px;
+}
+
+.solicitudes-view .form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.solicitudes-view .form-select,
+.solicitudes-view .form-input,
+.solicitudes-view .form-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.solicitudes-view .form-select:focus,
+.solicitudes-view .form-input:focus,
+.solicitudes-view .form-textarea:focus {
+  border-color: var(--brand);
+  outline: none;
+  background: var(--bg-card);
+}
+
+.solicitudes-view .form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.solicitudes-view .btn-primary {
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1rem;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .solicitud-card {

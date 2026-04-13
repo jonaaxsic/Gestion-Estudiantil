@@ -7,10 +7,6 @@
     <h1 class="header-title">Administración</h1>
   </div>
   <div class="header-right">
-    <button class="btn-primary" (click)="openRecordatorioDialog()">
-      <span class="material-icons">add_alert</span>
-      <span class="btn-text">Recordatorio</span>
-    </button>
     <!-- Toggle modo claro/oscuro -->
     <button class="btn-theme-toggle" (click)="theme.toggle()" [title]="theme.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
       <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
@@ -52,8 +48,12 @@
           <span class="material-icons">co_present</span>
           <span>Docentes</span>
         </button>
-        <button class="mobile-menu-item" (click)="activeTab.set('docentes'); closeMobileMenu()">
+        <button class="mobile-menu-item" (click)="openRecordatorioDialog(); closeMobileMenu()">
           <span class="material-icons">add_alert</span>
+          <span>Nuevo Recordatorio</span>
+        </button>
+        <button class="mobile-menu-item" (click)="activeTab.set('docentes'); closeMobileMenu()">
+          <span class="material-icons">notifications</span>
           <span>Mis Recordatorios</span>
         </button>
         <button class="mobile-menu-item logout" (click)="logout()">
