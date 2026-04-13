@@ -1346,10 +1346,6 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-}
 
 .stat-num {
   font-size: 1.25rem;
