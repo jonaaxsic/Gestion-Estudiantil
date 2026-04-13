@@ -24,10 +24,24 @@ Aplicación web para la gestión académica institucional que permite digitaliza
 | Categoría         | Tecnología                      |
 | ----------------- | ------------------------------- |
 | **Frontend**      | Angular 19 + Angular Material   |
-| **Backend**       | Python + Django (Serverless) |
+| **Backend**       | Python + Django (Serverless)    |
 | **Base de Datos** | MongoDB Atlas                   |
 | **Despliegue**    | Cloudflare Pages Workers + Render   |
-| **Desarrollo**    | TypeScript, Python, Django      |
+| **Desarrollo**    | TypeScript, Python, Django     |
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+Gestion-Estudiantil/
+├── Frontend/          # Aplicación Angular
+│   └── src/           # Código fuente
+├── Backend/           # API Django REST
+│   └── core/          # Modelos, vistas, serializadores
+├── api-worker/        # Cloudflare Workers (proxy API)
+└── docs/              # Documentación adicional
+```
 
 ---
 
@@ -38,6 +52,17 @@ Aplicación web para la gestión académica institucional que permite digitaliza
 - 📝 **Anotaciones** - Registro de comportamiento positivo y negativo
 - 📢 **Reuniones** - Gestión de reuniones de apoderados
 - 👥 **Gestión de Roles** - Admin, Docente, Apoderado
+
+---
+
+## 🚀 Despliegue
+
+| Servicio | URL |
+|----------|-----|
+| **Frontend** | Cloudflare Pages |
+| **API** | Cloudflare Workers → Render |
+
+> ⚠️ **Nota**: El backend en Render (plan free) entra en modo sleep tras 15 min de inactividad. Se recomienda configurar un servicio de ping (cron-job.org) cada 15 min para mantenerlo activo.
 
 ---
 
