@@ -240,6 +240,16 @@ class ReunioneSerializer(serializers.Serializer):
                 validated_data["lugar"] = "Por definir"
             if not validated_data.get("notificacion_enviada"):
                 validated_data["notificacion_enviada"] = False
+
+            # Convertir fecha a string si es datetime.date (MongoDB no acepta date)
+            if validated_data.get("fecha"):
+                from datetime import date
+
+                if isinstance(validated_data["fecha"], date):
+                    validated_data["fecha"] = validated_data["fecha"].strftime(
+                        "%Y-%m-%d"
+                    )
+
             # Convertir hora a string si es necesario
             if validated_data.get("hora") and not isinstance(
                 validated_data["hora"], str
