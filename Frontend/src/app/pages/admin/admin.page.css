@@ -130,60 +130,9 @@
   font-weight: 600;
 }
 
-/* ── TABS NAV ───────────────────────────────────────────── */
-.tabs {
-  display: flex;
-  align-items: center;   /* CRÍTICO: alinea verticalmente todos los botones */
-  gap: 6px;
-  margin-bottom: 24px;
-  background: var(--bg-card);
-  padding: 6px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 18px;
-  border: none;
-  background: transparent;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  line-height: 1;            /* evita saltos de altura */
-  vertical-align: middle;
-  font-family: inherit;
-}
-
-.tab:hover {
-  background: var(--tab-hover-bg);
-  color: var(--tab-hover-txt);
-}
-
-.tab.active {
-  background: var(--tab-active-bg);
-  color: var(--tab-active-txt);
-  box-shadow: var(--shadow-sm);
-}
-
-.tab .material-icons {
-  font-size: 18px;
-  vertical-align: middle;
-}
-
-/* ── CONTENT CARD ───────────────────────────────────────── */
-.content-card {
+/* ══════════════════════════════════════════════════════════
+    CONTENT CARD
+    ══════════════════════════════════════════════════════════ */
   background: var(--bg-card);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
