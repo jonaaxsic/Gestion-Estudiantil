@@ -116,13 +116,15 @@ class UsuarioDetail(APIView, MongoObjectIdMixin):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        recordatorio = self.get_object(pk)
-        if not recordatorio:
+        usuario = self.get_object(pk)
+        if not usuario:
             return Response(
-                {"error": "Recordatorio no encontrado"},
+                {"error": "Usuario no encontrado"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        recordatorio.delete()
+        # Invalidar cache de usuarios al eliminar
+        cache.delete("usuarios_list")
+        usuario.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
