@@ -140,11 +140,12 @@ class Usuario(BaseModel):
         self.email = None
         self.username = None
         self.password = None
-        self.rol = None  # 'docente', 'apoderado', 'administrador'
+        self.rol = None  # 'docente', 'apoderado', 'administrador', 'inspector_general'
         self.nombre = None
         self.apellido = None
         self.telefono = None
         self.activo = True
+        self.sub_rol = None  # Opcional, solo para inspector_patio
         super().__init__(data)
 
     def _load_from_dict(self, data):
@@ -158,6 +159,7 @@ class Usuario(BaseModel):
         self.apellido = data.get("apellido")
         self.telefono = data.get("telefono")
         self.activo = data.get("activo", True)
+        self.sub_rol = data.get("sub_rol")
 
     def to_dict(self):
         data = super().to_dict()
@@ -172,6 +174,7 @@ class Usuario(BaseModel):
                 "apellido": self.apellido,
                 "telefono": self.telefono,
                 "activo": self.activo,
+                "sub_rol": self.sub_rol,
             }
         )
         return data
@@ -570,3 +573,231 @@ class Nota(BaseModel):
         if not valores:
             return None
         return round(sum(valores) / len(valores), 1)
+
+
+# ============================================================
+# MODELOS DEL INSPECTOR GENERAL
+# ============================================================
+
+
+class DocumentoGenerado(BaseModel):
+    """Modelo para documentos emitidos por el inspector general"""
+
+    collection_name = "documentos_generados"
+
+    def __init__(self, data=None):
+        self.tipo_documento = None  # 'certificado_alumno_regular', 'certificado_notas', 'retiro_alumno', 'seguro_escolar', 'pase_hora', 'libro_clases'
+        self.estudiante_id = None
+        self.inspector_id = None
+        self.fecha_emision = None
+        self.datos_adicionales = {}
+        self.estado = "emitido"
+        super().__init__(data)
+
+    def _load_from_dict(self, data):
+        super()._load_from_dict(data)
+        self.tipo_documento = data.get("tipo_documento")
+        self.estudiante_id = data.get("estudiante_id")
+        self.inspector_id = data.get("inspector_id")
+        self.fecha_emision = data.get("fecha_emision")
+        self.datos_adicionales = data.get("datos_adicionales", {})
+        self.estado = data.get("estado", "emitido")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "tipo_documento": self.tipo_documento,
+                "estudiante_id": self.estudiante_id,
+                "inspector_id": self.inspector_id,
+                "fecha_emision": self.fecha_emision,
+                "datos_adicionales": self.datos_adicionales,
+                "estado": self.estado,
+            }
+        )
+        return data
+
+
+class AccidenteEscolar(BaseModel):
+    """Modelo para registro de accidentes escolares (seguro escolar)"""
+
+    collection_name = "accidentes_escolares"
+
+    def __init__(self, data=None):
+        self.estudiante_id = None
+        self.fecha_accidente = None
+        self.hora_accidente = None
+        self.lugar = None  # 'patio', 'sala', 'baño', 'pasillo', 'entrada'
+        self.descripcion = None
+        self.tipo_lesion = None
+        self.testigos = None
+        self.inspector_id = None
+        self.derivacion = None  # Hospital o clínica a la que se deriva
+        self.estado = "pendiente"  # 'pendiente', 'derivado', 'cerrado'
+        super().__init__(data)
+
+    def _load_from_dict(self, data):
+        super()._load_from_dict(data)
+        self.estudiante_id = data.get("estudiante_id")
+        self.fecha_accidente = data.get("fecha_accidente")
+        self.hora_accidente = data.get("hora_accidente")
+        self.lugar = data.get("lugar")
+        self.descripcion = data.get("descripcion")
+        self.tipo_lesion = data.get("tipo_lesion")
+        self.testigos = data.get("testigos")
+        self.inspector_id = data.get("inspector_id")
+        self.derivacion = data.get("derivacion")
+        self.estado = data.get("estado", "pendiente")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "estudiante_id": self.estudiante_id,
+                "fecha_accidente": self.fecha_accidente,
+                "hora_accidente": self.hora_accidente,
+                "lugar": self.lugar,
+                "descripcion": self.descripcion,
+                "tipo_lesion": self.tipo_lesion,
+                "testigos": self.testigos,
+                "inspector_id": self.inspector_id,
+                "derivacion": self.derivacion,
+                "estado": self.estado,
+            }
+        )
+        return data
+
+
+class RetiroAlumno(BaseModel):
+    """Modelo para registrar retiros autorizados de alumnos"""
+
+    collection_name = "retiros_alumno"
+
+    def __init__(self, data=None):
+        self.estudiante_id = None
+        self.apoderado_autorizante = None  # Nombre y RUT del apoderado
+        self.motivo = None
+        self.fecha = None
+        self.hora_salida = None
+        self.inspector_id = None
+        self.observacion = ""
+        super().__init__(data)
+
+    def _load_from_dict(self, data):
+        super()._load_from_dict(data)
+        self.estudiante_id = data.get("estudiante_id")
+        self.apoderado_autorizante = data.get("apoderado_autorizante")
+        self.motivo = data.get("motivo")
+        self.fecha = data.get("fecha")
+        self.hora_salida = data.get("hora_salida")
+        self.inspector_id = data.get("inspector_id")
+        self.observacion = data.get("observacion", "")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "estudiante_id": self.estudiante_id,
+                "apoderado_autorizante": self.apoderado_autorizante,
+                "motivo": self.motivo,
+                "fecha": self.fecha,
+                "hora_salida": self.hora_salida,
+                "inspector_id": self.inspector_id,
+                "observacion": self.observacion,
+            }
+        )
+        return data
+
+
+class LibroInspectoria(BaseModel):
+    """Modelo para el libro de inspectoría (registro diario de eventos)"""
+
+    collection_name = "libro_inspectoria"
+
+    def __init__(self, data=None):
+        self.tipo = None  # 'llegada_tarde', 'sin_materiales', 'conducta', 'comunicado', 'otro'
+        self.estudiante_id = None  # Opcional, si aplica a un estudiante específico
+        self.curso_id = None
+        self.descripcion = None
+        self.inspector_id = None
+        self.fecha = None
+        super().__init__(data)
+
+    def _load_from_dict(self, data):
+        super()._load_from_dict(data)
+        self.tipo = data.get("tipo")
+        self.estudiante_id = data.get("estudiante_id")
+        self.curso_id = data.get("curso_id")
+        self.descripcion = data.get("descripcion")
+        self.inspector_id = data.get("inspector_id")
+        self.fecha = data.get("fecha")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "tipo": self.tipo,
+                "estudiante_id": self.estudiante_id,
+                "curso_id": self.curso_id,
+                "descripcion": self.descripcion,
+                "inspector_id": self.inspector_id,
+                "fecha": self.fecha,
+            }
+        )
+        return data
+
+
+class ConfiguracionEstablecimiento(BaseModel):
+    """Modelo para la configuración del establecimiento (datos para PDFs)"""
+
+    collection_name = "configuracion_establecimiento"
+
+    def __init__(self, data=None):
+        self.nombre = None
+        self.rut = None
+        self.direccion = None
+        self.telefono = None
+        self.email = None
+        self.director = None
+        self.inspector_general = None
+        self.logo_url = None
+        self.codigo_sostenedor = None
+        self.dependencia = None  # 'Municipal', 'Particular', etc.
+        self.region = None
+        self.comuna = None
+        super().__init__(data)
+
+    def _load_from_dict(self, data):
+        super()._load_from_dict(data)
+        self.nombre = data.get("nombre")
+        self.rut = data.get("rut")
+        self.direccion = data.get("direccion")
+        self.telefono = data.get("telefono")
+        self.email = data.get("email")
+        self.director = data.get("director")
+        self.inspector_general = data.get("inspector_general")
+        self.logo_url = data.get("logo_url")
+        self.codigo_sostenedor = data.get("codigo_sostenedor")
+        self.dependencia = data.get("dependencia")
+        self.region = data.get("region")
+        self.comuna = data.get("comuna")
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update(
+            {
+                "nombre": self.nombre,
+                "rut": self.rut,
+                "direccion": self.direccion,
+                "telefono": self.telefono,
+                "email": self.email,
+                "director": self.director,
+                "inspector_general": self.inspector_general,
+                "logo_url": self.logo_url,
+                "codigo_sostenedor": self.codigo_sostenedor,
+                "dependencia": self.dependencia,
+                "region": self.region,
+                "comuna": self.comuna,
+            }
+        )
+        return data

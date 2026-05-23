@@ -17,3 +17,7 @@ python-dotenv>=1.0
 
 #gunicorn
 gunicorn>=21.2.0
+
+# Generación de PDFs
+reportlab>=4.0
+Pillow>=10.0

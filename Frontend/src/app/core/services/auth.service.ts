@@ -32,6 +32,7 @@ export class AuthService {
   readonly isDocente = computed(() => this._user()?.rol === 'docente');
   readonly isApoderado = computed(() => this._user()?.rol === 'apoderado');
   readonly isAdmin = computed(() => this._user()?.rol === 'administrador');
+  readonly isInspector = computed(() => this._user()?.rol === 'inspector_general');
   readonly sessionWarning = this._sessionWarning.asReadonly();
 
   constructor() {
@@ -236,6 +237,8 @@ export class AuthService {
       this.router.navigate(['/dashboard-apoderado']);
     } else if (user?.rol === 'administrador') {
       this.router.navigate(['/admin']);
+    } else if (user?.rol === 'inspector_general') {
+      this.router.navigate(['/dashboard-inspector']);
     }
   }
 

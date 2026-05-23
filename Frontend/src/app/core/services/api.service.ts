@@ -13,6 +13,13 @@ import {
   Recordatorio,
   AsignacionDocente,
   LoginResponse,
+  DocumentoGenerado,
+  AccidenteEscolar,
+  RetiroAlumno,
+  LibroInspectoria,
+  ConfiguracionEstablecimiento,
+  DashboardInspector,
+  PdfResponse,
 } from '../../shared/models';
 import { environment } from '../../../environments/environment';
 
@@ -353,5 +360,139 @@ export class ApiService {
 
   getDashboardApoderado(estudianteId: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/dashboard/apoderado?estudiante_id=${estudianteId}`, { headers: this.jsonHeaders });
+  }
+
+  // ============ INSPECTOR GENERAL ============
+
+  getDashboardInspector(inspectorId: string): Observable<DashboardInspector> {
+    return this.http.get<DashboardInspector>(`${this.baseUrl}/dashboard/inspector?inspector_id=${inspectorId}`, { headers: this.jsonHeaders });
+  }
+
+  // Documentos
+  getDocumentos(filters?: { inspector_id?: string; estudiante_id?: string; tipo_documento?: string }): Observable<DocumentoGenerado[]> {
+    let url = `${this.baseUrl}/documentos`;
+    const params = new URLSearchParams();
+    if (filters?.inspector_id) params.set('inspector_id', filters.inspector_id);
+    if (filters?.estudiante_id) params.set('estudiante_id', filters.estudiante_id);
+    if (filters?.tipo_documento) params.set('tipo_documento', filters.tipo_documento);
+    if (params.toString()) url += '?' + params.toString();
+    return this.http.get<DocumentoGenerado[]>(url, { headers: this.jsonHeaders });
+  }
+
+  // Certificados PDF
+  generarCertificadoAlumnoRegular(data: { estudiante_id: string; inspector_id: string }): Observable<PdfResponse> {
+    return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/certificado-alumno-regular`, data, { headers: this.jsonHeaders });
+  }
+
+  generarCertificadoNotas(data: { estudiante_id: string; inspector_id: string; ano_escolar?: number }): Observable<PdfResponse> {
+    return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/certificado-notas`, data, { headers: this.jsonHeaders });
+  }
+
+  generarAutorizacionRetiro(data: {
+    estudiante_id: string;
+    inspector_id: string;
+    apoderado_autorizante: string;
+    motivo: string;
+    fecha: string;
+    hora_salida: string;
+    observacion?: string;
+  }): Observable<PdfResponse> {
+    return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/autorizacion-retiro`, data, { headers: this.jsonHeaders });
+  }
+
+  generarDeclaracionAccidente(data: {
+    estudiante_id: string;
+    inspector_id: string;
+    fecha_accidente: string;
+    hora_accidente?: string;
+    lugar?: string;
+    descripcion: string;
+    tipo_lesion?: string;
+    testigos?: string;
+    derivacion?: string;
+  }): Observable<PdfResponse> {
+    return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/accidente-escolar`, data, { headers: this.jsonHeaders });
+  }
+
+  // Retiros
+  getRetiros(filters?: { fecha?: string; curso_id?: string }): Observable<RetiroAlumno[]> {
+    let url = `${this.baseUrl}/retiros`;
+    const params = new URLSearchParams();
+    if (filters?.fecha) params.set('fecha', filters.fecha);
+    if (filters?.curso_id) params.set('curso_id', filters.curso_id);
+    if (params.toString()) url += '?' + params.toString();
+    return this.http.get<RetiroAlumno[]>(url, { headers: this.jsonHeaders });
+  }
+
+  getRetiro(id: string): Observable<RetiroAlumno> {
+    return this.http.get<RetiroAlumno>(`${this.baseUrl}/retiros/${id}`, { headers: this.jsonHeaders });
+  }
+
+  deleteRetiro(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/retiros/${id}`, { headers: this.jsonHeaders });
+  }
+
+  // Accidentes
+  getAccidentes(filters?: { estado?: string; fecha?: string }): Observable<AccidenteEscolar[]> {
+    let url = `${this.baseUrl}/accidentes`;
+    const params = new URLSearchParams();
+    if (filters?.estado) params.set('estado', filters.estado);
+    if (filters?.fecha) params.set('fecha', filters.fecha);
+    if (params.toString()) url += '?' + params.toString();
+    return this.http.get<AccidenteEscolar[]>(url, { headers: this.jsonHeaders });
+  }
+
+  getAccidente(id: string): Observable<AccidenteEscolar> {
+    return this.http.get<AccidenteEscolar>(`${this.baseUrl}/accidentes/${id}`, { headers: this.jsonHeaders });
+  }
+
+  updateAccidente(id: string, data: Partial<AccidenteEscolar>): Observable<AccidenteEscolar> {
+    return this.http.put<AccidenteEscolar>(`${this.baseUrl}/accidentes/${id}`, data, { headers: this.jsonHeaders });
+  }
+
+  deleteAccidente(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/accidentes/${id}`, { headers: this.jsonHeaders });
+  }
+
+  // Libro de Inspectoría
+  getLibroInspectoria(filters?: { fecha?: string; curso_id?: string; tipo?: string }): Observable<LibroInspectoria[]> {
+    let url = `${this.baseUrl}/libro-inspectoria`;
+    const params = new URLSearchParams();
+    if (filters?.fecha) params.set('fecha', filters.fecha);
+    if (filters?.curso_id) params.set('curso_id', filters.curso_id);
+    if (filters?.tipo) params.set('tipo', filters.tipo);
+    if (params.toString()) url += '?' + params.toString();
+    return this.http.get<LibroInspectoria[]>(url, { headers: this.jsonHeaders });
+  }
+
+  createLibroInspectoria(data: Partial<LibroInspectoria>): Observable<LibroInspectoria> {
+    return this.http.post<LibroInspectoria>(`${this.baseUrl}/libro-inspectoria`, data, { headers: this.jsonHeaders });
+  }
+
+  deleteLibroInspectoria(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/libro-inspectoria/${id}`, { headers: this.jsonHeaders });
+  }
+
+  // Asistencia General
+  getAsistenciaGeneral(filters?: { fecha?: string; curso_id?: string }): Observable<Asistencia[]> {
+    let url = `${this.baseUrl}/asistencia-general`;
+    const params = new URLSearchParams();
+    if (filters?.fecha) params.set('fecha', filters.fecha);
+    if (filters?.curso_id) params.set('curso_id', filters.curso_id);
+    if (params.toString()) url += '?' + params.toString();
+    return this.http.get<Asistencia[]>(url, { headers: this.jsonHeaders });
+  }
+
+  getInasistenciasCriticas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/inasistencias-criticas`, { headers: this.jsonHeaders });
+  }
+
+  // Configuración del Establecimiento
+  getConfiguracionEstablecimiento(): Observable<ConfiguracionEstablecimiento> {
+    return this.http.get<ConfiguracionEstablecimiento>(`${this.baseUrl}/configuracion-establecimiento`, { headers: this.jsonHeaders });
+  }
+
+  updateConfiguracionEstablecimiento(data: Partial<ConfiguracionEstablecimiento>): Observable<ConfiguracionEstablecimiento> {
+    return this.http.post<ConfiguracionEstablecimiento>(`${this.baseUrl}/configuracion-establecimiento`, data, { headers: this.jsonHeaders });
   }
 }

@@ -115,6 +115,7 @@
 .stat-icon.admins     { background: var(--stat-icon-2); }
 .stat-icon.docentes   { background: var(--stat-icon-3); }
 .stat-icon.apoderados { background: var(--stat-icon-4); }
+.stat-icon.inspectors { background: #8b5cf6; }
 .stat-icon.students   { background: var(--stat-icon-1); }
 .stat-icon.courses    { background: var(--stat-icon-3); }
 .stat-icon.guardian   { background: var(--success); }

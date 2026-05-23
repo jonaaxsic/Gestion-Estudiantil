@@ -1,0 +1,632 @@
+<div class="header-bar">
+  <div class="header-left">
+    <button class="btn-icon mobile-menu-btn" (click)="toggleMobileMenu()">
+      <span class="material-icons">menu</span>
+    </button>
+    <span class="material-icons header-icon">badge</span>
+    <h1 class="header-title">Inspectoría General</h1>
+  </div>
+  <div class="header-right">
+    <button class="btn-theme-toggle" (click)="theme.toggle()" [title]="theme.isDark() ? 'Modo claro' : 'Modo oscuro'">
+      <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
+    </button>
+    <div class="user-info">
+      <span class="user-name">{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
+    </div>
+    <button class="btn-logout" (click)="logout()">
+      <span class="material-icons">logout</span>
+      <span class="btn-text">Cerrar</span>
+    </button>
+  </div>
+</div>
+
+<!-- Mobile Menu -->
+@if (showMobileMenu()) {
+  <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
+    <div class="mobile-menu" (click)="$event.stopPropagation()">
+      <div class="mobile-menu-header">
+        <h3>Menú Inspector</h3>
+        <button class="btn-icon" (click)="closeMobileMenu()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="mobile-menu-content">
+        <button class="mobile-menu-item" (click)="activeView.set('dashboard'); closeMobileMenu()">
+          <span class="material-icons">dashboard</span> Dashboard
+        </button>
+        <button class="mobile-menu-item" (click)="activeView.set('documentos'); closeMobileMenu()">
+          <span class="material-icons">description</span> Documentos
+        </button>
+        <button class="mobile-menu-item" (click)="activeView.set('retiros'); closeMobileMenu(); loadRetiros()">
+          <span class="material-icons">exit_to_app</span> Retiros
+        </button>
+        <button class="mobile-menu-item" (click)="activeView.set('accidentes'); closeMobileMenu(); loadAccidentes()">
+          <span class="material-icons">local_hospital</span> Accidentes
+        </button>
+        <button class="mobile-menu-item" (click)="activeView.set('asistencia'); closeMobileMenu(); loadAsistenciaData()">
+          <span class="material-icons">how_to_reg</span> Asistencia
+        </button>
+        <button class="mobile-menu-item" (click)="activeView.set('libro'); closeMobileMenu(); loadLibro()">
+          <span class="material-icons">book</span> Libro Inspectoría
+        </button>
+        <button class="mobile-menu-item logout" (click)="logout()">
+          <span class="material-icons">logout</span> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="page-container">
+  <app-shared-tabs
+    [tabs]="inspectorTabs"
+    [selectedIndex]="tabIndex"
+    (tabChanged)="onTabChanged($event)">
+  </app-shared-tabs>
+
+  <div class="tab-content">
+
+    <!-- ====== VIEW: DASHBOARD ====== -->
+    @if (activeView() === 'dashboard') {
+      <div class="stats-grid">
+        <div class="stat-card" (click)="activeView.set('documentos')">
+          <div class="stat-icon docs"><span class="material-icons">description</span></div>
+          <div class="stat-value">{{ dashboardData()?.documentos_hoy || 0 }}</div>
+          <div class="stat-label">Documentos Hoy</div>
+        </div>
+        <div class="stat-card" (click)="activeView.set('retiros'); loadRetiros()">
+          <div class="stat-icon retiros"><span class="material-icons">exit_to_app</span></div>
+          <div class="stat-value">{{ dashboardData()?.retiros_hoy || 0 }}</div>
+          <div class="stat-label">Retiros Hoy</div>
+        </div>
+        <div class="stat-card" (click)="activeView.set('accidentes'); loadAccidentes()">
+          <div class="stat-icon accidentes"><span class="material-icons">local_hospital</span></div>
+          <div class="stat-value">{{ dashboardData()?.accidentes_mes || 0 }}</div>
+          <div class="stat-label">Accidentes del Mes</div>
+        </div>
+        <div class="stat-card" (click)="activeView.set('asistencia'); loadAsistenciaData()">
+          <div class="stat-icon inasistencia"><span class="material-icons">warning</span></div>
+          <div class="stat-value">{{ dashboardData()?.inasistencias_criticas?.length || 0 }}</div>
+          <div class="stat-label">Inasistencias Críticas</div>
+        </div>
+      </div>
+
+      <h2 class="section-title"><span class="material-icons">flash_on</span> Acciones Rápidas</h2>
+      <div class="quick-actions-grid">
+        <button class="quick-action-btn" (click)="activeView.set('documentos')">
+          <span class="material-icons">description</span> Generar Documento
+        </button>
+        <button class="quick-action-btn" (click)="activeView.set('retiros'); loadRetiros()">
+          <span class="material-icons">exit_to_app</span> Registrar Retiro
+        </button>
+        <button class="quick-action-btn" (click)="activeView.set('accidentes'); loadAccidentes()">
+          <span class="material-icons">local_hospital</span> Declarar Accidente
+        </button>
+        <button class="quick-action-btn" (click)="activeView.set('libro'); loadLibro()">
+          <span class="material-icons">book</span> Libro Inspectoría
+        </button>
+      </div>
+
+      <!-- Alertas -->
+      @if (dashboardData()?.accidentes_pendientes && dashboardData()!.accidentes_pendientes > 0) {
+        <div class="alert-card warning">
+          <span class="material-icons">warning</span>
+          <span>Hay {{ dashboardData()?.accidentes_pendientes }} accidente(s) pendiente(s) de gestión</span>
+          <button class="btn-link" (click)="activeView.set('accidentes'); loadAccidentes()">Ver</button>
+        </div>
+      }
+
+      @if (dashboardData()?.inasistencias_criticas?.length) {
+        <div class="alert-card danger">
+          <span class="material-icons">priority_high</span>
+          <span>{{ dashboardData()?.inasistencias_criticas?.length }} estudiante(s) con inasistencias críticas</span>
+          <button class="btn-link" (click)="activeView.set('asistencia'); loadAsistenciaData()">Ver</button>
+        </div>
+      }
+
+      <div class="card-grid">
+        <!-- Documentos Recientes -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3 class="card-title"><span class="material-icons">description</span> Últimos Documentos</h3>
+          </div>
+          <div class="card-body">
+            @if ((dashboardData()?.documentos_recientes?.length || 0) === 0) {
+              <div class="empty-state"><span class="material-icons">info</span><p>Sin documentos emitidos hoy</p></div>
+            } @else {
+              @for (doc of dashboardData()?.documentos_recientes; track doc.id) {
+                <div class="list-item">
+                  <div class="list-icon docs"><span class="material-icons">description</span></div>
+                  <div class="list-content">
+                    <span class="title">{{ doc.tipo_documento.replace(/_/g, ' ') }}</span>
+                    <span class="subtitle">{{ doc.fecha_emision | slice:0:10 }}</span>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Retiros Recientes -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3 class="card-title"><span class="material-icons">exit_to_app</span> Últimos Retiros</h3>
+          </div>
+          <div class="card-body">
+            @if ((dashboardData()?.retiros_recientes?.length || 0) === 0) {
+              <div class="empty-state"><span class="material-icons">info</span><p>Sin retiros registrados</p></div>
+            } @else {
+              @for (ret of dashboardData()?.retiros_recientes; track ret.id) {
+                <div class="list-item">
+                  <div class="list-icon retiros"><span class="material-icons">exit_to_app</span></div>
+                  <div class="list-content">
+                    <span class="title">{{ ret.apoderado_autorizante }}</span>
+                    <span class="subtitle">{{ ret.fecha }} - {{ ret.motivo }}</span>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ====== VIEW: DOCUMENTOS ====== -->
+    @if (activeView() === 'documentos') {
+      <div class="panel-view">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="material-icons">description</span> Generación de Documentos</h2>
+        </div>
+
+        <!-- Buscador de Estudiante -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3 class="card-title"><span class="material-icons">search</span> Buscar Estudiante</h3>
+          </div>
+          <div class="card-body">
+            <div class="search-box">
+              <input type="text" class="form-input" #searchInput placeholder="Buscar por RUT, nombre o apellido..."
+                (keyup.enter)="buscarEstudiante(searchInput.value)">
+              <button class="btn btn-primary" (click)="buscarEstudiante(searchInput.value)">
+                <span class="material-icons">search</span> Buscar
+              </button>
+            </div>
+
+            @if (showBuscarEstudiante()) {
+              <div class="search-results">
+                @for (est of estudiantes(); track est.id) {
+                  <div class="search-result-item" (click)="seleccionarEstudiante(est)"
+                    [class.selected]="selectedEstudiante()?.id === est.id">
+                    <span class="est-nombre">{{ est.apellido }} {{ est.nombre }}</span>
+                    <span class="est-rut">{{ est.rut }}</span>
+                    <span class="est-curso">{{ getCursoNombre(est.curso_id || '') }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (selectedEstudiante()) {
+          <div class="content-card" style="margin-top: 20px;">
+            <div class="card-header">
+              <h3 class="card-title">
+                <span class="material-icons">person</span>
+                {{ selectedEstudiante()?.apellido }} {{ selectedEstudiante()?.nombre }}
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="estudiante-info">
+                <div><strong>RUT:</strong> {{ selectedEstudiante()?.rut }}</div>
+                <div><strong>Curso:</strong> {{ getCursoNombre(selectedEstudiante()?.curso_id || '') }}</div>
+              </div>
+              <div class="document-actions">
+                <button class="btn btn-primary" (click)="generarCertificadoRegular()" [disabled]="saving()">
+                  <span class="material-icons">verified</span>
+                  {{ saving() ? 'Generando...' : 'Certificado Alumno Regular' }}
+                </button>
+                <button class="btn btn-secondary" (click)="abrirCertificadoNotas()">
+                  <span class="material-icons">grade</span>
+                  Certificado de Notas
+                </button>
+                <button class="btn btn-secondary" (click)="abrirRetiroModal()">
+                  <span class="material-icons">exit_to_app</span>
+                  Autorización de Retiro
+                </button>
+                <button class="btn btn-secondary" (click)="abrirAccidenteModal()">
+                  <span class="material-icons">local_hospital</span>
+                  Declaración Accidente
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Modal Certificado de Notas -->
+      @if (showCertificadoNotas()) {
+        <div class="modal-overlay" (click)="showCertificadoNotas.set(false)">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2><span class="material-icons">grade</span> Certificado de Notas</h2>
+              <button class="close-btn" (click)="showCertificadoNotas.set(false)"><span class="material-icons">close</span></button>
+            </div>
+            <div class="modal-body">
+              <p>Seleccione el año escolar para generar el certificado de notas de <strong>{{ selectedEstudiante()?.apellido }} {{ selectedEstudiante()?.nombre }}</strong></p>
+              <div class="form-group" style="margin-top: 16px;">
+                <label class="form-label">Año Escolar</label>
+                <select class="form-select" #anoSelect>
+                  <option [value]="2026">2026</option>
+                  <option [value]="2025">2025</option>
+                  <option [value]="2024">2024</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" (click)="showCertificadoNotas.set(false)">Cancelar</button>
+              <button class="btn btn-primary" (click)="generarCertificadoNotas(+anoSelect.value)" [disabled]="saving()">
+                {{ saving() ? 'Generando...' : 'Generar Certificado' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+
+    <!-- ====== VIEW: RETIROS ====== -->
+    @if (activeView() === 'retiros') {
+      <div class="panel-view">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="material-icons">exit_to_app</span> Retiros del Día</h2>
+          <button class="btn-new" (click)="abrirRetiroModal()"><span class="material-icons">add</span> Nuevo Retiro</button>
+        </div>
+        <div class="content-card">
+          <div class="card-body">
+            @if (retiros().length === 0) {
+              <div class="empty-state"><span class="material-icons">info</span><p>No hay retiros registrados</p></div>
+            } @else {
+              @for (ret of retiros(); track ret.id) {
+                <div class="list-item">
+                  <div class="list-icon retiros"><span class="material-icons">exit_to_app</span></div>
+                  <div class="list-content">
+                    <span class="title">{{ ret.apoderado_autorizante }}</span>
+                    <span class="subtitle">{{ ret.fecha }} {{ ret.hora_salida }} - {{ ret.motivo }}</span>
+                    @if (ret.observacion) {
+                      <span class="subtitle">Obs: {{ ret.observacion }}</span>
+                    }
+                  </div>
+                  <button class="btn-icon delete" (click)="eliminarRetiro(ret.id!)" title="Eliminar">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ====== VIEW: ACCIDENTES ====== -->
+    @if (activeView() === 'accidentes') {
+      <div class="panel-view">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="material-icons">local_hospital</span> Accidentes Escolares</h2>
+          <button class="btn-new" (click)="abrirAccidenteModal()"><span class="material-icons">add</span> Nuevo Accidente</button>
+        </div>
+        <div class="content-card">
+          <div class="card-body">
+            @if (accidentes().length === 0) {
+              <div class="empty-state"><span class="material-icons">info</span><p>No hay accidentes registrados</p></div>
+            } @else {
+              @for (acc of accidentes(); track acc.id) {
+                <div class="list-item">
+                  <div class="list-icon" [class.pendiente]="acc.estado === 'pendiente'"
+                    [class.derivado]="acc.estado === 'derivado'" [class.cerrado]="acc.estado === 'cerrado'">
+                    <span class="material-icons">
+                      {{ acc.estado === 'pendiente' ? 'error_outline' : acc.estado === 'derivado' ? 'local_hospital' : 'check_circle' }}
+                    </span>
+                  </div>
+                  <div class="list-content">
+                    <span class="title">{{ acc.tipo_lesion || 'Sin especificar' }}</span>
+                    <span class="subtitle">{{ acc.fecha_accidente }} - {{ acc.lugar || 'Sin lugar' }}</span>
+                    @if (acc.descripcion) {
+                      <span class="subtitle">{{ acc.descripcion }}</span>
+                    }
+                    <span class="badge" [class.badge-warning]="acc.estado === 'pendiente'"
+                      [class.badge-info]="acc.estado === 'derivado'" [class.badge-success]="acc.estado === 'cerrado'">
+                      {{ acc.estado }}
+                    </span>
+                  </div>
+                  <div class="action-buttons">
+                    <select class="estado-select" (change)="cambiarEstadoAccidente(acc, $any($event.target).value)">
+                      <option value="pendiente" [selected]="acc.estado === 'pendiente'">Pendiente</option>
+                      <option value="derivado" [selected]="acc.estado === 'derivado'">Derivado</option>
+                      <option value="cerrado" [selected]="acc.estado === 'cerrado'">Cerrado</option>
+                    </select>
+                    <button class="btn-icon delete" (click)="eliminarAccidente(acc.id!)" title="Eliminar">
+                      <span class="material-icons">delete</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ====== VIEW: ASISTENCIA GENERAL ====== -->
+    @if (activeView() === 'asistencia') {
+      <div class="panel-view">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="material-icons">how_to_reg</span> Asistencia General</h2>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <h3 class="card-title"><span class="material-icons">calendar_today</span> Asistencia por Curso</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Fecha</label>
+              <input type="date" class="form-input" [value]="fechaAsistencia()" (change)="onFechaAsistenciaChange($event)">
+            </div>
+            <div class="asistencia-cursos">
+              @for (curso of cursos(); track curso.id) {
+                @let stats = getAsistenciaStats(curso.id!);
+                @if (stats.total > 0) {
+                  <div class="curso-asistencia-card">
+                    <div class="curso-header">{{ getCursoNombre(curso.id!) }}</div>
+                    <div class="asistencia-bar">
+                      <div class="bar-presente" [style.width.%]="stats.total > 0 ? (stats.presentes / stats.total * 100) : 0">
+                        {{ stats.presentes }}
+                      </div>
+                      <div class="bar-ausente" [style.width.%]="stats.total > 0 ? (stats.ausentes / stats.total * 100) : 0">
+                        {{ stats.ausentes }}
+                      </div>
+                    </div>
+                    <div class="asistencia-detalle">
+                      <span class="presente">✔ {{ stats.presentes }} Presentes</span>
+                      <span class="ausente">✘ {{ stats.ausentes }} Ausentes</span>
+                    </div>
+                  </div>
+                }
+              } @empty {
+                <div class="empty-state"><span class="material-icons">info</span><p>No hay asistencia registrada para esta fecha</p></div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Inasistencias Críticas -->
+        <div class="content-card" style="margin-top: 20px;">
+          <div class="card-header">
+            <h3 class="card-title"><span class="material-icons">warning</span> Inasistencias Críticas (3+ días)</h3>
+          </div>
+          <div class="card-body">
+            @if (inasistenciasCriticas().length === 0) {
+              <div class="empty-state"><span class="material-icons">check_circle</span><p>No hay estudiantes con inasistencias críticas</p></div>
+            } @else {
+              @for (ina of inasistenciasCriticas(); track ina.estudiante_id) {
+                <div class="list-item">
+                  <div class="list-icon inasistencia"><span class="material-icons">warning</span></div>
+                  <div class="list-content">
+                    <span class="title">{{ ina.nombre }}</span>
+                    <span class="subtitle">RUT: {{ ina.rut }} - {{ ina.total_inasistencias }} inasistencias</span>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ====== VIEW: LIBRO DE INSPECTORÍA ====== -->
+    @if (activeView() === 'libro') {
+      <div class="panel-view">
+        <div class="panel-header">
+          <h2 class="panel-title"><span class="material-icons">book</span> Libro de Inspectoría</h2>
+          <button class="btn-new" (click)="abrirLibroModal()"><span class="material-icons">add</span> Nuevo Registro</button>
+        </div>
+        <div class="content-card">
+          <div class="card-body">
+            @if (libroRegistros().length === 0) {
+              <div class="empty-state"><span class="material-icons">book</span><p>No hay registros en el libro de inspectoría</p></div>
+            } @else {
+              @for (reg of libroRegistros(); track reg.id) {
+                <div class="list-item">
+                  <div class="list-icon libro">
+                    <span class="material-icons">{{ getTipoIcon(reg.tipo) }}</span>
+                  </div>
+                  <div class="list-content">
+                    <span class="title">{{ getTipoLabel(reg.tipo) }}</span>
+                    <span class="subtitle">{{ reg.fecha }} - {{ getCursoNombre(reg.curso_id) }}</span>
+                    <span class="subtitle">{{ reg.descripcion }}</span>
+                  </div>
+                  <button class="btn-icon delete" (click)="eliminarLibroRegistro(reg.id!)" title="Eliminar">
+                    <span class="material-icons">delete</span>
+                  </button>
+                </div>
+              }
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODALS -->
+<!-- ============================================================ -->
+
+<!-- Modal Retiro -->
+@if (showRetiroModal()) {
+  <div class="modal-overlay" (click)="showRetiroModal.set(false)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><span class="material-icons">exit_to_app</span> Autorización de Retiro</h2>
+        <button class="close-btn" (click)="showRetiroModal.set(false)"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Apoderado que retira (Nombre y RUT)</label>
+          <input type="text" class="form-input" [(ngModel)]="retiroForm.apoderado_autorizante" placeholder="Ej: Juan Pérez, 12.345.678-9">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Motivo del retiro</label>
+          <select class="form-select" [(ngModel)]="retiroForm.motivo">
+            <option value="Cita médica">Cita médica</option>
+            <option value="Trámite familiar">Trámite familiar</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-input" [(ngModel)]="retiroForm.fecha">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora de salida</label>
+          <input type="time" class="form-input" [(ngModel)]="retiroForm.hora_salida">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Observación (opcional)</label>
+          <textarea class="form-textarea" [(ngModel)]="retiroForm.observacion" placeholder="Notas adicionales..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showRetiroModal.set(false)">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarRetiro()" [disabled]="saving()">
+          {{ saving() ? 'Generando...' : 'Generar Autorización' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Accidente -->
+@if (showAccidenteModal()) {
+  <div class="modal-overlay" (click)="showAccidenteModal.set(false)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><span class="material-icons">local_hospital</span> Declaración de Accidente Escolar</h2>
+        <button class="close-btn" (click)="showAccidenteModal.set(false)"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Fecha del accidente</label>
+          <input type="date" class="form-input" [(ngModel)]="accidenteForm.fecha_accidente">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora del accidente</label>
+          <input type="time" class="form-input" [(ngModel)]="accidenteForm.hora_accidente">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lugar del accidente</label>
+          <select class="form-select" [(ngModel)]="accidenteForm.lugar">
+            <option value="">Seleccionar lugar...</option>
+            @for (lugar of lugaresAccidente; track lugar.value) {
+              <option [value]="lugar.value">{{ lugar.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción del accidente</label>
+          <textarea class="form-textarea" [(ngModel)]="accidenteForm.descripcion" placeholder="Describa cómo ocurrió el accidente..." rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de lesión</label>
+          <input type="text" class="form-input" [(ngModel)]="accidenteForm.tipo_lesion" placeholder="Ej: Rodilla raspada, golpe en la cabeza">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Testigos</label>
+          <input type="text" class="form-input" [(ngModel)]="accidenteForm.testigos" placeholder="Nombre de testigos (opcional)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Derivación (opcional)</label>
+          <input type="text" class="form-input" [(ngModel)]="accidenteForm.derivacion" placeholder="Ej: Hospital San Juan de Dios">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showAccidenteModal.set(false)">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarAccidente()" [disabled]="saving()">
+          {{ saving() ? 'Generando...' : 'Generar Declaración' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Libro de Inspectoría -->
+@if (showLibroModal()) {
+  <div class="modal-overlay" (click)="showLibroModal.set(false)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><span class="material-icons">book</span> Nuevo Registro - Libro Inspectoría</h2>
+        <button class="close-btn" (click)="showLibroModal.set(false)"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Tipo de registro</label>
+          <select class="form-select" [(ngModel)]="libroForm.tipo">
+            @for (t of tiposLibro; track t.value) {
+              <option [value]="t.value">{{ t.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Curso</label>
+          <select class="form-select" [(ngModel)]="libroForm.curso_id">
+            <option value="">Seleccionar curso...</option>
+            @for (c of cursos(); track c.id) {
+              <option [value]="c.id">{{ getCursoNombre(c.id!) }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha</label>
+          <input type="date" class="form-input" [(ngModel)]="libroForm.fecha">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-textarea" [(ngModel)]="libroForm.descripcion" placeholder="Describa el evento..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="showLibroModal.set(false)">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarLibro()" [disabled]="saving()">
+          {{ saving() ? 'Guardando...' : 'Guardar Registro' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- PDF Preview Modal -->
+@if (showPdfPreview()) {
+  <div class="modal-overlay" (click)="closePdfPreview()">
+    <div class="modal-content pdf-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><span class="material-icons">picture_as_pdf</span> Documento Generado</h2>
+        <button class="close-btn" (click)="closePdfPreview()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        <iframe [src]="'data:application/pdf;base64,' + pdfPreviewData()" width="100%" height="500px"></iframe>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closePdfPreview()">Cerrar</button>
+        <button class="btn btn-primary" (click)="downloadPdf()">
+          <span class="material-icons">download</span> Descargar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Success Message -->
+@if (successMessage()) {
+  <div class="toast success">
+    <span class="material-icons">check_circle</span>
+    {{ successMessage() }}
+  </div>
+}

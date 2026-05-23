@@ -20,14 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ===========================================
 # CARGAR VARIABLES DE ENTORNO DESDE .env
 # ===========================================
-# Solo cargar .env local en desarrollo, NO en producción
+# Cargar .env para variables de entorno locales
+# En producción (Render), las variables se pasan directamente sin .env
 from dotenv import load_dotenv
 
-if os.environ.get("DEBUG", "False") == "False":
-    # En producción, no cargar .env local para evitar sobrescribir vars de Render
-    pass
-else:
-    load_dotenv()
+load_dotenv()
 
 
 # Función helper para obtener variables obligatorias

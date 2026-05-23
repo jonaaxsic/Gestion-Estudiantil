@@ -4,6 +4,7 @@ URL Configuration for Backend API
 
 from django.urls import path
 from . import views
+from . import inspector_views
 
 urlpatterns = [
     # Authentication
@@ -90,4 +91,93 @@ urlpatterns = [
     # Dashboards
     path("dashboard/docente/", views.dashboard_docente, name="dashboard-docente"),
     path("dashboard/apoderado/", views.dashboard_apoderado, name="dashboard-apoderado"),
+    # ============ MÓDULO INSPECTOR GENERAL ============
+    # Dashboard
+    path(
+        "dashboard/inspector/",
+        inspector_views.dashboard_inspector,
+        name="dashboard-inspector",
+    ),
+    # Documentos
+    path(
+        "documentos/",
+        inspector_views.DocumentoGeneradoList.as_view(),
+        name="documento-list",
+    ),
+    path(
+        "documentos/<str:pk>/",
+        inspector_views.DocumentoGeneradoDetail.as_view(),
+        name="documento-detail",
+    ),
+    # Certificados PDF
+    path(
+        "documentos/certificado-alumno-regular/",
+        inspector_views.generar_certificado_alumno_regular,
+        name="certificado-alumno-regular",
+    ),
+    path(
+        "documentos/certificado-notas/",
+        inspector_views.generar_certificado_notas,
+        name="certificado-notas",
+    ),
+    path(
+        "documentos/autorizacion-retiro/",
+        inspector_views.generar_autorizacion_retiro,
+        name="autorizacion-retiro",
+    ),
+    path(
+        "documentos/accidente-escolar/",
+        inspector_views.generar_declaracion_accidente,
+        name="accidente-escolar",
+    ),
+    # Retiros
+    path(
+        "retiros/",
+        inspector_views.RetiroList.as_view(),
+        name="retiro-list",
+    ),
+    path(
+        "retiros/<str:pk>/",
+        inspector_views.RetiroDetail.as_view(),
+        name="retiro-detail",
+    ),
+    # Accidentes
+    path(
+        "accidentes/",
+        inspector_views.AccidenteList.as_view(),
+        name="accidente-list",
+    ),
+    path(
+        "accidentes/<str:pk>/",
+        inspector_views.AccidenteDetail.as_view(),
+        name="accidente-detail",
+    ),
+    # Libro de Inspectoría
+    path(
+        "libro-inspectoria/",
+        inspector_views.LibroInspectoriaList.as_view(),
+        name="libro-inspectoria-list",
+    ),
+    path(
+        "libro-inspectoria/<str:pk>/",
+        inspector_views.LibroInspectoriaDetail.as_view(),
+        name="libro-inspectoria-detail",
+    ),
+    # Asistencia General (lectura)
+    path(
+        "asistencia-general/",
+        inspector_views.asistencia_general,
+        name="asistencia-general",
+    ),
+    path(
+        "inasistencias-criticas/",
+        inspector_views.inasistencias_criticas,
+        name="inasistencias-criticas",
+    ),
+    # Configuración del establecimiento
+    path(
+        "configuracion-establecimiento/",
+        inspector_views.ConfiguracionEstablecimientoView.as_view(),
+        name="configuracion-establecimiento",
+    ),
 ]

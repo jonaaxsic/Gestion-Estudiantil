@@ -15,6 +15,11 @@ from .models import (
     Apoderado,
     Recordatorio,
     AsignacionDocente,
+    DocumentoGenerado,
+    AccidenteEscolar,
+    RetiroAlumno,
+    LibroInspectoria,
+    ConfiguracionEstablecimiento,
 )
 
 
@@ -386,6 +391,147 @@ class NotaSerializer(serializers.Serializer):
         nota = Nota(validated_data)
         nota.save()
         return nota
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+# ============================================================
+# SERIALIZERS DEL INSPECTOR GENERAL
+# ============================================================
+
+
+class DocumentoGeneradoSerializer(serializers.Serializer):
+    """Serializer para DocumentoGenerado"""
+
+    id = serializers.CharField(source="_id", read_only=True)
+    tipo_documento = serializers.CharField(required=True)
+    estudiante_id = serializers.CharField(required=False, allow_null=True)
+    inspector_id = serializers.CharField(required=True)
+    fecha_emision = serializers.CharField(required=False, allow_null=True)
+    datos_adicionales = serializers.DictField(required=False, default={})
+    estado = serializers.CharField(default="emitido")
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        doc = DocumentoGenerado(validated_data)
+        doc.save()
+        return doc
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class AccidenteEscolarSerializer(serializers.Serializer):
+    """Serializer para AccidenteEscolar"""
+
+    id = serializers.CharField(source="_id", read_only=True)
+    estudiante_id = serializers.CharField(required=True)
+    fecha_accidente = serializers.CharField(required=True)
+    hora_accidente = serializers.CharField(required=False, allow_null=True)
+    lugar = serializers.CharField(required=False, allow_null=True)
+    descripcion = serializers.CharField(required=True)
+    tipo_lesion = serializers.CharField(required=False, allow_null=True)
+    testigos = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    inspector_id = serializers.CharField(required=True)
+    derivacion = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    estado = serializers.CharField(default="pendiente")
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        accidente = AccidenteEscolar(validated_data)
+        accidente.save()
+        return accidente
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class RetiroAlumnoSerializer(serializers.Serializer):
+    """Serializer para RetiroAlumno"""
+
+    id = serializers.CharField(source="_id", read_only=True)
+    estudiante_id = serializers.CharField(required=True)
+    apoderado_autorizante = serializers.CharField(required=True)
+    motivo = serializers.CharField(required=True)
+    fecha = serializers.CharField(required=True)
+    hora_salida = serializers.CharField(required=True)
+    inspector_id = serializers.CharField(required=True)
+    observacion = serializers.CharField(required=False, allow_blank=True, default="")
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        retiro = RetiroAlumno(validated_data)
+        retiro.save()
+        return retiro
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class LibroInspectoriaSerializer(serializers.Serializer):
+    """Serializer para LibroInspectoria"""
+
+    id = serializers.CharField(source="_id", read_only=True)
+    tipo = serializers.CharField(required=True)
+    estudiante_id = serializers.CharField(required=False, allow_null=True)
+    curso_id = serializers.CharField(required=True)
+    descripcion = serializers.CharField(required=True)
+    inspector_id = serializers.CharField(required=True)
+    fecha = serializers.CharField(required=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        registro = LibroInspectoria(validated_data)
+        registro.save()
+        return registro
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class ConfiguracionEstablecimientoSerializer(serializers.Serializer):
+    """Serializer para ConfiguracionEstablecimiento"""
+
+    id = serializers.CharField(source="_id", read_only=True)
+    nombre = serializers.CharField(required=True)
+    rut = serializers.CharField(required=False, allow_null=True)
+    direccion = serializers.CharField(required=False, allow_null=True)
+    telefono = serializers.CharField(required=False, allow_null=True)
+    email = serializers.CharField(required=False, allow_null=True)
+    director = serializers.CharField(required=False, allow_null=True)
+    inspector_general = serializers.CharField(required=False, allow_null=True)
+    logo_url = serializers.CharField(required=False, allow_null=True)
+    codigo_sostenedor = serializers.CharField(required=False, allow_null=True)
+    dependencia = serializers.CharField(required=False, allow_null=True)
+    region = serializers.CharField(required=False, allow_null=True)
+    comuna = serializers.CharField(required=False, allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        config = ConfiguracionEstablecimiento(validated_data)
+        config.save()
+        return config
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():

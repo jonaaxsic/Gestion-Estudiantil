@@ -138,6 +138,14 @@
         <div class="stat-value">{{ getCountByRole('apoderado') }}</div>
         <div class="stat-label">Apoderados</div>
       </div>
+
+      <div class="stat-card">
+        <div class="stat-icon inspectors">
+          <span class="material-icons">badge</span>
+        </div>
+        <div class="stat-value">{{ getCountByRole('inspector_general') }}</div>
+        <div class="stat-label">Inspectores</div>
+      </div>
     </div>
     
     <!-- Users Table -->
@@ -155,6 +163,7 @@
             <option value="administrador">Administrador</option>
             <option value="docente">Docente</option>
             <option value="apoderado">Apoderado</option>
+            <option value="inspector_general">Inspector General</option>
           </select>
           <button class="btn-new" (click)="openUserDialog()">
             <span class="material-icons">add</span>
@@ -653,6 +662,7 @@
             <option value="administrador">Administrador</option>
             <option value="docente">Docente</option>
             <option value="apoderado">Apoderado</option>
+            <option value="inspector_general">Inspector General</option>
           </select>
         </div>
         
