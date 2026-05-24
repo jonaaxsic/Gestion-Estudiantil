@@ -149,7 +149,7 @@
           </div>
           <div class="card-body">
             @if ((dashboardData()?.documentos_recientes?.length || 0) === 0) {
-              <div class="empty-state"><span class="material-icons">info</span><p>Sin documentos emitidos hoy</p></div>
+              <div class="empty-state"><div class="empty-icon"><span class="material-icons">description</span></div><p>Sin documentos emitidos hoy</p></div>
             } @else {
               @for (doc of dashboardData()?.documentos_recientes; track doc.id) {
                 <div class="list-item">
@@ -171,7 +171,7 @@
           </div>
           <div class="card-body">
             @if ((dashboardData()?.retiros_recientes?.length || 0) === 0) {
-              <div class="empty-state"><span class="material-icons">info</span><p>Sin retiros registrados</p></div>
+              <div class="empty-state"><div class="empty-icon"><span class="material-icons">exit_to_app</span></div><p>Sin retiros registrados</p></div>
             } @else {
               @for (ret of dashboardData()?.retiros_recientes; track ret.id) {
                 <div class="list-item">
@@ -309,7 +309,7 @@
         <div class="content-card">
           <div class="card-body">
             @if (retiros().length === 0) {
-              <div class="empty-state"><span class="material-icons">info</span><p>No hay retiros registrados</p></div>
+              <div class="empty-state"><div class="empty-icon"><span class="material-icons">exit_to_app</span></div><p>No hay retiros registrados</p><span class="hint">Use el botón "Nuevo Retiro" para registrar uno</span></div>
             } @else {
               @for (ret of retiros(); track ret.id) {
                 <div class="list-item">
@@ -342,7 +342,7 @@
         <div class="content-card">
           <div class="card-body">
             @if (accidentes().length === 0) {
-              <div class="empty-state"><span class="material-icons">info</span><p>No hay accidentes registrados</p></div>
+              <div class="empty-state"><div class="empty-icon"><span class="material-icons">local_hospital</span></div><p>No hay accidentes registrados</p><span class="hint">No se han reportado accidentes escolares hasta el momento</span></div>
             } @else {
               @for (acc of accidentes(); track acc.id) {
                 <div class="list-item">
@@ -486,7 +486,7 @@
         <div class="content-card">
           <div class="card-body">
             @if (libroRegistros().length === 0) {
-              <div class="empty-state"><span class="material-icons">book</span><p>No hay registros en el libro de inspectoría</p></div>
+              <div class="empty-state"><div class="empty-icon"><span class="material-icons">book</span></div><p>No hay registros en el libro de inspectoría</p></div>
             } @else {
               @for (reg of libroRegistros(); track reg.id) {
                 <div class="list-item">

@@ -12,6 +12,9 @@
       <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
     </button>
     <div class="user-info">
+      <div class="user-avatar" [title]="auth.user()?.nombre + ' ' + auth.user()?.apellido">
+        {{ auth.user()?.nombre?.charAt(0) }}{{ auth.user()?.apellido?.charAt(0) }}
+      </div>
       <span class="user-name">{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
     </div>
     <button class="btn-logout" (click)="logout()">
@@ -221,8 +224,9 @@
         
         @if (usuarios().length === 0) {
           <div class="empty-state">
-            <span class="material-icons">person_off</span>
+            <div class="empty-icon"><span class="material-icons">person_off</span></div>
             <p>No hay usuarios registrados</p>
+            <span class="hint">Agregue el primer usuario usando el botón "Nuevo Usuario"</span>
           </div>
         }
       </div>
@@ -331,8 +335,9 @@
         
         @if (estudiantes().length === 0) {
           <div class="empty-state">
-            <span class="material-icons">school</span>
+            <div class="empty-icon"><span class="material-icons">school</span></div>
             <p>No hay estudiantes registrados</p>
+            <span class="hint">Importe o registre estudiantes desde la sección correspondiente</span>
           </div>
         }
       </div>
@@ -397,8 +402,9 @@
         
         @if (cursos().length === 0) {
           <div class="empty-state">
-            <span class="material-icons">class</span>
+            <div class="empty-icon"><span class="material-icons">class</span></div>
             <p>No hay cursos registrados</p>
+            <span class="hint">Cree el primer curso usando el botón "Nuevo Curso"</span>
           </div>
         }
       </div>
@@ -476,8 +482,9 @@
       <div class="card-body">
         @if (recordatorios().length === 0) {
           <div class="empty-state">
-            <span class="material-icons">info</span>
+            <div class="empty-icon"><span class="material-icons">notifications_none</span></div>
             <p>No hay recordatorios</p>
+            <span class="hint">Los recordatorios aparecerán aquí cuando los cree</span>
           </div>
         } @else {
           @for (rec of recordatorios(); track rec.id) {
