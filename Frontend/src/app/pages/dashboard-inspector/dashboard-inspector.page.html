@@ -67,22 +67,22 @@
     <!-- ====== VIEW: DASHBOARD ====== -->
     @if (activeView() === 'dashboard') {
       <div class="stats-grid">
-        <div class="stat-card" (click)="activeView.set('documentos')">
+        <div class="stat-card docs" (click)="activeView.set('documentos')">
           <div class="stat-icon docs"><span class="material-icons">description</span></div>
           <div class="stat-value">{{ dashboardData()?.documentos_hoy || 0 }}</div>
           <div class="stat-label">Documentos Hoy</div>
         </div>
-        <div class="stat-card" (click)="activeView.set('retiros'); loadRetiros()">
+        <div class="stat-card retiros" (click)="activeView.set('retiros'); loadRetiros()">
           <div class="stat-icon retiros"><span class="material-icons">exit_to_app</span></div>
           <div class="stat-value">{{ dashboardData()?.retiros_hoy || 0 }}</div>
           <div class="stat-label">Retiros Hoy</div>
         </div>
-        <div class="stat-card" (click)="activeView.set('accidentes'); loadAccidentes()">
+        <div class="stat-card accidentes" (click)="activeView.set('accidentes'); loadAccidentes()">
           <div class="stat-icon accidentes"><span class="material-icons">local_hospital</span></div>
           <div class="stat-value">{{ dashboardData()?.accidentes_mes || 0 }}</div>
           <div class="stat-label">Accidentes del Mes</div>
         </div>
-        <div class="stat-card" (click)="activeView.set('asistencia'); loadAsistenciaData()">
+        <div class="stat-card inasistencia" (click)="activeView.set('asistencia'); loadAsistenciaData()">
           <div class="stat-icon inasistencia"><span class="material-icons">warning</span></div>
           <div class="stat-value">{{ dashboardData()?.inasistencias_criticas?.length || 0 }}</div>
           <div class="stat-label">Inasistencias Críticas</div>
@@ -177,68 +177,77 @@
         </div>
 
         <!-- Buscador de Estudiante -->
-        <div class="content-card">
-          <div class="card-header">
-            <h3 class="card-title"><span class="material-icons">search</span> Buscar Estudiante</h3>
+        <div class="search-section">
+          <div class="search-bar-wrapper">
+            <div class="search-bar">
+              <span class="material-icons search-bar-icon">search</span>
+              <input type="text" #searchInput class="search-bar-input"
+                placeholder="Buscar estudiante por RUT, nombre o apellido..."
+                (keyup.enter)="buscarEstudiante(searchInput.value)"
+                (input)="searchInput.value ? buscarEstudiante(searchInput.value) : estudiantes.set([])">
+              @if (searchInput.value) {
+                <button class="search-bar-clear" (click)="searchInput.value=''; estudiantes.set([]); selectedEstudiante.set(null)">
+                  <span class="material-icons">close</span>
+                </button>
+              }
+            </div>
           </div>
-          <div class="card-body">
-            <div class="search-box">
-              <input type="text" class="form-input" #searchInput placeholder="Buscar por RUT, nombre o apellido..."
-                (keyup.enter)="buscarEstudiante(searchInput.value)">
-              <button class="btn btn-primary" (click)="buscarEstudiante(searchInput.value)">
-                <span class="material-icons">search</span> Buscar
+
+          @if (showBuscarEstudiante()) {
+            <div class="search-results">
+              @for (est of estudiantes(); track est.id) {
+                <button class="search-result-item" (click)="seleccionarEstudiante(est)"
+                  [class.selected]="selectedEstudiante()?.id === est.id">
+                  <div class="search-result-avatar">{{ est.nombre.charAt(0) }}{{ est.apellido.charAt(0) }}</div>
+                  <div class="search-result-info">
+                    <span class="search-result-name">{{ est.apellido }} {{ est.nombre }}</span>
+                    <span class="search-result-meta">{{ est.rut }} · {{ getCursoNombre(est.curso_id || '') }}</span>
+                  </div>
+                  <span class="material-icons search-result-arrow">chevron_right</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (selectedEstudiante() && !searchInput.value) {
+            <div class="selected-student-card">
+              <div class="selected-student-avatar">{{ selectedEstudiante()?.nombre?.charAt(0) }}{{ selectedEstudiante()?.apellido?.charAt(0) }}</div>
+              <div class="selected-student-info">
+                <span class="selected-student-name">{{ selectedEstudiante()?.apellido }} {{ selectedEstudiante()?.nombre }}</span>
+                <span class="selected-student-meta">{{ selectedEstudiante()?.rut }} · {{ getCursoNombre(selectedEstudiante()?.curso_id || '') }}</span>
+              </div>
+              <button class="btn-icon" (click)="selectedEstudiante.set(null); searchInput.value=''" title="Cambiar estudiante">
+                <span class="material-icons">swap_horiz</span>
               </button>
             </div>
+          }
 
-            @if (showBuscarEstudiante()) {
-              <div class="search-results">
-                @for (est of estudiantes(); track est.id) {
-                  <div class="search-result-item" (click)="seleccionarEstudiante(est)"
-                    [class.selected]="selectedEstudiante()?.id === est.id">
-                    <span class="est-nombre">{{ est.apellido }} {{ est.nombre }}</span>
-                    <span class="est-rut">{{ est.rut }}</span>
-                    <span class="est-curso">{{ getCursoNombre(est.curso_id || '') }}</span>
-                  </div>
-                }
-              </div>
-            }
-          </div>
+          @if (selectedEstudiante()) {
+            <div class="document-actions">
+              <button class="doc-action-btn primary" (click)="generarCertificadoRegular()" [disabled]="saving()">
+                <span class="material-icons">verified</span>
+                <span class="doc-action-label">{{ saving() ? 'Generando...' : 'Certificado Alumno Regular' }}</span>
+              </button>
+              <button class="doc-action-btn" (click)="abrirCertificadoNotas()">
+                <span class="material-icons">grade</span>
+                <span class="doc-action-label">Certificado de Notas</span>
+              </button>
+              <button class="doc-action-btn" (click)="abrirRetiroModal()">
+                <span class="material-icons">exit_to_app</span>
+                <span class="doc-action-label">Autorización de Retiro</span>
+              </button>
+              <button class="doc-action-btn" (click)="abrirAccidenteModal()">
+                <span class="material-icons">local_hospital</span>
+                <span class="doc-action-label">Declaración Accidente</span>
+              </button>
+            </div>
+          } @else {
+            <div class="search-hint">
+              <span class="material-icons">info</span>
+              <span>Busca un estudiante para generar documentos, retiros o declaraciones</span>
+            </div>
+          }
         </div>
-
-        @if (selectedEstudiante()) {
-          <div class="content-card" style="margin-top: 20px;">
-            <div class="card-header">
-              <h3 class="card-title">
-                <span class="material-icons">person</span>
-                {{ selectedEstudiante()?.apellido }} {{ selectedEstudiante()?.nombre }}
-              </h3>
-            </div>
-            <div class="card-body">
-              <div class="estudiante-info">
-                <div><strong>RUT:</strong> {{ selectedEstudiante()?.rut }}</div>
-                <div><strong>Curso:</strong> {{ getCursoNombre(selectedEstudiante()?.curso_id || '') }}</div>
-              </div>
-              <div class="document-actions">
-                <button class="btn btn-primary" (click)="generarCertificadoRegular()" [disabled]="saving()">
-                  <span class="material-icons">verified</span>
-                  {{ saving() ? 'Generando...' : 'Certificado Alumno Regular' }}
-                </button>
-                <button class="btn btn-secondary" (click)="abrirCertificadoNotas()">
-                  <span class="material-icons">grade</span>
-                  Certificado de Notas
-                </button>
-                <button class="btn btn-secondary" (click)="abrirRetiroModal()">
-                  <span class="material-icons">exit_to_app</span>
-                  Autorización de Retiro
-                </button>
-                <button class="btn btn-secondary" (click)="abrirAccidenteModal()">
-                  <span class="material-icons">local_hospital</span>
-                  Declaración Accidente
-                </button>
-              </div>
-            </div>
-          </div>
-        }
       </div>
 
       <!-- Modal Certificado de Notas -->
@@ -357,66 +366,94 @@
     @if (activeView() === 'asistencia') {
       <div class="panel-view">
         <div class="panel-header">
-          <h2 class="panel-title"><span class="material-icons">how_to_reg</span> Asistencia General</h2>
+          <h2 class="panel-title"><span class="material-icons">how_to_reg</span> Control de Asistencia</h2>
+          <div class="date-picker-chip">
+            <span class="material-icons">calendar_today</span>
+            <input type="date" class="date-chip-input" [value]="fechaAsistencia()" (change)="onFechaAsistenciaChange($event)">
+          </div>
         </div>
 
-        <div class="content-card">
-          <div class="card-header">
-            <h3 class="card-title"><span class="material-icons">calendar_today</span> Asistencia por Curso</h3>
-          </div>
-          <div class="card-body">
-            <div class="form-group">
-              <label class="form-label">Fecha</label>
-              <input type="date" class="form-input" [value]="fechaAsistencia()" (change)="onFechaAsistenciaChange($event)">
+        <p class="section-description">
+          Resumen de asistencia por curso para la fecha seleccionada. También se muestran estudiantes con inasistencias críticas (3+ días).
+        </p>
+
+        <div class="insights-row">
+          @if (dashboardData()?.inasistencias_criticas?.length) {
+            <div class="insight-badge danger">
+              <span class="material-icons">priority_high</span>
+              <span>{{ dashboardData()?.inasistencias_criticas?.length }} estudiante(s) con inasistencias críticas</span>
             </div>
-            <div class="asistencia-cursos">
-              @for (curso of cursos(); track curso.id) {
-                @let stats = getAsistenciaStats(curso.id!);
-                @if (stats.total > 0) {
-                  <div class="curso-asistencia-card">
-                    <div class="curso-header">{{ getCursoNombre(curso.id!) }}</div>
-                    <div class="asistencia-bar">
-                      <div class="bar-presente" [style.width.%]="stats.total > 0 ? (stats.presentes / stats.total * 100) : 0">
-                        {{ stats.presentes }}
-                      </div>
-                      <div class="bar-ausente" [style.width.%]="stats.total > 0 ? (stats.ausentes / stats.total * 100) : 0">
-                        {{ stats.ausentes }}
-                      </div>
-                    </div>
-                    <div class="asistencia-detalle">
-                      <span class="presente">✔ {{ stats.presentes }} Presentes</span>
-                      <span class="ausente">✘ {{ stats.ausentes }} Ausentes</span>
-                    </div>
+          } @else {
+            <div class="insight-badge success">
+              <span class="material-icons">check_circle</span>
+              <span>Sin inasistencias críticas</span>
+            </div>
+          }
+        </div>
+
+        <div class="attendance-grid">
+          @for (curso of cursos(); track curso.id) {
+            @let stats = getAsistenciaStats(curso.id!);
+            @if (stats.total > 0) {
+              <div class="attendance-card">
+                <div class="attendance-card-header">
+                  <span class="attendance-curso">{{ getCursoNombre(curso.id!) }}</span>
+                  <span class="attendance-total">{{ stats.total }} alumnos</span>
+                </div>
+                <div class="attendance-bar">
+                  <div class="attendance-bar-fill presente" [style.width.%]="(stats.presentes / stats.total) * 100"></div>
+                  <div class="attendance-bar-fill ausente" [style.width.%]="(stats.ausentes / stats.total) * 100"></div>
+                </div>
+                <div class="attendance-stats">
+                  <div class="attendance-stat presente">
+                    <span class="stat-dot"></span>
+                    <span>{{ stats.presentes }} presentes</span>
                   </div>
-                }
-              } @empty {
-                <div class="empty-state"><span class="material-icons">info</span><p>No hay asistencia registrada para esta fecha</p></div>
-              }
+                  <div class="attendance-stat ausente">
+                    <span class="stat-dot"></span>
+                    <span>{{ stats.ausentes }} ausentes</span>
+                  </div>
+                  <div class="attendance-stat porcentaje">
+                    <span class="material-icons">trending_up</span>
+                    <span>{{ stats.total > 0 ? (stats.presentes / stats.total * 100).toFixed(0) : 0 }}%</span>
+                  </div>
+                </div>
+              </div>
+            }
+          } @empty {
+            <div class="attendance-empty">
+              <span class="material-icons">event_busy</span>
+              <p>No hay asistencia registrada para esta fecha</p>
+              <span class="attendance-empty-hint">Selecciona otra fecha o espera a que los docentes registren la asistencia</span>
             </div>
-          </div>
+          }
         </div>
 
         <!-- Inasistencias Críticas -->
-        <div class="content-card" style="margin-top: 20px;">
-          <div class="card-header">
-            <h3 class="card-title"><span class="material-icons">warning</span> Inasistencias Críticas (3+ días)</h3>
-          </div>
-          <div class="card-body">
-            @if (inasistenciasCriticas().length === 0) {
-              <div class="empty-state"><span class="material-icons">check_circle</span><p>No hay estudiantes con inasistencias críticas</p></div>
-            } @else {
+        @if (inasistenciasCriticas().length > 0) {
+          <div class="critical-section">
+            <div class="critical-header">
+              <span class="material-icons">warning</span>
+              <h3>Inasistencias Críticas</h3>
+              <span class="critical-count">{{ inasistenciasCriticas().length }} estudiantes</span>
+            </div>
+            <div class="critical-list">
               @for (ina of inasistenciasCriticas(); track ina.estudiante_id) {
-                <div class="list-item">
-                  <div class="list-icon inasistencia"><span class="material-icons">warning</span></div>
-                  <div class="list-content">
-                    <span class="title">{{ ina.nombre }}</span>
-                    <span class="subtitle">RUT: {{ ina.rut }} - {{ ina.total_inasistencias }} inasistencias</span>
+                <div class="critical-item">
+                  <div class="critical-item-avatar">{{ ina.nombre.charAt(0) }}</div>
+                  <div class="critical-item-info">
+                    <span class="critical-item-name">{{ ina.nombre }}</span>
+                    <span class="critical-item-meta">{{ ina.rut }}</span>
+                  </div>
+                  <div class="critical-item-count">
+                    <span class="critical-number">{{ ina.total_inasistencias }}</span>
+                    <span class="critical-label">inasistencias</span>
                   </div>
                 </div>
               }
-            }
+            </div>
           </div>
-        </div>
+        }
       </div>
     }
 
