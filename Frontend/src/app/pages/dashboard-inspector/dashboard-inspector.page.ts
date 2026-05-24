@@ -54,6 +54,30 @@ export class DashboardInspectorPage implements OnInit {
   showPdfPreview = signal(false);
   pdfPreviewData = signal<string>('');
 
+  // Confirm modal
+  showConfirmModal = signal(false);
+  confirmTitle = signal('');
+  confirmMessage = signal('');
+  private pendingConfirmAction: (() => void) | null = null;
+
+  openConfirmModal(title: string, message: string, onConfirm: () => void): void {
+    this.confirmTitle.set(title);
+    this.confirmMessage.set(message);
+    this.pendingConfirmAction = onConfirm;
+    this.showConfirmModal.set(true);
+  }
+
+  onConfirmAction(): void {
+    this.pendingConfirmAction?.();
+    this.pendingConfirmAction = null;
+    this.showConfirmModal.set(false);
+  }
+
+  onCancelConfirm(): void {
+    this.pendingConfirmAction = null;
+    this.showConfirmModal.set(false);
+  }
+
   // Selected
   selectedEstudiante = signal<Estudiante | null>(null);
   selectedCursoId = signal<string>('');
@@ -277,15 +301,19 @@ export class DashboardInspectorPage implements OnInit {
   }
 
   eliminarRetiro(id: string): void {
-    if (confirm('¿Eliminar este registro de retiro?')) {
-      this.api.deleteRetiro(id).subscribe({
-        next: () => {
-          this.showSuccess('Retiro eliminado');
-          this.loadRetiros();
-        },
-        error: () => alert('Error al eliminar retiro'),
-      });
-    }
+    this.openConfirmModal(
+      'Eliminar retiro',
+      '¿Estás seguro de eliminar este registro de retiro? Esta acción no se puede deshacer.',
+      () => {
+        this.api.deleteRetiro(id).subscribe({
+          next: () => {
+            this.showSuccess('Retiro eliminado');
+            this.loadRetiros();
+          },
+          error: () => alert('Error al eliminar retiro'),
+        });
+      },
+    );
   }
 
   // ============ ACCIDENTES ============
@@ -338,15 +366,19 @@ export class DashboardInspectorPage implements OnInit {
   }
 
   eliminarAccidente(id: string): void {
-    if (confirm('¿Eliminar este registro de accidente?')) {
-      this.api.deleteAccidente(id).subscribe({
-        next: () => {
-          this.showSuccess('Accidente eliminado');
-          this.loadAccidentes();
-        },
-        error: () => alert('Error al eliminar accidente'),
-      });
-    }
+    this.openConfirmModal(
+      'Eliminar accidente',
+      '¿Estás seguro de eliminar este registro de accidente? Esta acción no se puede deshacer.',
+      () => {
+        this.api.deleteAccidente(id).subscribe({
+          next: () => {
+            this.showSuccess('Accidente eliminado');
+            this.loadAccidentes();
+          },
+          error: () => alert('Error al eliminar accidente'),
+        });
+      },
+    );
   }
 
   cambiarEstadoAccidente(acc: AccidenteEscolar, nuevoEstado: string): void {
@@ -439,15 +471,19 @@ export class DashboardInspectorPage implements OnInit {
   }
 
   eliminarLibroRegistro(id: string): void {
-    if (confirm('¿Eliminar este registro?')) {
-      this.api.deleteLibroInspectoria(id).subscribe({
-        next: () => {
-          this.showSuccess('Registro eliminado');
-          this.loadLibro();
-        },
-        error: () => alert('Error al eliminar registro'),
-      });
-    }
+    this.openConfirmModal(
+      'Eliminar registro',
+      '¿Estás seguro de eliminar este registro del libro de inspectoría? Esta acción no se puede deshacer.',
+      () => {
+        this.api.deleteLibroInspectoria(id).subscribe({
+          next: () => {
+            this.showSuccess('Registro eliminado');
+            this.loadLibro();
+          },
+          error: () => alert('Error al eliminar registro'),
+        });
+      },
+    );
   }
 
   getTipoIcon(tipo: string): string {

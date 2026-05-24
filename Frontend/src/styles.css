@@ -37,6 +37,13 @@ body.light {
   /* Bordes */
   --border:       #dde3f0;
   --border-light: #edf0fa;
+  --color-border-focus: #3d6fe8;
+
+  /* Superficies semánticas */
+  --color-surface-raised: #f7f9ff;
+  --color-surface-overlay: rgba(0, 0, 0, 0.55);
+  --color-text-on-brand: #ffffff;
+  --color-focus: oklch(60% 0.15 258 / 0.45);
 
   /* Texto */
   --text-primary:   #1a1f36;
@@ -127,6 +134,13 @@ body.dark {
   /* Bordes */
   --border:       #2e3148;
   --border-light: #232640;
+  --color-border-focus: #00c896;
+
+  /* Superficies semánticas */
+  --color-surface-raised: #222535;
+  --color-surface-overlay: rgba(0, 0, 0, 0.7);
+  --color-text-on-brand: #0f1117;
+  --color-focus: oklch(70% 0.15 150 / 0.45);
 
   /* Texto */
   --text-primary:   #f0f2ff;
@@ -191,6 +205,36 @@ body.dark {
 /* Dark mode styles are now handled by the :root.dark class above */
 
 /* ══════════════════════════════════════════════════════════
+    DESIGN TOKENS — Sistema de diseño unificado
+    ══════════════════════════════════════════════════════════ */
+
+/* ── ESCALA TIPOGRÁFICA ─────────────────────────────────── */
+:root {
+  --text-hero: clamp(2.5rem, 6vw, 4.5rem);
+  --text-display: clamp(1.75rem, 4vw, 3rem);
+  --text-display-s: clamp(1.4rem, 3vw, 2rem);
+  --text-xl: 1.25rem;
+  --text-lg: 1.125rem;
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+  --text-caption: 0.7rem;
+
+  /* ── DURACIÓN Y EASING ────────────────────────────────── */
+  --dur-instant: 80ms;
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 350ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── ESPACIADO ───────────────────────────────────────── */
+  --space-section: clamp(3rem, 8vw, 6rem);
+  --space-component: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* ══════════════════════════════════════════════════════════
     BASE
     ══════════════════════════════════════════════════════════ */
 html, body {
@@ -201,10 +245,47 @@ html, body {
   background-color: var(--bg-page);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color var(--dur-slow) var(--ease-out),
+    color var(--dur-slow) var(--ease-out);
 }
 
 * { box-sizing: border-box; }
+
+/* ── FOCO UNIVERSAL ─────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: inherit;
+  /* Sin transición — debe aparecer instantáneamente */
+}
+
+/* ── SKIP LINK ──────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 8px;
+  padding: 8px 16px;
+  background: var(--brand);
+  color: var(--color-text-on-brand);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  z-index: 10000;
+  text-decoration: none;
+}
+.skip-link:focus {
+  top: 8px;
+}
+
+/* ── ANIMACIONES GLOBALES ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* ── UTILIDADES ─────────────────────────────────────────── */
 .container { padding: 20px; }
@@ -232,7 +313,11 @@ html, body {
   background: var(--toggle-bg);
   color: var(--toggle-icon);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    transform var(--dur-fast) var(--ease-spring),
+    color var(--dur-base) var(--ease-out);
   font-size: 0;
   flex-shrink: 0;
 }
@@ -246,5 +331,5 @@ html, body {
 .btn-theme-toggle .material-icons {
   font-size: 20px;
   color: var(--toggle-icon);
-  transition: color 0.25s ease;
+  transition: color var(--dur-base) var(--ease-out);
 }

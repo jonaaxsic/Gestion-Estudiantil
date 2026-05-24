@@ -67,25 +67,44 @@
     <!-- ====== VIEW: DASHBOARD ====== -->
     @if (activeView() === 'dashboard') {
       <div class="stats-grid">
-        <div class="stat-card docs" (click)="activeView.set('documentos')">
-          <div class="stat-icon docs"><span class="material-icons">description</span></div>
-          <div class="stat-value">{{ dashboardData()?.documentos_hoy || 0 }}</div>
-          <div class="stat-label">Documentos Hoy</div>
+        <!-- Variante A: Horizontal compacta — Documentos Hoy -->
+        <div class="stat-card-h docs" (click)="activeView.set('documentos')">
+          <div class="stat-card-h-icon"><span class="material-icons">description</span></div>
+          <div class="stat-card-h-body">
+            <span class="stat-card-h-value">{{ dashboardData()?.documentos_hoy || 0 }}</span>
+            <span class="stat-card-h-label">Documentos Hoy</span>
+          </div>
+          <span class="material-icons stat-card-h-chevron">chevron_right</span>
         </div>
-        <div class="stat-card retiros" (click)="activeView.set('retiros'); loadRetiros()">
-          <div class="stat-icon retiros"><span class="material-icons">exit_to_app</span></div>
-          <div class="stat-value">{{ dashboardData()?.retiros_hoy || 0 }}</div>
-          <div class="stat-label">Retiros Hoy</div>
+
+        <!-- Variante A: Horizontal compacta — Retiros Hoy -->
+        <div class="stat-card-h retiros" (click)="activeView.set('retiros'); loadRetiros()">
+          <div class="stat-card-h-icon"><span class="material-icons">exit_to_app</span></div>
+          <div class="stat-card-h-body">
+            <span class="stat-card-h-value">{{ dashboardData()?.retiros_hoy || 0 }}</span>
+            <span class="stat-card-h-label">Retiros Hoy</span>
+          </div>
+          <span class="material-icons stat-card-h-chevron">chevron_right</span>
         </div>
-        <div class="stat-card accidentes" (click)="activeView.set('accidentes'); loadAccidentes()">
-          <div class="stat-icon accidentes"><span class="material-icons">local_hospital</span></div>
-          <div class="stat-value">{{ dashboardData()?.accidentes_mes || 0 }}</div>
-          <div class="stat-label">Accidentes del Mes</div>
+
+        <!-- Variante B: Minimalista — Accidentes del Mes -->
+        <div class="stat-card-m accidentes" (click)="activeView.set('accidentes'); loadAccidentes()">
+          <span class="stat-card-m-icon material-icons">local_hospital</span>
+          <span class="stat-card-m-value">{{ dashboardData()?.accidentes_mes || 0 }}</span>
+          <span class="stat-card-m-label">Accidentes del Mes</span>
+          @if (dashboardData()?.accidentes_pendientes) {
+            <span class="stat-card-m-badge">{{ dashboardData()?.accidentes_pendientes }} pendientes</span>
+          }
         </div>
+
+        <!-- Variante C: Con barra de estado — Inasistencias Críticas -->
         <div class="stat-card inasistencia" (click)="activeView.set('asistencia'); loadAsistenciaData()">
           <div class="stat-icon inasistencia"><span class="material-icons">warning</span></div>
           <div class="stat-value">{{ dashboardData()?.inasistencias_criticas?.length || 0 }}</div>
           <div class="stat-label">Inasistencias Críticas</div>
+          <div class="stat-card-progress">
+            <div class="stat-card-progress-bar" [style.width.%]="dashboardData()?.inasistencias_criticas?.length ? 100 : 0"></div>
+          </div>
         </div>
       </div>
 
@@ -654,6 +673,25 @@
         <button class="btn btn-secondary" (click)="closePdfPreview()">Cerrar</button>
         <button class="btn btn-primary" (click)="downloadPdf()">
           <span class="material-icons">download</span> Descargar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal de Confirmación Destructiva -->
+@if (showConfirmModal()) {
+  <div class="modal-overlay confirm-overlay" (click)="onCancelConfirm()">
+    <div class="modal-confirm" (click)="$event.stopPropagation()">
+      <div class="modal-confirm-icon">
+        <span class="material-icons">error_outline</span>
+      </div>
+      <h3 class="modal-confirm-title">{{ confirmTitle() }}</h3>
+      <p class="modal-confirm-message">{{ confirmMessage() }}</p>
+      <div class="modal-confirm-actions">
+        <button class="btn btn-secondary" (click)="onCancelConfirm()">Cancelar</button>
+        <button class="btn btn-danger" (click)="onConfirmAction()">
+          <span class="material-icons">delete</span> Eliminar
         </button>
       </div>
     </div>
