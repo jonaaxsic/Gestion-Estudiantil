@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, SharedHeaderComponent, TabItem } from '../../shared/components';
 import {
   Estudiante, Curso, Asistencia,
   DocumentoGenerado, AccidenteEscolar, RetiroAlumno,
@@ -20,6 +20,7 @@ import {
     FormsModule,
     MatIconModule,
     SharedTabsComponent,
+    SharedHeaderComponent,
   ],
   templateUrl: './dashboard-inspector.page.html',
   styleUrls: ['./dashboard-inspector.page.css'],

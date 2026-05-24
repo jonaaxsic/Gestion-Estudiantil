@@ -3,71 +3,7 @@
    Copiado exact del docente, adaptado para apoderado
    ============================================================ */
 
-/* ══════════════════════════════════════════════════════════
-    HEADER
-    ══════════════════════════════════════════════════════════ */
-.header-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: var(--bg-header);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  gap: 12px;
-}
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
-
-.header-icon {
-  color: var(--brand);
-  font-size: 26px;
-}
-
-.header-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  white-space: nowrap;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: default;
-}
-
-.user-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
-  color: var(--color-text-on-brand);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
 
 .user-name {
   color: var(--text-primary);
@@ -942,26 +878,6 @@
 }
 
 @media (max-width: 768px) {
-  .header-bar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px 14px;
-  }
-  
-  .header-left { gap: 8px; }
-  .header-title { font-size: 1rem; }
-  .header-icon { font-size: 22px; }
-  .header-right { gap: 6px; }
-  
-  .user-rut { display: none; }
-  
-  .mobile-menu-btn { display: flex; }
-  
-  .btn-text { display: none; }
-  
   .page-container { padding: 14px; }
   
   .stats-grid {
@@ -1101,66 +1017,6 @@
 }
 
 @media (max-width: 768px) {
-  .header-bar {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 12px 14px;
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    order: 1;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    order: 2;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .header-title {
-    font-size: 1.1rem;
-  }
-
-  .header-icon {
-    font-size: 24px;
-  }
-
-  .user-info {
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .user-name {
-    font-size: 0.8rem;
-    max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .user-rut {
-    display: none;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-  }
-
-  .btn-text {
-    display: none;
-  }
-
   .page-container {
     padding: 14px;
   }

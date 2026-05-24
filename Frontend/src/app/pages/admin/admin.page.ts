@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, SharedHeaderComponent, TabItem } from '../../shared/components';
 import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado } from '../../shared/models';
 
 @Component({
@@ -22,6 +22,7 @@ import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado 
     MatButtonModule,
     MatCardModule,
     SharedTabsComponent,
+    SharedHeaderComponent,
   ],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.css']

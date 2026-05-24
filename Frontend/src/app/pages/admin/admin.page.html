@@ -1,28 +1,12 @@
-<div class="header-bar">
-  <div class="header-left">
-    <button class="btn-icon mobile-menu-btn" (click)="toggleMobileMenu()">
-      <span class="material-icons">menu</span>
-    </button>
-    <span class="material-icons header-icon">admin_panel_settings</span>
-    <h1 class="header-title">Administración</h1>
-  </div>
-  <div class="header-right">
-    <!-- Toggle modo claro/oscuro -->
-    <button class="btn-theme-toggle" (click)="theme.toggle()" [title]="theme.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'">
-      <span class="material-icons">{{ theme.isDark() ? 'light_mode' : 'dark_mode' }}</span>
-    </button>
-    <div class="user-info">
-      <div class="user-avatar" [title]="auth.user()?.nombre + ' ' + auth.user()?.apellido">
-        {{ auth.user()?.nombre?.charAt(0) }}{{ auth.user()?.apellido?.charAt(0) }}
-      </div>
-      <span class="user-name">{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
-    </div>
-    <button class="btn-logout" (click)="logout()">
-      <span class="material-icons">logout</span>
-      <span class="btn-text">Cerrar</span>
-    </button>
-  </div>
-</div>
+<app-shared-header
+  title="Administración"
+  icon="admin_panel_settings"
+  [userName]="(auth.user()?.nombre || '') + ' ' + (auth.user()?.apellido || '')"
+  [isDark]="theme.isDark()"
+  (menuToggled)="toggleMobileMenu()"
+  (themeToggled)="theme.toggle()"
+  (logout)="logout()"
+></app-shared-header>
 
 <!-- Mobile Menu Overlay -->
 @if (showMobileMenu()) {
