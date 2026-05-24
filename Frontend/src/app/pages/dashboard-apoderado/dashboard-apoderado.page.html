@@ -1,7 +1,6 @@
 <app-shared-header
   title="Panel del Apoderado"
   icon="family_restroom"
-  [userName]="(auth.user()?.nombre || '') + ' ' + (auth.user()?.apellido || '')"
   [isDark]="theme.isDark()"
   (menuToggled)="toggleMobileMenu()"
   (themeToggled)="theme.toggle()"

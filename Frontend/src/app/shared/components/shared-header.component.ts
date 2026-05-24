@@ -22,9 +22,6 @@ import { CommonModule } from "@angular/common";
         >
           <span class="material-icons">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
         </button>
-        <div class="user-info">
-          <span class="user-name">{{ userName }}</span>
-        </div>
         <button class="btn-logout" (click)="logout.emit()">
           <span class="material-icons">logout</span>
           <span class="btn-text">Cerrar</span>
@@ -74,19 +71,6 @@ import { CommonModule } from "@angular/common";
         align-items: center;
         gap: 8px;
         flex-wrap: nowrap;
-      }
-
-      .user-info {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        cursor: default;
-      }
-
-      .user-name {
-        color: var(--text-primary);
-        font-weight: 600;
-        font-size: 0.85rem;
       }
 
       .btn-theme-toggle {
@@ -205,13 +189,6 @@ import { CommonModule } from "@angular/common";
         .header-icon {
           font-size: 22px;
         }
-        .user-name {
-          font-size: 0.8rem;
-          max-width: 100px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
       }
     `,
   ],
@@ -219,7 +196,6 @@ import { CommonModule } from "@angular/common";
 export class SharedHeaderComponent {
   @Input() title = "";
   @Input() icon = "school";
-  @Input() userName = "";
   @Input() isDark = false;
   @Output() menuToggled = new EventEmitter<void>();
   @Output() themeToggled = new EventEmitter<void>();

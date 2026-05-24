@@ -1,7 +1,6 @@
 <app-shared-header
   title="Panel del Docente"
   icon="school"
-  [userName]="(auth.user()?.nombre || '') + ' ' + (auth.user()?.apellido || '')"
   [isDark]="theme.isDark()"
   (menuToggled)="toggleMobileMenu()"
   (themeToggled)="theme.toggle()"
