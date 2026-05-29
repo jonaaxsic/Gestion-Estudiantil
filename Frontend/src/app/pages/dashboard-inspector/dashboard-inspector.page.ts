@@ -54,6 +54,7 @@ export class DashboardInspectorPage implements OnInit {
   showMobileMenu = signal(false);
   showPdfPreview = signal(false);
   pdfPreviewData = signal<string>('');
+  lastGeneratedDocType = signal<string>('');
 
   // Confirm modal
   showConfirmModal = signal(false);
@@ -206,6 +207,7 @@ export class DashboardInspectorPage implements OnInit {
     if (!est?.id || !userId) return;
 
     this.saving.set(true);
+    this.lastGeneratedDocType.set('certificado_alumno_regular');
     this.api.generarCertificadoAlumnoRegular({
       estudiante_id: est.id,
       inspector_id: userId,
@@ -234,6 +236,7 @@ export class DashboardInspectorPage implements OnInit {
     if (!est?.id || !userId) return;
 
     this.saving.set(true);
+    this.lastGeneratedDocType.set('certificado_notas');
     this.api.generarCertificadoNotas({
       estudiante_id: est.id,
       inspector_id: userId,
@@ -281,6 +284,7 @@ export class DashboardInspectorPage implements OnInit {
     }
 
     this.saving.set(true);
+    this.lastGeneratedDocType.set('autorizacion_retiro');
     this.api.generarAutorizacionRetiro({
       ...this.retiroForm,
       inspector_id: userId,
@@ -346,6 +350,7 @@ export class DashboardInspectorPage implements OnInit {
     }
 
     this.saving.set(true);
+    this.lastGeneratedDocType.set('declaracion_accidente');
     this.api.generarDeclaracionAccidente({
       ...this.accidenteForm,
       inspector_id: userId,
@@ -523,14 +528,39 @@ export class DashboardInspectorPage implements OnInit {
     this.showMobileMenu.set(false);
   }
 
+  // Mapeo de tipo_documento interno a nombre legible para el archivo
+  private readonly DOC_FILENAMES: Record<string, string> = {
+    certificado_alumno_regular: 'certificado_alumnoregular',
+    certificado_notas: 'certificado_notas',
+    autorizacion_retiro: 'autorizacion_retiro',
+    retiro_alumno: 'autorizacion_retiro',
+    declaracion_accidente: 'declaracion_accidente',
+    seguro_escolar: 'declaracion_accidente',
+  };
+
   closePdfPreview(): void {
     this.showPdfPreview.set(false);
     this.pdfPreviewData.set('');
+    this.lastGeneratedDocType.set('');
   }
 
   downloadPdf(): void {
     const base64 = this.pdfPreviewData();
     if (!base64) return;
+
+    const est = this.selectedEstudiante();
+    const docType = this.lastGeneratedDocType();
+    const nombreBase = this.DOC_FILENAMES[docType] || 'documento';
+
+    // Construir nombre: ApellidoNombre_tipo.pdf
+    let nombreAlumno = 'documento';
+    if (est?.apellido && est?.nombre) {
+      nombreAlumno = `${est.apellido}_${est.nombre}`.replace(/\s+/g, '');
+    } else if (est?.nombre) {
+      nombreAlumno = est.nombre.replace(/\s+/g, '');
+    }
+    const filename = `${nombreAlumno}_${nombreBase}.pdf`;
+
     const byteCharacters = atob(base64);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
@@ -541,7 +571,7 @@ export class DashboardInspectorPage implements OnInit {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `documento-${Date.now()}.pdf`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   }

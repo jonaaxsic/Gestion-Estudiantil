@@ -274,4 +274,32 @@ describe('DashboardInspectorPage', () => {
       expect(mockApi.getCurso).toHaveBeenCalledWith('curso-1');
     });
   });
+
+  describe('download filename', () => {
+    it('should set lastGeneratedDocType when generating certificado regular', () => {
+      mockApi.generarCertificadoAlumnoRegular = jasmine.createSpy('generarCertificadoAlumnoRegular').and.returnValue(of({ pdf_base64: '', success: true, message: '' }));
+      const fixture = TestBed.createComponent(DashboardInspectorPage);
+      const component = fixture.componentInstance;
+      component.selectedEstudiante.set({ id: 'est-1', nombre: 'Diego', apellido: 'Rodriguez' } as any);
+      component.generarCertificadoRegular();
+      expect(component.lastGeneratedDocType()).toBe('certificado_alumno_regular');
+    });
+
+    it('should build filename from student name and doc type', () => {
+      const fixture = TestBed.createComponent(DashboardInspectorPage);
+      const component = fixture.componentInstance;
+      component.selectedEstudiante.set({ nombre: 'Diego', apellido: 'Rodriguez' } as Estudiante);
+      component.lastGeneratedDocType.set('certificado_alumno_regular');
+      expect(component['DOC_FILENAMES']['certificado_alumno_regular']).toBe('certificado_alumnoregular');
+    });
+
+    it('should clear doc type on closePdfPreview', () => {
+      const fixture = TestBed.createComponent(DashboardInspectorPage);
+      const component = fixture.componentInstance;
+      component.lastGeneratedDocType.set('certificado_alumno_regular');
+      component.showPdfPreview.set(true);
+      component.closePdfPreview();
+      expect(component.lastGeneratedDocType()).toBe('');
+    });
+  });
 });
