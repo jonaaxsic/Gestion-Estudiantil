@@ -141,13 +141,19 @@ urlpatterns = [
     # IMPORTANTE: Rutas específicas SIEMPRE antes que rutas con <str:pk>
     # para evitar que Django capture nombres como "certificado-alumno-regular" como un pk.
     path("dashboard/inspector", inspector_views.dashboard_inspector, name="dashboard-inspector"),
-    # Documentos - rutas específicas primero
+    # Documentos - rutas específicas primero (con y sin slash, igual que el resto)
     path("documentos/", inspector_views.DocumentoGeneradoList.as_view(), name="documento-list"),
+    path("documentos", inspector_views.DocumentoGeneradoList.as_view(), name="documento-list-noslash"),
     path("documentos/certificado-alumno-regular/", inspector_views.generar_certificado_alumno_regular, name="certificado-alumno-regular"),
+    path("documentos/certificado-alumno-regular", inspector_views.generar_certificado_alumno_regular, name="certificado-alumno-regular-noslash"),
     path("documentos/certificado-notas/", inspector_views.generar_certificado_notas, name="certificado-notas"),
+    path("documentos/certificado-notas", inspector_views.generar_certificado_notas, name="certificado-notas-noslash"),
     path("documentos/autorizacion-retiro/", inspector_views.generar_autorizacion_retiro, name="autorizacion-retiro"),
+    path("documentos/autorizacion-retiro", inspector_views.generar_autorizacion_retiro, name="autorizacion-retiro-noslash"),
     path("documentos/accidente-escolar/", inspector_views.generar_declaracion_accidente, name="accidente-escolar"),
+    path("documentos/accidente-escolar", inspector_views.generar_declaracion_accidente, name="accidente-escolar-noslash"),
     path("documentos/<str:pk>/", inspector_views.DocumentoGeneradoDetail.as_view(), name="documento-detail"),
+    path("documentos/<str:pk>", inspector_views.DocumentoGeneradoDetail.as_view(), name="documento-detail-noslash"),
     # Retiros
     path("retiros/", inspector_views.RetiroList.as_view(), name="retiro-list"),
     path("retiros/<str:pk>/", inspector_views.RetiroDetail.as_view(), name="retiro-detail"),

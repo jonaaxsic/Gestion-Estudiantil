@@ -4,6 +4,8 @@ Verifica que los endpoints respondan correctamente
 y que las rutas especificas NO sean capturadas por <str:pk>.
 """
 
+import pytest
+
 
 class TestUrlsInspector:
     """Verifica que las rutas del inspector estén correctamente configuradas"""
@@ -32,56 +34,49 @@ class TestUrlsInspector:
         for ruta in rutas_requeridas:
             assert ruta in patterns_str, f"Falta ruta requerida: {ruta}"
 
-    def test_certificado_no_es_capturado_como_pk(self):
-        """
-        Verifica que 'certificado-alumno-regular' aparezca como ruta
-        ANTES que 'documentos/<str:pk>' en urlpatterns.
-        Si aparece despues, Django lo captura como pk y da 405.
-        """
+    def _verificar_orden_rutas(self, urlpatterns, module_name):
+        """Helper: verifica que las rutas especificas esten ANTES que <str:pk>"""
+        idx_cert = None
+        idx_cert_noslash = None
+        idx_pk_trailing = None
+        idx_pk_noslash = None
+
+        for i, p in enumerate(urlpatterns):
+            pattern_str = str(p.pattern)
+            if pattern_str == "documentos/certificado-alumno-regular/":
+                idx_cert = i
+            elif pattern_str == "documentos/certificado-alumno-regular":
+                idx_cert_noslash = i
+            elif pattern_str == "documentos/<str:pk>/":
+                idx_pk_trailing = i
+            elif pattern_str == "documentos/<str:pk>":
+                idx_pk_noslash = i
+
+        errors = []
+        if idx_cert is None:
+            errors.append("Falta 'documentos/certificado-alumno-regular/'")
+        if idx_cert_noslash is None:
+            errors.append("Falta 'documentos/certificado-alumno-regular' (sin slash)")
+        if idx_pk_trailing is None:
+            errors.append("Falta 'documentos/<str:pk>/'")
+        if errors:
+            pytest.fail(f"{module_name}: " + "; ".join(errors))
+
+        assert idx_cert < idx_pk_trailing, (
+            f"ERROR en {module_name}: certificado/ (pos {idx_cert}) "
+            f"DESPUES de <str:pk>/ (pos {idx_pk_trailing})"
+        )
+        assert idx_cert_noslash < idx_pk_trailing, (
+            f"ERROR en {module_name}: certificado (sin slash, pos {idx_cert_noslash}) "
+            f"DESPUES de <str:pk>/ (pos {idx_pk_trailing})"
+        )
+
+    def test_urls_py_orden_correcto(self):
+        """Backend/urls.py: certificados antes que <str:pk> (con y sin slash)"""
         from urls import urlpatterns
+        self._verificar_orden_rutas(urlpatterns, "Backend/urls.py")
 
-        # Buscar indices
-        idx_cert = None
-        idx_pk = None
-
-        for i, p in enumerate(urlpatterns):
-            pattern_str = str(p.pattern)
-            if "certificado-alumno-regular" in pattern_str:
-                idx_cert = i
-            if "documentos/<str:pk>" in pattern_str:
-                idx_pk = i
-
-        assert idx_cert is not None, (
-            "No se encontro ruta 'certificado-alumno-regular' en urlpatterns"
-        )
-        assert idx_pk is not None, (
-            "No se encontro ruta 'documentos/<str:pk>' en urlpatterns"
-        )
-        assert idx_cert < idx_pk, (
-            f"ERROR: 'certificado-alumno-regular' (posicion {idx_cert}) "
-            f"esta DESPUES de 'documentos/<str:pk>' (posicion {idx_pk}). "
-            "Django capturara 'certificado-alumno-regular' como un pk y dara error 405."
-        )
-
-    def test_core_urls_tiene_mismo_orden_correcto(self):
-        """core/urls.py tambien debe tener las rutas especificas antes que <str:pk>"""
+    def test_core_urls_orden_correcto(self):
+        """core/urls.py: certificados antes que <str:pk> (con y sin slash)"""
         from core.urls import urlpatterns
-
-        idx_cert = None
-        idx_pk = None
-
-        for i, p in enumerate(urlpatterns):
-            pattern_str = str(p.pattern)
-            if "certificado-alumno-regular" in pattern_str:
-                idx_cert = i
-            if "documentos/<str:pk>" in pattern_str:
-                idx_pk = i
-
-        assert idx_cert is not None, (
-            "Falta 'certificado-alumno-regular' en core/urls.py"
-        )
-        assert idx_pk is not None, "Falta 'documentos/<str:pk>' en core/urls.py"
-        assert idx_cert < idx_pk, (
-            f"ERROR en core/urls.py: certificado ({idx_cert}) "
-            f"despues de <str:pk> ({idx_pk})"
-        )
+        self._verificar_orden_rutas(urlpatterns, "core/urls.py")

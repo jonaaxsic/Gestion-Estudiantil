@@ -104,6 +104,11 @@ urlpatterns = [
         inspector_views.DocumentoGeneradoList.as_view(),
         name="documento-list",
     ),
+    path(
+        "documentos",
+        inspector_views.DocumentoGeneradoList.as_view(),
+        name="documento-list-noslash",
+    ),
     # IMPORTANTE: Rutas específicas SIEMPRE antes que <str:pk>
     # para evitar que Django capture "certificado-alumno-regular" como un pk
     path(
@@ -112,9 +117,19 @@ urlpatterns = [
         name="certificado-alumno-regular",
     ),
     path(
+        "documentos/certificado-alumno-regular",
+        inspector_views.generar_certificado_alumno_regular,
+        name="certificado-alumno-regular-noslash",
+    ),
+    path(
         "documentos/certificado-notas/",
         inspector_views.generar_certificado_notas,
         name="certificado-notas",
+    ),
+    path(
+        "documentos/certificado-notas",
+        inspector_views.generar_certificado_notas,
+        name="certificado-notas-noslash",
     ),
     path(
         "documentos/autorizacion-retiro/",
@@ -122,14 +137,29 @@ urlpatterns = [
         name="autorizacion-retiro",
     ),
     path(
+        "documentos/autorizacion-retiro",
+        inspector_views.generar_autorizacion_retiro,
+        name="autorizacion-retiro-noslash",
+    ),
+    path(
         "documentos/accidente-escolar/",
         inspector_views.generar_declaracion_accidente,
         name="accidente-escolar",
     ),
     path(
+        "documentos/accidente-escolar",
+        inspector_views.generar_declaracion_accidente,
+        name="accidente-escolar-noslash",
+    ),
+    path(
         "documentos/<str:pk>/",
         inspector_views.DocumentoGeneradoDetail.as_view(),
         name="documento-detail",
+    ),
+    path(
+        "documentos/<str:pk>",
+        inspector_views.DocumentoGeneradoDetail.as_view(),
+        name="documento-detail-noslash",
     ),
     # Retiros
     path(
