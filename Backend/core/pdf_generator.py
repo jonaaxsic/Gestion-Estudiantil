@@ -502,10 +502,13 @@ def generar_certificado_alumno_regular(estudiante, establecimiento, inspector):
     Diseño profesional tipo carta con logo, highlight box y firma
     """
     buffer = BytesIO()
+    nombre_est = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}".strip()
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
         leftMargin=MARGIN_LEFT, rightMargin=MARGIN_RIGHT,
         topMargin=MARGIN_TOP, bottomMargin=MARGIN_BOTTOM,
+        title=f"Certificado de Alumno Regular - {nombre_est}",
+        author=inspector.get('nombre', ''),
     )
     estilos = _get_estilos()
     elements = []
@@ -635,10 +638,13 @@ def generar_certificado_notas(estudiante, notas_por_asignatura, establecimiento,
     Diseño profesional tipo carta con logo, highlight box, tabla y firma
     """
     buffer = BytesIO()
+    nombre_est = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}".strip()
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
         leftMargin=MARGIN_LEFT, rightMargin=MARGIN_RIGHT,
         topMargin=MARGIN_TOP, bottomMargin=MARGIN_BOTTOM,
+        title=f"Certificado de Notas - {nombre_est}",
+        author=inspector.get('nombre', ''),
     )
     estilos = _get_estilos()
     elements = []
@@ -717,10 +723,13 @@ def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspec
     cuerpo configurable, y firmas (inspector + apoderado)
     """
     buffer = BytesIO()
+    nombre_est = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}".strip()
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
         leftMargin=MARGIN_LEFT, rightMargin=MARGIN_RIGHT,
         topMargin=MARGIN_TOP, bottomMargin=MARGIN_BOTTOM,
+        title=f"Autorización de Retiro - {nombre_est}",
+        author=inspector.get('nombre', ''),
     )
     estilos = _get_estilos()
     elements = []
@@ -813,10 +822,13 @@ def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, i
     Diseño profesional tipo carta con logo, highlight box, datos del accidente y firma
     """
     buffer = BytesIO()
+    nombre_est = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}".strip()
     doc = SimpleDocTemplate(
         buffer, pagesize=A4,
         leftMargin=MARGIN_LEFT, rightMargin=MARGIN_RIGHT,
         topMargin=MARGIN_TOP, bottomMargin=MARGIN_BOTTOM,
+        title=f"Declaración de Accidente Escolar - {nombre_est}",
+        author=inspector.get('nombre', ''),
     )
     estilos = _get_estilos()
     elements = []
