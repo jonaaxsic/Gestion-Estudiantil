@@ -1,12 +1,13 @@
 """
 Módulo de generación de PDFs para el Inspector General
 Usa ReportLab + Pillow para crear documentos oficiales
+Diseño profesional tipo carta con logo, highlight box y firma
 """
 
 import os
 from io import BytesIO
 from datetime import datetime
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm, mm
 from reportlab.lib.colors import HexColor, black, white, grey
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -15,185 +16,436 @@ from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
     Image, HRFlowable, PageBreak, Frame, PageTemplate
 )
-from reportlab.platypus.flowables import HRFlowable
 
-# Colores institucionales
-COLOR_PRIMARY = HexColor("#1a237e")  # Azul oscuro
-COLOR_SECONDARY = HexColor("#0d47a1")  # Azul medio
-COLOR_ACCENT = HexColor("#1565c0")  # Azul claro
-COLOR_LIGHT = HexColor("#e8eaf6")  # Azul muy claro
-COLOR_BORDER = HexColor("#bdbdbd")  # Gris para bordes
+# ============================================================
+# PALETA DE COLORES (del diseño HTML)
+# ============================================================
+COLOR_PRIMARY = HexColor("#1a365d")      # Azul oscuro institucional
+COLOR_LIGHT_BG = HexColor("#f8fafc")     # Fondo muy claro para highlight
+COLOR_BORDER = HexColor("#d3d3d3")       # Gris suave para bordes
+COLOR_TEXT = HexColor("#333333")         # Texto principal
+COLOR_LABEL = HexColor("#4a5568")        # Color para etiquetas
+COLOR_VALUE = HexColor("#1a202c")        # Color para valores
+COLOR_SUBTLE = HexColor("#718096")       # Texto secundario
+COLOR_MUTED = HexColor("#a0aec0")        # Texto muy tenue
 
-# Margenes del documento
+# ============================================================
+# MÁRGENES
+# ============================================================
 MARGIN_LEFT = 2.5 * cm
 MARGIN_RIGHT = 2.5 * cm
 MARGIN_TOP = 2 * cm
 MARGIN_BOTTOM = 2 * cm
 
 
+# ============================================================
+# ESTILOS
+# ============================================================
 def _get_estilos():
-    """Obtiene los estilos de párrafo para los documentos"""
+    """Estilos profesionales para documentos tipo carta"""
     estilos = getSampleStyleSheet()
 
     estilos.add(ParagraphStyle(
+        "NombreInstitucion",
+        parent=estilos["Normal"],
+        fontSize=14,
+        leading=17,
+        textColor=COLOR_PRIMARY,
+        fontName="Helvetica-Bold",
+        alignment=TA_LEFT,
+    ))
+
+    estilos.add(ParagraphStyle(
+        "DatosInstitucion",
+        parent=estilos["Normal"],
+        fontSize=9,
+        leading=13,
+        textColor=HexColor("#555555"),
+        fontName="Helvetica",
+        alignment=TA_LEFT,
+    ))
+
+    estilos.add(ParagraphStyle(
         "TituloDocumento",
-        parent=estilos["Title"],
-        fontSize=16,
-        leading=20,
+        parent=estilos["Normal"],
+        fontSize=17,
+        leading=22,
         textColor=COLOR_PRIMARY,
-        spaceAfter=6,
-        alignment=TA_CENTER,
         fontName="Helvetica-Bold",
-    ))
-
-    estilos.add(ParagraphStyle(
-        "SubtituloDocumento",
-        parent=estilos["Normal"],
-        fontSize=10,
-        leading=14,
-        textColor=COLOR_SECONDARY,
-        spaceAfter=20,
         alignment=TA_CENTER,
-        fontName="Helvetica",
-    ))
-
-    estilos.add(ParagraphStyle(
-        "EncabezadoColegio",
-        parent=estilos["Normal"],
-        fontSize=11,
-        leading=14,
-        textColor=COLOR_PRIMARY,
-        alignment=TA_CENTER,
-        fontName="Helvetica-Bold",
-    ))
-
-    estilos.add(ParagraphStyle(
-        "DatosColegio",
-        parent=estilos["Normal"],
-        fontSize=8,
-        leading=10,
-        textColor=COLOR_SECONDARY,
-        alignment=TA_CENTER,
-        fontName="Helvetica",
-    ))
-
-    estilos.add(ParagraphStyle(
-        "LabelDato",
-        parent=estilos["Normal"],
-        fontSize=10,
-        leading=14,
-        textColor=black,
-        fontName="Helvetica-Bold",
-        spaceBefore=4,
-        spaceAfter=2,
-    ))
-
-    estilos.add(ParagraphStyle(
-        "ValorDato",
-        parent=estilos["Normal"],
-        fontSize=10,
-        leading=14,
-        textColor=black,
-        fontName="Helvetica",
-        spaceBefore=2,
-        spaceAfter=4,
-        leftIndent=10,
+        spaceBefore=14,
+        spaceAfter=14,
     ))
 
     estilos.add(ParagraphStyle(
         "CuerpoDocumento",
         parent=estilos["Normal"],
         fontSize=10,
-        leading=15,
-        textColor=black,
+        leading=16,
+        textColor=COLOR_TEXT,
         fontName="Helvetica",
         alignment=TA_JUSTIFY,
-        spaceBefore=10,
-        spaceAfter=10,
+        spaceBefore=8,
+        spaceAfter=8,
+    ))
+
+    estilos.add(ParagraphStyle(
+        "LabelHighlight",
+        parent=estilos["Normal"],
+        fontSize=10,
+        leading=16,
+        textColor=COLOR_LABEL,
+        fontName="Helvetica-Bold",
+    ))
+
+    estilos.add(ParagraphStyle(
+        "ValueHighlight",
+        parent=estilos["Normal"],
+        fontSize=10,
+        leading=16,
+        textColor=COLOR_VALUE,
+        fontName="Helvetica",
+    ))
+
+    estilos.add(ParagraphStyle(
+        "SubtituloDocumento",
+        parent=estilos["Normal"],
+        fontSize=11,
+        leading=15,
+        textColor=COLOR_PRIMARY,
+        fontName="Helvetica",
+        alignment=TA_CENTER,
+        spaceBefore=0,
+        spaceAfter=14,
+    ))
+
+    estilos.add(ParagraphStyle(
+        "EtiquetaTabla",
+        parent=estilos["Normal"],
+        fontSize=10,
+        leading=16,
+        textColor=COLOR_LABEL,
+        fontName="Helvetica-Bold",
+    ))
+
+    estilos.add(ParagraphStyle(
+        "ValorTabla",
+        parent=estilos["Normal"],
+        fontSize=10,
+        leading=16,
+        textColor=COLOR_VALUE,
+        fontName="Helvetica",
+    ))
+
+    estilos.add(ParagraphStyle(
+        "FooterFecha",
+        parent=estilos["Normal"],
+        fontSize=9,
+        leading=13,
+        textColor=COLOR_SUBTLE,
+        fontName="Helvetica",
+        alignment=TA_LEFT,
     ))
 
     estilos.add(ParagraphStyle(
         "FirmaTexto",
         parent=estilos["Normal"],
-        fontSize=10,
-        leading=14,
-        textColor=black,
+        fontSize=9,
+        leading=13,
+        textColor=COLOR_SUBTLE,
         fontName="Helvetica",
         alignment=TA_CENTER,
-        spaceBefore=4,
-        spaceAfter=2,
     ))
 
     estilos.add(ParagraphStyle(
-        "PiePagina",
+        "FirmaNombre",
+        parent=estilos["Normal"],
+        fontSize=10,
+        leading=14,
+        textColor=COLOR_VALUE,
+        fontName="Helvetica-Bold",
+        alignment=TA_CENTER,
+    ))
+
+    estilos.add(ParagraphStyle(
+        "PiePaginaTexto",
         parent=estilos["Normal"],
         fontSize=7,
         leading=9,
-        textColor=grey,
-        alignment=TA_CENTER,
+        textColor=COLOR_MUTED,
         fontName="Helvetica-Oblique",
+        alignment=TA_CENTER,
     ))
 
     return estilos
 
 
-def _build_encabezado_colegio(establecimiento, estilos):
-    """Construye el encabezado institucional del documento"""
-    elements = []
+# ============================================================
+# LOGO
+# ============================================================
+def _obtener_logo(establecimiento, ancho=120, alto=120):
+    """
+    Obtiene el logo desde la URL configurada.
+    Si falla o no hay URL, retorna None.
+    """
+    logo_url = establecimiento.get("logo_url", "").strip()
+    if not logo_url:
+        return None
+    try:
+        from urllib.request import urlopen
+        img_data = urlopen(logo_url, timeout=5).read()
+        logo = Image(BytesIO(img_data), width=ancho, height=alto)
+        return logo
+    except Exception:
+        return None
 
+
+# ============================================================
+# ENCABEZADO INSTITUCIONAL (con logo)
+# ============================================================
+def _build_encabezado_con_logo(establecimiento, estilos):
+    """
+    Encabezado profesional:
+      [Izquierda 65%] Nombre institución + datos
+      [Derecha 35%]  Logo
+      Línea fina inferior de separación
+    """
     nombre = establecimiento.get("nombre", "ESTABLECIMIENTO EDUCACIONAL")
     rut = establecimiento.get("rut", "")
     direccion = establecimiento.get("direccion", "")
+    comuna = establecimiento.get("comuna", "")
     telefono = establecimiento.get("telefono", "")
     email = establecimiento.get("email", "")
 
-    elements.append(Paragraph(nombre.upper(), estilos["EncabezadoColegio"]))
-
-    datos = []
+    # Info de la institución (columna izquierda)
+    datos_html = f"<b>{nombre.upper()}</b><br/>"
+    datos_html += f'<font size="9" color="#555555">'
+    partes = []
     if rut:
-        datos.append(f"RUT: {rut}")
+        partes.append(f"RUT: {rut}")
     if direccion:
-        datos.append(direccion)
+        dir_txt = direccion
+        if comuna:
+            dir_txt += f", {comuna}"
+        partes.append(dir_txt)
     if telefono or email:
-        datos.append(f"Tel: {telefono or ''} / Email: {email or ''}")
-    for dato in datos:
-        elements.append(Paragraph(dato, estilos["DatosColegio"]))
+        partes.append(f"Tel: {telefono} / Email: {email}")
+    datos_html += "<br/>".join(partes)
+    datos_html += "</font>"
 
-    elements.append(HRFlowable(
-        width="100%", thickness=2, color=COLOR_PRIMARY,
-        spaceAfter=10, spaceBefore=6
-    ))
+    left_cell = Paragraph(datos_html, estilos["NombreInstitucion"])
 
-    return elements
+    # Logo (columna derecha)
+    logo = _obtener_logo(establecimiento)
+    if logo:
+        right_cell = logo
+    else:
+        right_cell = Spacer(1, 10)
+
+    # Tabla: 65% izquierda, 35% derecha
+    tbl = Table(
+        [[left_cell, right_cell]],
+        colWidths=[11 * cm, 5 * cm],
+    )
+    tbl.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (0, 0), (0, 0), "LEFT"),
+        ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
+    ]))
+
+    return tbl
 
 
+def _build_separador():
+    """Línea fina horizontal con color primario"""
+    return HRFlowable(
+        width="100%",
+        thickness=1.5,
+        color=COLOR_PRIMARY,
+        spaceAfter=6,
+        spaceBefore=0,
+    )
+
+
+# ============================================================
+# HIGHLIGHT BOX (datos del estudiante)
+# ============================================================
+def _build_highlight_box(datos, estilos):
+    """
+    Crea un recuadro estilizado con:
+      - Barra izquierda de color primario (4px)
+      - Fondo gris muy claro
+      - Filas de label: valor
+
+    datos: list of [label, value] strings
+    """
+    if not datos:
+        return Spacer(1, 1)
+
+    rows = []
+    for label, value in datos:
+        label_p = Paragraph(f"<b>{label}</b>", estilos["LabelHighlight"])
+        value_p = Paragraph(str(value) if value else "-", estilos["ValueHighlight"])
+        rows.append([label_p, value_p])
+
+    # Tabla interior: label | value
+    inner = Table(rows, colWidths=[5 * cm, 10 * cm])
+    inner.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LEADING", (0, 0), (-1, -1), 18),
+        ("TEXTCOLOR", (0, 0), (0, -1), COLOR_LABEL),
+        ("TEXTCOLOR", (1, 0), (1, -1), COLOR_VALUE),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (1, 0), (1, -1), 8),
+    ]))
+
+    # Envoltura con barra de color + fondo
+    wrapper = Table([[inner]], colWidths=[15 * cm])
+    wrapper.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, 0), COLOR_LIGHT_BG),
+        ("LEFTLINE", (0, 0), (0, 0), 4, COLOR_PRIMARY),
+        ("TOPPADDING", (0, 0), (0, 0), 8),
+        ("BOTTOMPADDING", (0, 0), (0, 0), 8),
+        ("LEFTPADDING", (0, 0), (0, 0), 0),
+        ("RIGHTPADDING", (0, 0), (0, 0), 0),
+    ]))
+
+    return wrapper
+
+
+# ============================================================
+# TABLA DE DATOS SIMPLE (para accidente, retiro, etc.)
+# ============================================================
+def _build_tabla_datos(datos, estilos):
+    """
+    Tabla simple de dos columnas: label | value
+    Sin fondo ni barra de color (para secciones de datos adicionales)
+
+    datos: list of [label, value] strings
+    """
+    if not datos:
+        return Spacer(1, 1)
+
+    rows = []
+    for label, value in datos:
+        label_p = Paragraph(f"<b>{label}</b>", estilos["EtiquetaTabla"])
+        value_p = Paragraph(str(value) if value else "-", estilos["ValorTabla"])
+        rows.append([label_p, value_p])
+
+    tbl = Table(rows, colWidths=[5 * cm, 10 * cm])
+    tbl.setStyle(TableStyle([
+        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+        ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
+        ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ("LEADING", (0, 0), (-1, -1), 18),
+        ("TEXTCOLOR", (0, 0), (0, -1), COLOR_LABEL),
+        ("TEXTCOLOR", (1, 0), (1, -1), COLOR_VALUE),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("LEFTPADDING", (1, 0), (1, -1), 8),
+    ]))
+    return tbl
+
+
+# ============================================================
+# FOOTER CON FIRMA
+# ============================================================
+def _build_footer_firma(inspector, fecha_texto, ciudad, estilos):
+    """
+    Pie de documento estilo carta:
+      [Izquierda] Fecha de emisión
+      [Derecha]   Firma del inspector
+    """
+    left_html = (
+        f"<b>Fecha de Emisión:</b><br/>"
+        f"{fecha_texto}<br/>"
+        f"{ciudad}."
+    )
+    left = Paragraph(left_html, estilos["FooterFecha"])
+
+    right_html = (
+        f"<br/><br/>"
+        f"_________________________<br/>"
+        f"<b>{inspector.get('nombre', '')} {inspector.get('apellido', '')}</b><br/>"
+        f"<font size='9' color='#4a5568'>Inspector General<br/>"
+        f"RUT: {inspector.get('rut', '')}</font>"
+    )
+    right = Paragraph(right_html, estilos["FirmaTexto"])
+
+    tbl = Table([[left, right]], colWidths=[7.5 * cm, 7.5 * cm])
+    tbl.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+        ("ALIGN", (0, 0), (0, 0), "LEFT"),
+        ("ALIGN", (1, 0), (1, 0), "CENTER"),
+        ("TOPPADDING", (0, 0), (-1, -1), 20),
+    ]))
+    return tbl
+
+
+# ============================================================
+# FIRMA DUAL (inspector + apoderado, lado a lado)
+# ============================================================
+def _build_dual_signature(inspector, apoderado, estilos):
+    """
+    Dos firmas lado a lado para retiro:
+      [Izquierda] Inspector General
+      [Derecha]   Apoderado
+    """
+    insp_html = (
+        f"_________________________<br/>"
+        f"<b>{inspector.get('nombre', '')} {inspector.get('apellido', '')}</b><br/>"
+        f"<font size='9' color='#4a5568'>Inspector(a) General<br/>"
+        f"RUT: {inspector.get('rut', '')}</font>"
+    )
+    apo_html = (
+        f"_________________________<br/>"
+        f"<b>{apoderado}</b><br/>"
+        f"<font size='9' color='#4a5568'>Apoderado(a)</font>"
+    )
+
+    tbl = Table(
+        [[Paragraph(insp_html, estilos["FirmaTexto"]),
+          Paragraph(apo_html, estilos["FirmaTexto"])]],
+        colWidths=[7.5 * cm, 7.5 * cm],
+    )
+    tbl.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("TOPPADDING", (0, 0), (-1, -1), 30),
+    ]))
+    return tbl
+
+
+# ============================================================
+# PIE DE PÁGINA
+# ============================================================
 def _build_pie_pagina(canvas, doc):
-    """Dibuja el pie de página en cada página"""
+    """Dibuja el pie de página genérico"""
     canvas.saveState()
     canvas.setFont("Helvetica-Oblique", 7)
-    canvas.setFillColor(grey)
+    canvas.setFillColor(COLOR_MUTED)
     canvas.drawCentredString(
         A4[0] / 2, 1.2 * cm,
-        f"Documento generado por el sistema de gestión estudiantil - {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+        f"Documento generado por el sistema de gestión estudiantil - "
+        f"{datetime.now().strftime('%d/%m/%Y %H:%M')}",
     )
-    # Número de página
     canvas.drawCentredString(
         A4[0] / 2, 0.8 * cm,
-        f"Página {doc.page}"
+        f"Página {doc.page}",
     )
     canvas.restoreState()
 
 
-def _build_linea_firma(estilos):
-    """Construye la línea de firma"""
-    elements = []
-    elements.append(Spacer(1, 30))
-    elements.append(HRFlowable(width="40%", thickness=1, color=black, spaceAfter=4))
-    elements.append(Paragraph("Inspector General", estilos["FirmaTexto"]))
-    elements.append(Spacer(1, 4))
-    return elements
-
-
+# ============================================================
+# VARIABLES Y TEXTOS CONFIGURABLES
+# ============================================================
 def _reemplazar_variables(texto, variables):
     """Reemplaza {variables} en un texto con sus valores"""
     for key, value in variables.items():
@@ -212,47 +464,42 @@ def _obtener_texto_certificado(establecimiento, campo, variables, texto_fallback
     return texto_fallback
 
 
-def _build_datos_estudiante(estudiante, estilos):
-    """Construye tabla con datos del estudiante"""
+# ============================================================
+# HELPERS COMUNES
+# ============================================================
+def _build_datos_estudiante_highlight(estudiante, estilos):
+    """Construye el highlight box con datos del estudiante"""
     nombre_completo = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}"
     curso_nombre = estudiante.get("curso_nombre", "")
-
     datos = [
-        ["NOMBRE DEL ALUMNO(A):", nombre_completo],
-        ["RUT:", estudiante.get("rut", "")],
-        ["CURSO:", curso_nombre],
+        ["Nombre del Alumno(a):", nombre_completo],
+        ["RUT Estudiante:", estudiante.get("rut", "")],
+        ["Curso:", curso_nombre],
     ]
-
-    tbl = Table(datos, colWidths=[5 * cm, 10 * cm])
-    tbl.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-        ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 16),
-        ("ALIGN", (0, 0), (0, -1), "RIGHT"),
-        ("ALIGN", (1, 0), (1, -1), "LEFT"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-        ("LEFTPADDING", (0, 0), (-1, -1), 8),
-    ]))
-    return tbl, nombre_completo, curso_nombre
+    return _build_highlight_box(datos, estilos), nombre_completo, curso_nombre
 
 
-def _build_firma_inspector(inspector, estilos):
-    """Construye la linea de firma del inspector"""
-    elements = []
-    inspector_nombre = f"{inspector.get('nombre', '')} {inspector.get('apellido', '')}"
-    elements.extend(_build_linea_firma(estilos))
-    elements.append(Paragraph(inspector_nombre, estilos["FirmaTexto"]))
-    elements.append(Paragraph(f"RUT: {inspector.get('rut', '')}", estilos["FirmaTexto"]))
-    return elements
+def _build_fecha_emision():
+    """Retorna fecha formateada para el pie del documento"""
+    now = datetime.now()
+    meses = [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio",
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+    ]
+    dia = now.day
+    mes = meses[now.month - 1]
+    anio = now.year
+    hora = now.strftime("%H:%M")
+    return f"{dia} de {mes} de {anio}, {hora} hrs."
 
 
+# ============================================================
+# 1. CERTIFICADO DE ALUMNO REGULAR
+# ============================================================
 def generar_certificado_alumno_regular(estudiante, establecimiento, inspector):
     """
     Genera PDF de Certificado de Alumno Regular
-    Usa texto configurable de configuracion_establecimiento si existe
+    Diseño profesional tipo carta con logo, highlight box y firma
     """
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -263,52 +510,33 @@ def generar_certificado_alumno_regular(estudiante, establecimiento, inspector):
     estilos = _get_estilos()
     elements = []
 
-    # Encabezado
-    elements.extend(_build_encabezado_colegio(establecimiento, estilos))
+    # ---- ENCABEZADO ----
+    elements.append(_build_encabezado_con_logo(establecimiento, estilos))
+    elements.append(_build_separador())
 
-    # Título
-    elements.append(Spacer(1, 10))
+    # ---- TÍTULO ----
     elements.append(Paragraph("CERTIFICADO DE ALUMNO REGULAR", estilos["TituloDocumento"]))
-    elements.append(Paragraph("(Artículo 5° Decreto N° 315/2024)", estilos["SubtituloDocumento"]))
-    elements.append(Spacer(1, 10))
 
-    # Línea divisoria
-    elements.append(HRFlowable(width="60%", thickness=0.5, color=COLOR_BORDER, spaceAfter=15))
+    # ---- DATOS DEL ESTUDIANTE ----
+    box, nombre_completo, curso_nombre = _build_datos_estudiante_highlight(estudiante, estilos)
+    elements.append(box)
+    elements.append(Spacer(1, 8))
 
-    # Datos del estudiante
-    tbl, nombre_completo, curso_nombre = _build_datos_estudiante(estudiante, estilos)
-    elements.append(tbl)
-    elements.append(Spacer(1, 15))
-
-    # Datos adicionales
+    # ---- AÑO LECTIVO (pequeña tabla después del highlight) ----
     ano_actual = datetime.now().year
-    datos_extra = [["AÑO LECTIVO:", str(ano_actual)]]
-    tbl_extra = Table(datos_extra, colWidths=[5 * cm, 10 * cm])
-    tbl_extra.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-        ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 16),
-        ("ALIGN", (0, 0), (0, -1), "RIGHT"),
-        ("ALIGN", (1, 0), (1, -1), "LEFT"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-        ("LEFTPADDING", (0, 0), (-1, -1), 8),
-    ]))
-    elements.append(tbl_extra)
-    elements.append(Spacer(1, 20))
+    elements.append(_build_tabla_datos([["Año Lectivo:", str(ano_actual)]], estilos))
+    elements.append(Spacer(1, 16))
 
-    # --- Cuerpo del certificado (configurable) ---
+    # ---- CUERPO DEL CERTIFICADO (configurable) ----
     ciudad = establecimiento.get("comuna", "Santiago")
-    fecha_emision = datetime.now().strftime("%d de %B de %Y")
+    fecha_emision = _build_fecha_emision()
 
     texto_fijo = (
-        f"El Director del establecimiento educacional {establecimiento.get('nombre', '')}, "
-        f"RUT {establecimiento.get('rut', '')}, debidamente facultado por la legislación educacional vigente, "
-        f"CERTIFICA que el/la alumno/a <b>{nombre_completo}</b>, RUT {estudiante.get('rut', '')}, "
-        f"se encuentra matriculado/a y cursando regularmente <b>{curso_nombre}</b> "
-        f"en este establecimiento durante el año lectivo {ano_actual}."
+        f"La Dirección del establecimiento educacional <b>{establecimiento.get('nombre', '')}</b>, "
+        f"debidamente facultada por la legislación educacional vigente, "
+        f"certifica que el/la alumno/a <b>{nombre_completo}</b>, "
+        f"RUT {estudiante.get('rut', '')}, se encuentra matriculado/a y cursando regularmente "
+        f"<b>{curso_nombre}</b> en este establecimiento durante el año lectivo {ano_actual}."
     )
 
     variables = {
@@ -325,42 +553,36 @@ def generar_certificado_alumno_regular(estudiante, establecimiento, inspector):
     texto_certificado = _obtener_texto_certificado(
         establecimiento, "texto_certificado_regular", variables, texto_fijo
     )
-
-    # Segundo párrafo fijo
-    texto_segundo = (
-        "Se extiende el presente certificado para los fines legales que el/la apoderado/a estime conveniente. "
-        "No requiere timbre ni firma digital para su validez."
-    )
-
     elements.append(Paragraph(texto_certificado, estilos["CuerpoDocumento"]))
+
+    # ---- PÁRRAFO FINAL ----
+    elements.append(Spacer(1, 4))
+    elements.append(Paragraph(
+        "Se extiende el presente certificado a petición del apoderado o interesado "
+        "para los fines legales y administrativos que estime conveniente.",
+        estilos["CuerpoDocumento"],
+    ))
+
+    # ---- FIRMA ----
     elements.append(Spacer(1, 10))
-    elements.append(Paragraph(texto_segundo, estilos["CuerpoDocumento"]))
-    elements.append(Spacer(1, 25))
+    elements.append(_build_footer_firma(inspector, fecha_emision, f"Cerro Navia, Santiago", estilos))
 
-    # Fecha y lugar de emisión
-    now = datetime.now()
-    elements.append(Paragraph(
-        f"Emitido en {ciudad}, el {now.strftime('%d de %B de %Y')} a las {now.strftime('%H:%M')} horas.",
-        estilos["FirmaTexto"]
-    ))
-    elements.append(Spacer(1, 5))
-    elements.append(Paragraph(
-        f"Por {establecimiento.get('inspector_general', 'Inspectoría General')}",
-        estilos["FirmaTexto"]
-    ))
-    elements.append(Spacer(1, 15))
+    # ---- BARRA DE CONTROL (opcional) ----
+    elements.append(Spacer(1, 20))
+    codigo = f"Código de Control: {estudiante.get('rut', '')[:4]}{datetime.now().strftime('%Y%m%d%H%M')}"
+    elements.append(HRFlowable(width="100%", thickness=0.5, color=COLOR_BORDER, spaceAfter=6))
+    elements.append(Paragraph(codigo, estilos["PiePaginaTexto"]))
 
-    # Línea de firma
-    elements.extend(_build_firma_inspector(inspector, estilos))
-
-    # Construir PDF
     doc.build(elements, onFirstPage=_build_pie_pagina, onLaterPages=_build_pie_pagina)
     buffer.seek(0)
     return buffer
 
 
+# ============================================================
+# 2. CERTIFICADO DE NOTAS
+# ============================================================
 def _build_tabla_notas(notas_por_asignatura):
-    """Construye la tabla de notas"""
+    """Construye la tabla de notas con estilo profesional"""
     encabezados_tabla = ["Asignatura", "N1", "N2", "N3", "N4", "N5", "N6", "Prom."]
     data_tabla = [encabezados_tabla]
     total_promedios = []
@@ -381,21 +603,28 @@ def _build_tabla_notas(notas_por_asignatura):
         prom_general = round(sum(total_promedios) / len(total_promedios), 1)
         data_tabla.append(["PROMEDIO GENERAL", "", "", "", "", "", "", str(prom_general)])
 
-    col_widths = [5.5 * cm, 1.5 * cm, 1.5 * cm, 1.5 * cm, 1.5 * cm, 1.5 * cm, 1.5 * cm, 2 * cm]
+    col_widths = [
+        5.5 * cm, 1.5 * cm, 1.5 * cm, 1.5 * cm,
+        1.5 * cm, 1.5 * cm, 1.5 * cm, 2 * cm,
+    ]
     tbl_notas = Table(data_tabla, colWidths=col_widths, repeatRows=1)
     tbl_notas.setStyle(TableStyle([
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
         ("FONTSIZE", (0, 0), (-1, -1), 9),
+        ("FONTSIZE", (0, 0), (-1, 0), 10),
         ("ALIGN", (1, 0), (-1, -1), "CENTER"),
         ("ALIGN", (0, 0), (0, -1), "LEFT"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("GRID", (0, 0), (-1, -1), 0.5, COLOR_BORDER),
-        ("BACKGROUND", (0, 0), (-1, 0), COLOR_LIGHT),
+        ("GRID", (0, 0), (-1, -2), 0.5, COLOR_BORDER),
+        ("LINEBELOW", (0, 0), (-1, 0), 1.5, COLOR_PRIMARY),
+        ("BACKGROUND", (0, 0), (-1, 0), COLOR_LIGHT_BG),
         ("BACKGROUND", (0, -1), (-1, -1), COLOR_PRIMARY),
         ("TEXTCOLOR", (0, -1), (-1, -1), white),
         ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
         ("TOPPADDING", (0, 0), (-1, -1), 6),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
     ]))
     return tbl_notas, total_promedios
 
@@ -403,7 +632,7 @@ def _build_tabla_notas(notas_por_asignatura):
 def generar_certificado_notas(estudiante, notas_por_asignatura, establecimiento, inspector, ano_escolar):
     """
     Genera PDF de Certificado de Notas
-    Usa texto configurable de configuracion_establecimiento si existe
+    Diseño profesional tipo carta con logo, highlight box, tabla y firma
     """
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -414,44 +643,25 @@ def generar_certificado_notas(estudiante, notas_por_asignatura, establecimiento,
     estilos = _get_estilos()
     elements = []
 
-    # Encabezado
-    elements.extend(_build_encabezado_colegio(establecimiento, estilos))
+    # ---- ENCABEZADO ----
+    elements.append(_build_encabezado_con_logo(establecimiento, estilos))
+    elements.append(_build_separador())
 
-    # Título
-    elements.append(Spacer(1, 10))
+    # ---- TÍTULO ----
     elements.append(Paragraph("CERTIFICADO DE NOTAS", estilos["TituloDocumento"]))
-    elements.append(Paragraph(f"Año Escolar {ano_escolar}", estilos["SubtituloDocumento"]))
-    elements.append(Spacer(1, 10))
 
-    # Línea divisoria
-    elements.append(HRFlowable(width="60%", thickness=0.5, color=COLOR_BORDER, spaceAfter=15))
+    # ---- DATOS DEL ESTUDIANTE ----
+    box, nombre_completo, curso_nombre = _build_datos_estudiante_highlight(estudiante, estilos)
+    elements.append(box)
+    elements.append(Spacer(1, 8))
 
-    # Datos del estudiante
-    tbl, nombre_completo, curso_nombre = _build_datos_estudiante(estudiante, estilos)
-    datos_extra = [["AÑO ESCOLAR:", str(ano_escolar)]]
-    tbl_extra = Table(datos_extra, colWidths=[5 * cm, 10 * cm])
-    tbl_extra.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-        ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 16),
-        ("ALIGN", (0, 0), (0, -1), "RIGHT"),
-        ("ALIGN", (1, 0), (1, -1), "LEFT"),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-        ("LEFTPADDING", (0, 0), (-1, -1), 8),
-    ]))
+    # ---- AÑO ESCOLAR ----
+    elements.append(_build_tabla_datos([["Año Escolar:", str(ano_escolar)]], estilos))
+    elements.append(Spacer(1, 16))
 
-    elements.append(tbl)
-    elements.append(Spacer(1, 5))
-    elements.append(tbl_extra)
-    elements.append(Spacer(1, 20))
-
-    # --- Texto configurable ---
+    # ---- CUERPO (configurable) ----
     ciudad = establecimiento.get("comuna", "Santiago")
-    now = datetime.now()
-    fecha_emision = now.strftime("%d de %B de %Y")
+    fecha_emision = _build_fecha_emision()
 
     texto_fijo = (
         f"El presente certificado de notas corresponde al rendimiento académico del/la alumno/a "
@@ -475,46 +685,36 @@ def generar_certificado_notas(estudiante, notas_por_asignatura, establecimiento,
         establecimiento, "texto_certificado_notas", variables, texto_fijo
     )
     elements.append(Paragraph(texto_final, estilos["CuerpoDocumento"]))
-    elements.append(Spacer(1, 15))
+    elements.append(Spacer(1, 16))
 
-    # --- Tabla de notas ---
+    # ---- TABLA DE NOTAS ----
     tbl_notas, _ = _build_tabla_notas(notas_por_asignatura)
     elements.append(tbl_notas)
-    elements.append(Spacer(1, 25))
 
-    # Nota al pie
+    # ---- PIE DE TABLA ----
+    elements.append(Spacer(1, 8))
     elements.append(Paragraph(
-        "Este documento es emitido electrónicamente y puede ser validado en cualquier momento. "
-        "No reemplaza el informe de notas oficial firmado por el Director.",
-        estilos["PiePagina"]
+        "Documento emitido electrónicamente. No reemplaza el informe oficial firmado.",
+        estilos["PiePaginaTexto"],
     ))
-    elements.append(Spacer(1, 15))
 
-    # Fecha
-    elements.append(Paragraph(
-        f"Emitido en {ciudad}, el {now.strftime('%d de %B de %Y')} a las {now.strftime('%H:%M')} horas.",
-        estilos["FirmaTexto"]
-    ))
-    elements.append(Spacer(1, 5))
-    elements.append(Paragraph(
-        f"Por {establecimiento.get('inspector_general', 'Inspectoría General')}",
-        estilos["FirmaTexto"]
-    ))
-    elements.append(Spacer(1, 15))
-
-    # Firma
-    elements.extend(_build_firma_inspector(inspector, estilos))
+    # ---- FIRMA ----
+    elements.append(Spacer(1, 8))
+    elements.append(_build_footer_firma(inspector, fecha_emision, f"Cerro Navia, Santiago", estilos))
 
     doc.build(elements, onFirstPage=_build_pie_pagina, onLaterPages=_build_pie_pagina)
     buffer.seek(0)
     return buffer
 
 
+# ============================================================
+# 3. AUTORIZACIÓN DE RETIRO
+# ============================================================
 def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspector):
     """
     Genera PDF de Autorización de Retiro de Alumno
-    Usa texto configurable de configuracion_establecimiento si existe
-    Incluye TODOS los datos del formulario (apoderado, motivo, fecha, hora, observacion)
+    Diseño profesional tipo carta con logo, highlight box,
+    cuerpo configurable, y firmas (inspector + apoderado)
     """
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -525,59 +725,50 @@ def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspec
     estilos = _get_estilos()
     elements = []
 
-    # Encabezado
-    elements.extend(_build_encabezado_colegio(establecimiento, estilos))
+    # ---- ENCABEZADO ----
+    elements.append(_build_encabezado_con_logo(establecimiento, estilos))
+    elements.append(_build_separador())
 
-    # Título
-    elements.append(Spacer(1, 10))
+    # ---- TÍTULO ----
     elements.append(Paragraph("AUTORIZACIÓN DE RETIRO DE ALUMNO", estilos["TituloDocumento"]))
-    elements.append(Spacer(1, 10))
 
-    elements.append(HRFlowable(width="60%", thickness=0.5, color=COLOR_BORDER, spaceAfter=15))
-
-    # Datos
+    # ---- DATOS DEL ESTUDIANTE ----
     nombre_completo = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}"
     curso_nombre = estudiante.get("curso_nombre", "")
     observacion = retiro_data.get("observacion", "")
 
-    datos = [
-        ["ESTUDIANTE:", nombre_completo],
-        ["RUT ESTUDIANTE:", estudiante.get("rut", "")],
-        ["CURSO:", curso_nombre],
-        ["APODERADO QUE RETIRA:", retiro_data.get("apoderado_autorizante", "")],
-        ["MOTIVO DEL RETIRO:", retiro_data.get("motivo", "")],
-        ["FECHA DEL RETIRO:", retiro_data.get("fecha", "")],
-        ["HORA DE SALIDA:", retiro_data.get("hora_salida", "")],
+    datos_estudiante = [
+        ["Nombre del Alumno(a):", nombre_completo],
+        ["RUT Estudiante:", estudiante.get("rut", "")],
+        ["Curso:", curso_nombre],
     ]
+    elements.append(_build_highlight_box(datos_estudiante, estilos))
+    elements.append(Spacer(1, 8))
 
+    # ---- DATOS DEL RETIRO ----
+    datos_retiro = [
+        ["Apoderado que retira:", retiro_data.get("apoderado_autorizante", "")],
+        ["Motivo del Retiro:", retiro_data.get("motivo", "")],
+        ["Fecha del Retiro:", retiro_data.get("fecha", "")],
+        ["Hora de Salida:", retiro_data.get("hora_salida", "")],
+    ]
     if observacion:
-        datos.append(["OBSERVACIÓN:", observacion])
+        datos_retiro.append(["Observación:", observacion])
 
-    tbl = Table(datos, colWidths=[5 * cm, 10 * cm])
-    tbl.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
-        ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 16),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-    ]))
-    elements.append(tbl)
-    elements.append(Spacer(1, 15))
+    elements.append(_build_tabla_datos(datos_retiro, estilos))
+    elements.append(Spacer(1, 16))
 
-    # --- Texto configurable ---
+    # ---- CUERPO (configurable) ----
     ciudad = establecimiento.get("comuna", "Santiago")
-    now = datetime.now()
-    fecha_emision = now.strftime("%d de %B de %Y")
+    fecha_emision = _build_fecha_emision()
     apoderado = retiro_data.get("apoderado_autorizante", "")
 
     texto_fijo = (
         f"Por medio del presente documento, se autoriza el retiro del/la alumno/a "
         f"<b>{nombre_completo}</b>, RUT {estudiante.get('rut', '')}, del curso {curso_nombre}, "
         f"del establecimiento educacional, por el motivo señalado anteriormente. "
-        f"El/La apoderado/a {apoderado} se hace responsable "
-        "del alumno/a desde el momento de su retiro."
+        f"El/La apoderado/a <b>{apoderado}</b> se hace responsable "
+        f"del/la alumno/a desde el momento de su retiro."
     )
 
     variables = {
@@ -599,48 +790,27 @@ def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspec
         establecimiento, "texto_autorizacion_retiro", variables, texto_fijo
     )
     elements.append(Paragraph(texto_final, estilos["CuerpoDocumento"]))
-    elements.append(Spacer(1, 5))
 
-    # Hora de emisión
+    # ---- FIRMAS (Inspector + Apoderado) ----
+    elements.append(Spacer(1, 6))
     elements.append(Paragraph(
-        f"Emitido en {ciudad}, el {now.strftime('%d de %B de %Y')} a las {now.strftime('%H:%M')} horas.",
-        estilos["FirmaTexto"]
+        f"Emitido en Cerro Navia, Santiago, el {fecha_emision}.",
+        estilos["FooterFecha"],
     ))
-    elements.append(Spacer(1, 20))
-
-    # Firmas - tabla de firmas lado a lado
-    firmas_data = [
-        ["", ""],
-        ["_________________________", "_________________________"],
-        [f"{inspector.get('nombre', '')} {inspector.get('apellido', '')}", apoderado],
-        ["Inspector(a) General", "Apoderado(a)"],
-    ]
-
-    tbl_firmas = Table(firmas_data, colWidths=[7.5 * cm, 7.5 * cm])
-    tbl_firmas.setStyle(TableStyle([
-        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-        ("LEFTPADDING", (0, 0), (-1, -1), 8),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ("FONTNAME", (0, 2), (0, 2), "Helvetica-Bold"),
-        ("FONTNAME", (1, 2), (1, 2), "Helvetica-Bold"),
-        ("FONTNAME", (0, 3), (1, 3), "Helvetica"),
-        ("FONTSIZE", (0, 3), (1, 3), 8),
-        ("TEXTCOLOR", (0, 3), (1, 3), grey),
-    ]))
-    elements.append(tbl_firmas)
+    elements.append(_build_dual_signature(inspector, apoderado, estilos))
 
     doc.build(elements, onFirstPage=_build_pie_pagina, onLaterPages=_build_pie_pagina)
     buffer.seek(0)
     return buffer
 
 
+# ============================================================
+# 4. DECLARACIÓN DE ACCIDENTE ESCOLAR
+# ============================================================
 def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, inspector):
     """
-    Genera PDF de Declaración de Accidente Escolar (Ley 16.744)
-    Usa texto configurable de configuracion_establecimiento si existe
-    Incluye TODOS los datos del formulario (fecha, hora, lugar, descripcion, lesion, testigos, derivacion)
+    Genera PDF de Declaración de Accidente Escolar
+    Diseño profesional tipo carta con logo, highlight box, datos del accidente y firma
     """
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -651,53 +821,39 @@ def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, i
     estilos = _get_estilos()
     elements = []
 
-    # Encabezado
-    elements.extend(_build_encabezado_colegio(establecimiento, estilos))
+    # ---- ENCABEZADO ----
+    elements.append(_build_encabezado_con_logo(establecimiento, estilos))
+    elements.append(_build_separador())
 
-    # Título
-    elements.append(Spacer(1, 10))
+    # ---- TÍTULO ----
     elements.append(Paragraph("DECLARACIÓN DE ACCIDENTE ESCOLAR", estilos["TituloDocumento"]))
     elements.append(Paragraph("Ley 16.744 - Seguro Escolar", estilos["SubtituloDocumento"]))
-    elements.append(Spacer(1, 10))
 
-    elements.append(HRFlowable(width="60%", thickness=0.5, color=COLOR_BORDER, spaceAfter=15))
-
-    # Datos del estudiante
+    # ---- DATOS DEL ESTUDIANTE ----
     nombre_completo = f"{estudiante.get('nombre', '')} {estudiante.get('apellido', '')}"
     curso_nombre = estudiante.get("curso_nombre", "")
     fecha_nac = estudiante.get("fecha_nacimiento", "")
 
-    datos_estudiante = [
-        ["DATOS DEL ACCIDENTADO", ""],
-        ["Nombre:", nombre_completo],
-        ["RUT:", estudiante.get("rut", "")],
+    datos_est = [
+        ["Nombre del Alumno(a):", nombre_completo],
+        ["RUT Estudiante:", estudiante.get("rut", "")],
         ["Curso:", curso_nombre],
-        ["Fecha Nacimiento:", str(fecha_nac) if fecha_nac else ""],
     ]
+    if fecha_nac:
+        datos_est.append(["Fecha de Nacimiento:", str(fecha_nac)])
 
-    tbl_est = Table(datos_estudiante, colWidths=[4 * cm, 11 * cm])
-    tbl_est.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"),
-        ("FONTNAME", (1, 1), (1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 16),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-        ("BACKGROUND", (0, 0), (-1, 0), COLOR_LIGHT),
-    ]))
-    elements.append(tbl_est)
-    elements.append(Spacer(1, 15))
+    elements.append(_build_highlight_box(datos_est, estilos))
+    elements.append(Spacer(1, 8))
 
-    # --- Texto configurable ---
+    # ---- CUERPO (configurable) ----
     ciudad = establecimiento.get("comuna", "Santiago")
-    now = datetime.now()
-    fecha_emision = now.strftime("%d de %B de %Y")
+    fecha_emision = _build_fecha_emision()
 
     texto_fijo = (
         f"Declaración de Accidente Escolar según lo dispuesto en la Ley 16.744 sobre Seguro Escolar. "
-        f"Se deja constancia que el/la alumno/a <b>{nombre_completo}</b>, RUT {estudiante.get('rut', '')}, "
-        f"del curso {curso_nombre}, sufrió un accidente en las dependencias del establecimiento "
+        f"Se deja constancia que el/la alumno/a <b>{nombre_completo}</b>, "
+        f"RUT {estudiante.get('rut', '')}, del curso {curso_nombre}, "
+        f"sufrió un accidente en las dependencias del establecimiento "
         f"o en actividades escolares, cuyos detalles se señalan a continuación."
     )
 
@@ -722,13 +878,12 @@ def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, i
         establecimiento, "texto_declaracion_accidente", variables, texto_fijo
     )
     elements.append(Paragraph(texto_final, estilos["CuerpoDocumento"]))
-    elements.append(Spacer(1, 15))
+    elements.append(Spacer(1, 16))
 
-    # Datos del accidente (tabla detallada)
+    # ---- DATOS DEL ACCIDENTE ----
     datos_accidente = [
-        ["DATOS DEL ACCIDENTE", ""],
-        ["Fecha:", accidente_data.get("fecha_accidente", "")],
-        ["Hora:", accidente_data.get("hora_accidente", "")],
+        ["Fecha del Accidente:", accidente_data.get("fecha_accidente", "")],
+        ["Hora del Accidente:", accidente_data.get("hora_accidente", "")],
         ["Lugar:", accidente_data.get("lugar", "")],
         ["Descripción:", accidente_data.get("descripcion", "")],
         ["Tipo de Lesión:", accidente_data.get("tipo_lesion", "")],
@@ -736,34 +891,11 @@ def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, i
         ["Derivación:", accidente_data.get("derivacion", "No requiere")],
     ]
 
-    tbl_acc = Table(datos_accidente, colWidths=[4 * cm, 11 * cm])
-    tbl_acc.setStyle(TableStyle([
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTNAME", (0, 1), (0, -1), "Helvetica-Bold"),
-        ("FONTNAME", (1, 1), (1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 10),
-        ("LEADING", (0, 0), (-1, -1), 16),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-        ("BACKGROUND", (0, 0), (-1, 0), COLOR_LIGHT),
-    ]))
-    elements.append(tbl_acc)
-    elements.append(Spacer(1, 20))
+    elements.append(_build_tabla_datos(datos_accidente, estilos))
 
-    # Fecha y hora de emisión
-    elements.append(Paragraph(
-        f"Emitido en {ciudad}, el {now.strftime('%d de %B de %Y')} a las {now.strftime('%H:%M')} horas.",
-        estilos["FirmaTexto"]
-    ))
-    elements.append(Spacer(1, 5))
-    elements.append(Paragraph(
-        f"Por {establecimiento.get('inspector_general', 'Inspectoría General')}",
-        estilos["FirmaTexto"]
-    ))
-    elements.append(Spacer(1, 15))
-
-    # Firma
-    elements.extend(_build_firma_inspector(inspector, estilos))
+    # ---- FIRMA ----
+    elements.append(Spacer(1, 10))
+    elements.append(_build_footer_firma(inspector, fecha_emision, f"Cerro Navia, Santiago", estilos))
 
     doc.build(elements, onFirstPage=_build_pie_pagina, onLaterPages=_build_pie_pagina)
     buffer.seek(0)

@@ -54,7 +54,7 @@ class Command(BaseCommand):
             "email": "contacto@colegioamanecer.cl",
             "director": "María González López",
             "inspector_general": "Jefatura de Inspectoría General",
-            "logo_url": "",
+            "logo_url": "https://res.cloudinary.com/dyslpppz8/image/upload/v1780066980/Gemini_Generated_Image_8lrou8lrou8lrou8_sebabv.png",
             "codigo_sostenedor": "12345",
             "dependencia": "Particular Subvencionado",
             "region": "Región Metropolitana",
