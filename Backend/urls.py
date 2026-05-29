@@ -3,9 +3,9 @@ URL Configuration for Backend API
 Simple and clean endpoints - no admin, no docs complications
 """
 
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.http import JsonResponse
-from core import views
+from core import views, inspector_views
 
 
 def api_root(request):
@@ -137,4 +137,28 @@ urlpatterns = [
         views.cursos_con_asignaciones,
         name="cursos-con-asignaciones",
     ),
+    # ============ MÓDULO INSPECTOR GENERAL ============
+    # IMPORTANTE: Rutas específicas SIEMPRE antes que rutas con <str:pk>
+    # para evitar que Django capture nombres como "certificado-alumno-regular" como un pk.
+    path("dashboard/inspector", inspector_views.dashboard_inspector, name="dashboard-inspector"),
+    # Documentos - rutas específicas primero
+    path("documentos/", inspector_views.DocumentoGeneradoList.as_view(), name="documento-list"),
+    path("documentos/certificado-alumno-regular/", inspector_views.generar_certificado_alumno_regular, name="certificado-alumno-regular"),
+    path("documentos/certificado-notas/", inspector_views.generar_certificado_notas, name="certificado-notas"),
+    path("documentos/autorizacion-retiro/", inspector_views.generar_autorizacion_retiro, name="autorizacion-retiro"),
+    path("documentos/accidente-escolar/", inspector_views.generar_declaracion_accidente, name="accidente-escolar"),
+    path("documentos/<str:pk>/", inspector_views.DocumentoGeneradoDetail.as_view(), name="documento-detail"),
+    # Retiros
+    path("retiros/", inspector_views.RetiroList.as_view(), name="retiro-list"),
+    path("retiros/<str:pk>/", inspector_views.RetiroDetail.as_view(), name="retiro-detail"),
+    # Accidentes
+    path("accidentes/", inspector_views.AccidenteList.as_view(), name="accidente-list"),
+    path("accidentes/<str:pk>/", inspector_views.AccidenteDetail.as_view(), name="accidente-detail"),
+    # Libro Inspectoría
+    path("libro-inspectoria/", inspector_views.LibroInspectoriaList.as_view(), name="libro-inspectoria-list"),
+    path("libro-inspectoria/<str:pk>/", inspector_views.LibroInspectoriaDetail.as_view(), name="libro-inspectoria-detail"),
+    # Asistencia, inasistencias, configuración
+    path("asistencia-general/", inspector_views.asistencia_general, name="asistencia-general"),
+    path("inasistencias-criticas/", inspector_views.inasistencias_criticas, name="inasistencias-criticas"),
+    path("configuracion-establecimiento/", inspector_views.ConfiguracionEstablecimientoView.as_view(), name="configuracion-establecimiento"),
 ]
