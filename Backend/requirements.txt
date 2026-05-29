@@ -21,3 +21,10 @@ gunicorn>=21.2.0
 # Generación de PDFs
 reportlab>=4.0
 Pillow>=10.0
+
+# Testing
+pytest>=8.0
+pytest-django>=4.0
+
+# Code quality (opcional - solo para desarrollo/CI)
+ruff>=0.5

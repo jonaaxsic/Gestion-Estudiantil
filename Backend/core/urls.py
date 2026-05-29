@@ -104,12 +104,8 @@ urlpatterns = [
         inspector_views.DocumentoGeneradoList.as_view(),
         name="documento-list",
     ),
-    path(
-        "documentos/<str:pk>/",
-        inspector_views.DocumentoGeneradoDetail.as_view(),
-        name="documento-detail",
-    ),
-    # Certificados PDF
+    # IMPORTANTE: Rutas específicas SIEMPRE antes que <str:pk>
+    # para evitar que Django capture "certificado-alumno-regular" como un pk
     path(
         "documentos/certificado-alumno-regular/",
         inspector_views.generar_certificado_alumno_regular,
@@ -129,6 +125,11 @@ urlpatterns = [
         "documentos/accidente-escolar/",
         inspector_views.generar_declaracion_accidente,
         name="accidente-escolar",
+    ),
+    path(
+        "documentos/<str:pk>/",
+        inspector_views.DocumentoGeneradoDetail.as_view(),
+        name="documento-detail",
     ),
     # Retiros
     path(

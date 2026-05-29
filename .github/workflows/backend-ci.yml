@@ -1,0 +1,45 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Backend/**'
+  pull_request:
+    paths:
+      - 'Backend/**'
+
+jobs:
+  test:
+    name: Run Backend Tests + Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          cd Backend
+          pip install -r requirements.txt
+
+      - name: Run Lint (ruff)
+        run: |
+          cd Backend
+          pip install ruff
+          ruff check core/ --no-cache --output-format=github
+
+      - name: Run Tests
+        run: |
+          cd Backend
+          # DJANGO_SETTINGS_MODULE se configura en pyproject.toml
+          pytest -v --tb=short 2>&1
+        env:
+          DJANGO_SETTINGS_MODULE: settings
+          PYTHONPATH: ${{ github.workspace }}/Backend
