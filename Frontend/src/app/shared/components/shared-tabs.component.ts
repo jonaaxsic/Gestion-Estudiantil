@@ -132,18 +132,26 @@ export interface TabItem {
         }
       }
 
-      @media (max-width: 480px) {
+      @media (max-width: 499px) {
         .ge-tabs-wrapper {
           padding: 12px 0 0;
         }
 
         .ge-tabs {
-          padding: 4px 28px;
+          padding: 4px 20px;
         }
 
         .ge-tab {
-          padding: 10px 12px;
-          font-size: 0.85rem;
+          padding: 10px 14px;
+        }
+
+        /* Opción A: ocultar texto del tab, solo íconos visibles */
+        .ge-tab-label {
+          display: none;
+        }
+
+        .ge-tab-icon {
+          font-size: 22px;
         }
       }
     `,
