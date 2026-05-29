@@ -56,6 +56,11 @@ export class DashboardInspectorPage implements OnInit {
   pdfPreviewData = signal<string>('');
   lastGeneratedDocType = signal<string>('');
 
+  // Modal student search (shared: only one modal at a time)
+  showModalStudentSearch = signal(false);
+  modalSearchQuery = signal('');
+  modalEstudiantes = signal<Estudiante[]>([]);
+
   // Confirm modal
   showConfirmModal = signal(false);
   confirmTitle = signal('');
@@ -189,7 +194,47 @@ export class DashboardInspectorPage implements OnInit {
   seleccionarEstudiante(est: Estudiante): void {
     this.selectedEstudiante.set(est);
     this.showBuscarEstudiante.set(false);
-    // Cargar curso del estudiante
+    this._cargarCursoEstudiante(est);
+  }
+
+  /** Busca estudiante dentro de un modal (retiro, accidente, libro) */
+  buscarEstudianteModal(rutONombre: string): void {
+    if (!rutONombre.trim()) {
+      this.modalEstudiantes.set([]);
+      return;
+    }
+    this.modalSearchQuery.set(rutONombre);
+    this.api.getEstudiantes().subscribe(data => {
+      const query = rutONombre.toLowerCase();
+      const results = data.filter(e =>
+        e.rut?.toLowerCase().includes(query) ||
+        `${e.nombre} ${e.apellido}`.toLowerCase().includes(query) ||
+        e.nombre?.toLowerCase().includes(query) ||
+        e.apellido?.toLowerCase().includes(query)
+      );
+      this.modalEstudiantes.set(results);
+      this.showModalStudentSearch.set(results.length > 0);
+    });
+  }
+
+  /** Selecciona un estudiante desde el buscador del modal */
+  seleccionarEstudianteModal(est: Estudiante): void {
+    this.selectedEstudiante.set(est);
+    this.showModalStudentSearch.set(false);
+    this.modalEstudiantes.set([]);
+    this.modalSearchQuery.set('');
+    this._cargarCursoEstudiante(est);
+  }
+
+  /** Cierra el buscador del modal */
+  cerrarBusquedaModal(): void {
+    this.showModalStudentSearch.set(false);
+    this.modalEstudiantes.set([]);
+    this.modalSearchQuery.set('');
+  }
+
+  /** Carga el nombre del curso del estudiante */
+  private _cargarCursoEstudiante(est: Estudiante): void {
     if (est.curso_id) {
       this.api.getCurso(est.curso_id).subscribe(curso => {
         const currentEst = this.selectedEstudiante();
@@ -263,6 +308,7 @@ export class DashboardInspectorPage implements OnInit {
   }
 
   abrirRetiroModal(): void {
+    this.cerrarBusquedaModal();
     const est = this.selectedEstudiante();
     this.retiroForm = {
       estudiante_id: est?.id || '',
@@ -277,7 +323,12 @@ export class DashboardInspectorPage implements OnInit {
 
   guardarRetiro(): void {
     const userId = this.auth.user()?.id;
+    const est = this.selectedEstudiante();
     if (!userId) return;
+    if (!est?.id) {
+      alert('Debe seleccionar un estudiante');
+      return;
+    }
     if (!this.retiroForm.apoderado_autorizante || !this.retiroForm.motivo || !this.retiroForm.hora_salida) {
       alert('Complete todos los campos requeridos');
       return;
@@ -285,6 +336,7 @@ export class DashboardInspectorPage implements OnInit {
 
     this.saving.set(true);
     this.lastGeneratedDocType.set('autorizacion_retiro');
+    this.retiroForm.estudiante_id = est.id;
     this.api.generarAutorizacionRetiro({
       ...this.retiroForm,
       inspector_id: userId,
@@ -327,6 +379,7 @@ export class DashboardInspectorPage implements OnInit {
   }
 
   abrirAccidenteModal(): void {
+    this.cerrarBusquedaModal();
     const est = this.selectedEstudiante();
     this.accidenteForm = {
       estudiante_id: est?.id || '',
@@ -343,7 +396,12 @@ export class DashboardInspectorPage implements OnInit {
 
   guardarAccidente(): void {
     const userId = this.auth.user()?.id;
+    const est = this.selectedEstudiante();
     if (!userId) return;
+    if (!est?.id) {
+      alert('Debe seleccionar un estudiante');
+      return;
+    }
     if (!this.accidenteForm.descripcion) {
       alert('La descripción del accidente es requerida');
       return;
@@ -351,6 +409,7 @@ export class DashboardInspectorPage implements OnInit {
 
     this.saving.set(true);
     this.lastGeneratedDocType.set('declaracion_accidente');
+    this.accidenteForm.estudiante_id = est.id;
     this.api.generarDeclaracionAccidente({
       ...this.accidenteForm,
       inspector_id: userId,
@@ -440,9 +499,11 @@ export class DashboardInspectorPage implements OnInit {
   }
 
   abrirLibroModal(): void {
+    this.cerrarBusquedaModal();
+    const est = this.selectedEstudiante();
     this.libroForm = {
       tipo: 'otro',
-      estudiante_id: '',
+      estudiante_id: est?.id || '',
       curso_id: '',
       descripcion: '',
       fecha: new Date().toISOString().split('T')[0],
@@ -452,13 +513,19 @@ export class DashboardInspectorPage implements OnInit {
 
   guardarLibro(): void {
     const userId = this.auth.user()?.id;
+    const est = this.selectedEstudiante();
     if (!userId) return;
-    if (!this.libroForm.descripcion || !this.libroForm.curso_id) {
-      alert('Complete todos los campos requeridos');
+    if (!est?.id) {
+      alert('Debe seleccionar un estudiante');
+      return;
+    }
+    if (!this.libroForm.descripcion) {
+      alert('La descripción del registro es requerida');
       return;
     }
 
     this.saving.set(true);
+    this.libroForm.estudiante_id = est.id;
     this.api.createLibroInspectoria({
       ...this.libroForm,
       inspector_id: userId,

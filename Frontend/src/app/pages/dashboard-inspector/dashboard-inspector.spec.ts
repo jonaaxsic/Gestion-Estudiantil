@@ -237,8 +237,6 @@ describe('DashboardInspectorPage', () => {
       const component = fixture.componentInstance;
       component.buscarEstudiante('lopez');
       expect(component.estudiantes().length).toBe(1);
-      expect(component.estudiantes()[0].appellido || component.estudiantes()[0].apellido).toBe('Lopez');
-      // Fix: check apellido directly
       expect(component.estudiantes()[0].apellido).toBe('Lopez');
     });
 
