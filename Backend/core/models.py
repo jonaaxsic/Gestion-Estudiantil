@@ -221,6 +221,11 @@ class Estudiante(BaseModel):
                 "apoderado_id": self.apoderado_id,
             }
         )
+        # Incluir atributos dinámicos (ej: curso_nombre seteado en vistas)
+        for key in ("curso_nombre",):
+            value = getattr(self, key, None)
+            if value is not None:
+                data[key] = value
         return data
 
 
