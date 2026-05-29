@@ -24,6 +24,19 @@ ESTABLECIMIENTO = {
     "director": "María González",
     "inspector_general": "Inspector General",
     "comuna": "Santiago",
+    "texto_certificado_regular": "",
+    "texto_certificado_notas": "",
+    "texto_autorizacion_retiro": "",
+    "texto_declaracion_accidente": "",
+}
+
+ESTABLECIMIENTO_CON_TEXTO = {
+    **ESTABLECIMIENTO,
+    "texto_certificado_regular": (
+        "CERTIFICO que el/la alumno/a {nombre_alumno}, RUT {rut_alumno}, "
+        "del curso {curso}, es alumno/a regular de este establecimiento "
+        "durante el año lectivo {anio_lectivo}."
+    ),
 }
 
 INSPECTOR = {
@@ -37,6 +50,7 @@ RETIRO_DATA = {
     "motivo": "Cita médica",
     "fecha": "2026-05-29",
     "hora_salida": "11:30",
+    "observacion": "Regresará después del almuerzo",
 }
 
 ACCIDENTE_DATA = {
@@ -123,6 +137,26 @@ class TestPDFGeneracion:
         data_sin_derivacion["derivacion"] = ""
         buffer = self.gen_accidente(
             ESTUDIANTE, data_sin_derivacion, ESTABLECIMIENTO, INSPECTOR
+        )
+        assert isinstance(buffer, BytesIO)
+        assert buffer.getvalue().startswith(b"%PDF")
+
+    def test_certificado_regular_con_texto_configurable(self):
+        """El certificado debe usar el texto configurable cuando existe"""
+        buffer = self.gen_cert_regular(
+            ESTUDIANTE, ESTABLECIMIENTO_CON_TEXTO, INSPECTOR
+        )
+        assert isinstance(buffer, BytesIO)
+        contenido = buffer.getvalue()
+        assert contenido.startswith(b"%PDF"), "No comienza con firma PDF"
+        assert len(contenido) > 1000, "PDF muy pequeno"
+
+    def test_certificado_regular_sin_texto_configurable_usar_fallback(self):
+        """Sin texto configurable, debe usar el texto fijo por defecto"""
+        establecimiento_sin_texto = dict(ESTABLECIMIENTO)
+        establecimiento_sin_texto.pop("texto_certificado_regular", None)
+        buffer = self.gen_cert_regular(
+            ESTUDIANTE, establecimiento_sin_texto, INSPECTOR
         )
         assert isinstance(buffer, BytesIO)
         assert buffer.getvalue().startswith(b"%PDF")

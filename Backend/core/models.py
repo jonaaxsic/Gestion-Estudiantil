@@ -765,6 +765,11 @@ class ConfiguracionEstablecimiento(BaseModel):
         self.dependencia = None  # 'Municipal', 'Particular', etc.
         self.region = None
         self.comuna = None
+        # Textos personalizables para cada tipo de certificado
+        self.texto_certificado_regular = None
+        self.texto_certificado_notas = None
+        self.texto_autorizacion_retiro = None
+        self.texto_declaracion_accidente = None
         super().__init__(data)
 
     def _load_from_dict(self, data):
@@ -781,6 +786,10 @@ class ConfiguracionEstablecimiento(BaseModel):
         self.dependencia = data.get("dependencia")
         self.region = data.get("region")
         self.comuna = data.get("comuna")
+        self.texto_certificado_regular = data.get("texto_certificado_regular")
+        self.texto_certificado_notas = data.get("texto_certificado_notas")
+        self.texto_autorizacion_retiro = data.get("texto_autorizacion_retiro")
+        self.texto_declaracion_accidente = data.get("texto_declaracion_accidente")
 
     def to_dict(self):
         data = super().to_dict()
@@ -798,6 +807,10 @@ class ConfiguracionEstablecimiento(BaseModel):
                 "dependencia": self.dependencia,
                 "region": self.region,
                 "comuna": self.comuna,
+                "texto_certificado_regular": self.texto_certificado_regular,
+                "texto_certificado_notas": self.texto_certificado_notas,
+                "texto_autorizacion_retiro": self.texto_autorizacion_retiro,
+                "texto_declaracion_accidente": self.texto_declaracion_accidente,
             }
         )
         return data

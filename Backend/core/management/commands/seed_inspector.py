@@ -53,12 +53,16 @@ class Command(BaseCommand):
             "telefono": "+56 2 2123 4567",
             "email": "contacto@colegioamanecer.cl",
             "director": "María González López",
-            "inspector_general": "Inspector General",
+            "inspector_general": "Jefatura de Inspectoría General",
             "logo_url": "",
             "codigo_sostenedor": "12345",
             "dependencia": "Particular Subvencionado",
             "region": "Región Metropolitana",
             "comuna": "Santiago",
+            "texto_certificado_regular": "El Director del establecimiento educacional {nombre_colegio}, RUT {rut_colegio}, debidamente facultado por la legislación educacional vigente, CERTIFICA que el/la alumno/a {nombre_alumno}, RUT {rut_alumno}, se encuentra matriculado/a y cursando regularmente {curso} en este establecimiento durante el año lectivo {anio_lectivo}. Se extiende el presente certificado para los fines legales que el/la apoderado/a estime conveniente.",
+            "texto_certificado_notas": "El presente certificado de notas corresponde al rendimiento académico del/la alumno/a {nombre_alumno}, RUT {rut_alumno}, durante el año escolar {anio_escolar} en el curso {curso}. Las calificaciones aquí detalladas son las registradas oficialmente en el sistema de gestión del establecimiento.",
+            "texto_autorizacion_retiro": "Por medio del presente documento, se autoriza el retiro del/la alumno/a {nombre_alumno}, RUT {rut_alumno}, del curso {curso}, del establecimiento educacional, por el motivo señalado anteriormente. El/La apoderado/a {apoderado} se hace responsable del alumno/a desde el momento de su retiro.",
+            "texto_declaracion_accidente": "Declaración de Accidente Escolar según lo dispuesto en la Ley 16.744 sobre Seguro Escolar. Se deja constancia que el/la alumno/a {nombre_alumno}, RUT {rut_alumno}, del curso {curso}, sufrió un accidente en las dependencias del establecimiento o en actividades escolares, cuyos detalles se señalan a continuación.",
         })
         config.save()
         self.stdout.write(self.style.SUCCESS(f"  ✅ ConfiguracionEstablecimiento creada (ID: {config._id})"))

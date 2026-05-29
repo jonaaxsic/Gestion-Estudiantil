@@ -223,6 +223,11 @@ export interface ConfiguracionEstablecimiento {
   dependencia?: string;
   region?: string;
   comuna?: string;
+  // Textos personalizables para cada tipo de certificado
+  texto_certificado_regular?: string;
+  texto_certificado_notas?: string;
+  texto_autorizacion_retiro?: string;
+  texto_declaracion_accidente?: string;
   created_at?: string;
   updated_at?: string;
 }

@@ -654,6 +654,10 @@ class ConfiguracionEstablecimientoView(APIView, MongoObjectIdMixin):
             "dependencia": "",
             "region": "",
             "comuna": "",
+            "texto_certificado_regular": "",
+            "texto_certificado_notas": "",
+            "texto_autorizacion_retiro": "",
+            "texto_declaracion_accidente": "",
         })
 
     def post(self, request):
@@ -760,6 +764,10 @@ def _get_establecimiento_config():
         "dependencia": "",
         "region": "",
         "comuna": "Santiago",
+        "texto_certificado_regular": "",
+        "texto_certificado_notas": "",
+        "texto_autorizacion_retiro": "",
+        "texto_declaracion_accidente": "",
     }
 
 

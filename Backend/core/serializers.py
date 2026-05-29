@@ -525,6 +525,10 @@ class ConfiguracionEstablecimientoSerializer(serializers.Serializer):
     dependencia = serializers.CharField(required=False, allow_null=True)
     region = serializers.CharField(required=False, allow_null=True)
     comuna = serializers.CharField(required=False, allow_null=True)
+    texto_certificado_regular = serializers.CharField(required=False, allow_null=True)
+    texto_certificado_notas = serializers.CharField(required=False, allow_null=True)
+    texto_autorizacion_retiro = serializers.CharField(required=False, allow_null=True)
+    texto_declaracion_accidente = serializers.CharField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
 
