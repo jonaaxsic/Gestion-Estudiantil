@@ -1,5 +1,5 @@
-// URL del backend en Render
+// URL del backend en Vercel
 export const environment = {
   production: true,
-  apiUrl: 'https://gestion-estuduantil.onrender.com'
+  apiUrl: 'https://gestion-estudiantil-two.vercel.app'
 };
