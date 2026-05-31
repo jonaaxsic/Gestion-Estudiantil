@@ -489,8 +489,8 @@ class LibroInspectoriaSerializer(serializers.Serializer):
 
     id = serializers.CharField(source="_id", read_only=True)
     tipo = serializers.CharField(required=True)
-    estudiante_id = serializers.CharField(required=False, allow_null=True)
-    curso_id = serializers.CharField(required=True)
+    estudiante_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    curso_id = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     descripcion = serializers.CharField(required=True)
     inspector_id = serializers.CharField(required=True)
     fecha = serializers.CharField(required=True)

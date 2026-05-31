@@ -708,7 +708,13 @@ export class DashboardInspectorPage implements OnInit {
 
   // ============ LIBRO DE INSPECTORÍA ============
   loadLibro(): void {
-    this.api.getLibroInspectoria().subscribe(data => this.libroRegistros.set(data));
+    this.api.getLibroInspectoria().subscribe({
+      next: (data) => this.libroRegistros.set(data),
+      error: (err) => {
+        console.error('Error al cargar libro de inspectoría:', err);
+        this.libroRegistros.set([]);
+      },
+    });
   }
 
   abrirLibroModal(): void {
