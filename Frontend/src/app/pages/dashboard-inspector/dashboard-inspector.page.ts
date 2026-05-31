@@ -501,10 +501,11 @@ export class DashboardInspectorPage implements OnInit {
           this.loadInitialData();
         },
         error: () => {
-        this.saving.set(false);
-        alert('Error al generar declaración de accidente');
-      },
-    });
+          this.saving.set(false);
+          alert('Error al generar declaración de accidente');
+        },
+      });
+    }
   }
 
   eliminarAccidente(id: string): void {
@@ -669,6 +670,18 @@ export class DashboardInspectorPage implements OnInit {
       libro_clases: 'Libro de Clases',
     };
     return labels[tipo] || tipo.replace(/_/g, ' ');
+  }
+
+  formatFecha(isoDate: string | undefined): string {
+    if (!isoDate) return '';
+    // Si ya está en DD-MM-YYYY, devolver como está
+    if (/^\d{2}-\d{2}-\d{4}$/.test(isoDate)) return isoDate;
+    // Convertir de ISO (YYYY-MM-DD) a DD-MM-YYYY
+    const parts = isoDate.split('T')[0].split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return isoDate;
   }
 
   // ============ ASISTENCIA GENERAL ============

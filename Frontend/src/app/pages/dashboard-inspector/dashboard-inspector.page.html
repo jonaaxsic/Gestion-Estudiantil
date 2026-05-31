@@ -144,7 +144,7 @@
                   <div class="list-icon docs"><span class="material-icons">description</span></div>
                   <div class="list-content">
                     <span class="title">{{ getTipoDocumentoLabel(doc.tipo_documento) }}</span>
-                    <span class="subtitle">{{ doc.fecha_emision | slice:0:10 }}</span>
+                    <span class="subtitle">{{ formatFecha(doc.fecha_emision) }}</span>
                   </div>
                   <span class="material-icons list-chevron">chevron_right</span>
                 </button>
@@ -853,7 +853,7 @@
         <!-- Fecha Emisión -->
         <div class="detail-row">
           <span class="detail-label">Fecha de Emisión</span>
-          <span class="detail-value">{{ doc.fecha_emision | slice:0:10 }}</span>
+          <span class="detail-value">{{ formatFecha(doc.fecha_emision) }}</span>
         </div>
 
         <!-- Inspector -->
