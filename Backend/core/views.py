@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.throttling import AnonRateThrottle
 from django.core.cache import cache
+from django.contrib.auth.hashers import check_password, make_password
 from bson import ObjectId
 from .models import (
     Usuario,
@@ -158,16 +159,13 @@ class AsignacionDocenteList(APIView, MongoObjectIdMixin):
         return Response(serializer.data)
 
     def post(self, request):
-        # Método simplificado para debugging
         try:
             data = request.data
-            print(f"DEBUG - Datos recibidos: {data}")
 
             # Verificar conexión a MongoDB
             from core.database import is_connected
 
             mongo_ok = is_connected()
-            print(f"DEBUG - MongoDB conectado: {mongo_ok}")
 
             if not mongo_ok:
                 return Response(
@@ -193,7 +191,6 @@ class AsignacionDocenteList(APIView, MongoObjectIdMixin):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            print(f"DEBUG - Creando AsignacionDocente...")
             asignacion = AsignacionDocente(
                 {
                     "docente_id": data.get("docente_id"),
@@ -203,10 +200,7 @@ class AsignacionDocenteList(APIView, MongoObjectIdMixin):
                 }
             )
 
-            print(f"DEBUG - Llamando save()...")
             asignacion.save()
-
-            print(f"DEBUG - GUARDADO OK! _id: {asignacion._id}")
 
             # Invalidar caché de asignaciones
             cache.delete("asignaciones_all")
@@ -287,6 +281,22 @@ class AsignacionDocenteDetail(APIView, MongoObjectIdMixin):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+# Algoritmos de hash conocidos de Django
+_HASH_PREFIXES = {
+    "pbkdf2_sha256", "pbkdf2_sha1", "bcrypt", "bcrypt_sha256",
+    "argon2", "md5", "sha1", "crypt", "unsalted_md5", "unsalted_sha1",
+}
+
+
+def _is_hashed(password):
+    """Verifica si un password tiene formato de hash Django"""
+    try:
+        algorithm = password.split("$")[0]
+        return algorithm in _HASH_PREFIXES
+    except (IndexError, AttributeError):
+        return False
+
+
 @api_view(["POST"])
 def login_view(request):
     """Endpoint de login"""
@@ -298,24 +308,36 @@ def login_view(request):
             {"error": "Email y password requeridos"}, status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Debug: ver qué llega
-    print(f"DEBUG login: email={email}, password={password}")
+    # Buscar usuario por email SOLO (no incluir password en la query)
+    usuario = Usuario.find_one({"email": email, "activo": True})
 
-    # Buscar sin filtro de password primero para debug
-    usuario_debug = Usuario.find_one({"email": email, "activo": True})
-    if usuario_debug:
-        print(f"DEBUG usuario encontrado: {usuario_debug.to_dict()}")
+    if not usuario:
+        return Response(
+            {"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED
+        )
 
-    # Login normal con password
-    usuario = Usuario.find_one({"email": email, "password": password, "activo": True})
+    stored_password = usuario.password
+    matched = False
 
-    if usuario:
-        serializer = UsuarioSerializer(usuario)
-        return Response({"success": True, "user": serializer.data})
+    if _is_hashed(stored_password):
+        # Password ya hasheado — usar check_password de Django
+        matched = check_password(password, stored_password)
+    else:
+        # Password en texto plano (legacy) — comparación directa
+        matched = password == stored_password
 
-    return Response(
-        {"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED
-    )
+    if not matched:
+        return Response(
+            {"error": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    # Si era texto plano, hacer upgrade a hash automáticamente
+    if not _is_hashed(stored_password):
+        usuario.password = make_password(password)
+        usuario.save()
+
+    serializer = UsuarioSerializer(usuario)
+    return Response({"success": True, "user": serializer.data})
 
 
 @api_view(["POST"])
@@ -337,12 +359,16 @@ def create_test_user(request):
     if existing:
         return Response({"message": "Usuario ya existe", "user": existing})
 
-    # Crear usuario
-    usuario = Usuario(test_user)
+    # Crear usuario con password hasheado
+    hashed_data = dict(test_user)
+    hashed_data["password"] = make_password(test_user["password"])
+    usuario = Usuario(hashed_data)
     usuario.save()
 
+    # No incluir password en la respuesta (original ni hash)
+    response_user = {k: v for k, v in test_user.items() if k != "password"}
     return Response(
-        {"message": "Usuario creado", "user": test_user}, status=status.HTTP_201_CREATED
+        {"message": "Usuario creado", "user": response_user}, status=status.HTTP_201_CREATED
     )
 
 
@@ -1386,11 +1412,11 @@ def registro_apoderado(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    # Crear el usuario con rol de apoderado
+    # Crear el usuario con rol de apoderado (password hasheado)
     nuevo_apoderado = Usuario(
         {
             "email": email,
-            "password": password,
+            "password": make_password(password),
             "rut": rut,
             "nombre": nombre,
             "apellido": apellido,

@@ -4,6 +4,7 @@ Convierten los modelos MongoDB a JSON y viceversa
 """
 
 from rest_framework import serializers
+from django.contrib.auth.hashers import make_password
 from .models import (
     Usuario,
     Estudiante,
@@ -40,11 +41,17 @@ class UsuarioSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
+        # Hashear password antes de guardar
+        if validated_data.get("password"):
+            validated_data["password"] = make_password(validated_data["password"])
         usuario = Usuario(validated_data)
         usuario.save()
         return usuario
 
     def update(self, instance, validated_data):
+        # Hashear password si viene en la actualización
+        if validated_data.get("password"):
+            validated_data["password"] = make_password(validated_data["password"])
         for key, value in validated_data.items():
             setattr(instance, key, value)
         instance.save()
@@ -115,7 +122,6 @@ class AsistenciaSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        print(f"DEBUG - Creating Asistencia with data: {validated_data}")
         asistencia = Asistencia(validated_data)
         asistencia.save()
         return asistencia
@@ -143,7 +149,6 @@ class EvaluacionSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        print(f"DEBUG - Creating Evaluacion with data: {validated_data}")
         # Normalizar fecha si viene en formato DD-MM-YYYY
         fecha = validated_data.get("fecha")
         if fecha and isinstance(fecha, str) and "-" in fecha:
@@ -195,7 +200,6 @@ class AnotacionSerializer(serializers.Serializer):
         # Si no hay tipo, usar 'negativa' por defecto
         if not validated_data.get("tipo"):
             validated_data["tipo"] = "negativa"
-        print(f"DEBUG - Creating Anotacion with data: {validated_data}")
         anotacion = Anotacion(validated_data)
         anotacion.save()
         return anotacion
@@ -323,7 +327,6 @@ class RecordatorioSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        print(f"DEBUG - Creating Recordatorio with data: {validated_data}")
         # Normalizar fechas si vienen en formato DD-MM-YYYY
         for campo in ["fecha", "fecha_limite"]:
             val = validated_data.get(campo)
@@ -359,11 +362,8 @@ class AsignacionDocenteSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        print(f"DEBUG - Creating AsignacionDocente with data: {validated_data}")
         asignacion = AsignacionDocente(validated_data)
-        print(f"DEBUG - Before save: {asignacion.to_dict()}")
         asignacion.save()
-        print(f"DEBUG - After save, _id: {asignacion._id}")
         return asignacion
 
     def update(self, instance, validated_data):

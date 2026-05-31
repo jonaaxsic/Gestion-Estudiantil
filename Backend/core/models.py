@@ -58,7 +58,6 @@ class BaseModel:
                 result = self.get_collection().update_one(
                     {"_id": ObjectId(self._id)}, {"$set": data}
                 )
-                print(f"DEBUG Model.save() - Updated OK")
             else:
                 # Insert
                 data["created_at"] = now
@@ -67,7 +66,6 @@ class BaseModel:
                 self._id = str(result.inserted_id)
                 self.created_at = data["created_at"]
                 self.updated_at = data["updated_at"]
-                print(f"DEBUG Model.save() - Inserted OK, _id: {self._id}")
 
             return self
         except Exception as e:
@@ -95,34 +93,23 @@ class BaseModel:
 
     @classmethod
     def find(cls, query=None, **kwargs):
-        """Buscar múltiples documentos"""
+        """Buscar múltiples documentos usando filtros de MongoDB"""
         collection = cls.get_collection()
-        limit = kwargs.get("limit")
-        skip = kwargs.get("skip")
         sort = kwargs.get("sort")
+        skip = kwargs.get("skip")
+        limit = kwargs.get("limit")
 
-        # Get all results
         cursor = collection.find(query or {})
 
-        results = []
-        for doc in cursor:
-            results.append(cls(doc))
-
-        # Apply sorting if needed
+        # Aplicar sort, skip, limit DIRECTAMENTE en MongoDB (no en Python)
         if sort:
-            # sort is a list of tuples like [("campo", 1 or -1)]
-            field, direction = sort[0]
-            results.sort(
-                key=lambda x: getattr(x, field, "") or "", reverse=(direction == -1)
-            )
-
-        # Apply skip and limit
+            cursor = cursor.sort(sort)
         if skip:
-            results = results[skip:]
+            cursor = cursor.skip(skip)
         if limit:
-            results = results[:limit]
+            cursor = cursor.limit(limit)
 
-        return results
+        return [cls(doc) for doc in cursor]
 
     @classmethod
     def count(cls, query=None):

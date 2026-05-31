@@ -4,9 +4,14 @@
  */
 
 const MONGO_ATLAS_API_URL = "https://data.mongodb-api.com/app/data-fqxhm/endpoint/data/v1";
-const MONGO_ATLAS_API_KEY = "XKjM4M7U0OqC7Yb5p8n2v1w9z0A3d6f8e7h9g2i1j0";
+// !!! IMPORTANTE: MONGO_ATLAS_API_KEY debe configurarse como variable de entorno en Cloudflare Workers
+// NO hardcodear la API key. Configurar en Cloudflare Dashboard -> Workers -> Variables
+// Usar: npx wrangler secret put MONGO_ATLAS_API_KEY
 
 const DB_NAME = "App_estudiantil";
+
+// Variable de entorno (se asigna en fetch() por request)
+let _env = {};
 
 // MongoDB Data API endpoints
 const ENDPOINTS = {
@@ -28,7 +33,7 @@ async function mongoRequest(endpoint, method, body = null, query = "") {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "api-key": MONGO_ATLAS_API_KEY,
+      "api-key": _env?.MONGO_ATLAS_API_KEY || "",
     },
   };
   
@@ -68,6 +73,9 @@ function createResponse(data, status = 200) {
 
 export default {
   async fetch(request, env, ctx) {
+    // Asignar entorno para esta request (cada request tiene su propio isolate)
+    _env = env;
+
     // Handle CORS preflight
     if (request.method === "OPTIONS") {
       return handleOptions();
