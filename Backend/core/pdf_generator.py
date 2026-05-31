@@ -791,6 +791,9 @@ def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspec
         f"del/la alumno/a desde el momento de su retiro."
     )
 
+    if observacion:
+        texto_fijo += f"<br/><br/>Observaciones del Inspector(a):<br/><i>{observacion}</i>"
+
     variables = {
         "nombre_alumno": f"<b>{nombre_completo}</b>",
         "rut_alumno": estudiante.get("rut", ""),
