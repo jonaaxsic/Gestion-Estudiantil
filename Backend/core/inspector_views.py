@@ -80,14 +80,162 @@ class DocumentoGeneradoList(APIView, MongoObjectIdMixin):
 
 
 class DocumentoGeneradoDetail(APIView, MongoObjectIdMixin):
-    """Detalle de un documento"""
+    """Detalle, actualización y eliminación de un documento"""
 
     def get(self, request, pk):
         doc = DocumentoGenerado.find_one({"_id": ObjectId(pk)})
         if not doc:
             return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         serializer = DocumentoGeneradoSerializer(doc)
-        return Response(serializer.data)
+        data = serializer.data
+        # Enriquecer con datos del estudiante
+        if doc.estudiante_id:
+            estudiante = Estudiante.find_one({"_id": ObjectId(doc.estudiante_id)})
+            if estudiante:
+                data["estudiante_nombre"] = f"{estudiante.nombre} {estudiante.apellido}"
+                data["estudiante_rut"] = estudiante.rut
+                if estudiante.curso_id:
+                    curso = Curso.find_one({"_id": ObjectId(estudiante.curso_id)})
+                    if curso:
+                        data["curso_nombre"] = f"{curso.nivel} {curso.nombre}"
+        return Response(data)
+
+    def put(self, request, pk):
+        doc = DocumentoGenerado.find_one({"_id": ObjectId(pk)})
+        if not doc:
+            return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = DocumentoGeneradoSerializer(doc, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            # Si el tipo es autorizacion_retiro, actualizar el retiro asociado
+            tipo = doc.tipo_documento
+            if tipo == "autorizacion_retiro" and doc.datos_adicionales.get("retiro_id"):
+                retiro_id = doc.datos_adicionales["retiro_id"]
+                retiro = RetiroAlumno.find_one({"_id": ObjectId(retiro_id)})
+                if retiro:
+                    retiro_serializer = RetiroAlumnoSerializer(
+                        retiro, data=request.data, partial=True
+                    )
+                    if retiro_serializer.is_valid():
+                        retiro_serializer.save()
+            # Si el tipo es seguro_escolar, actualizar el accidente asociado
+            if tipo == "seguro_escolar" and doc.datos_adicionales.get("accidente_id"):
+                accidente_id = doc.datos_adicionales["accidente_id"]
+                accidente = AccidenteEscolar.find_one({"_id": ObjectId(accidente_id)})
+                if accidente:
+                    accidente_serializer = AccidenteEscolarSerializer(
+                        accidente, data=request.data, partial=True
+                    )
+                    if accidente_serializer.is_valid():
+                        accidente_serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        doc = DocumentoGenerado.find_one({"_id": ObjectId(pk)})
+        if not doc:
+            return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        doc.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ============================================================
+# REGENERAR PDF DE DOCUMENTO EXISTENTE
+# ============================================================
+
+@api_view(["POST"])
+def regenerar_pdf_documento(request, pk):
+    """Regenera el PDF de un documento existente"""
+    try:
+        doc = DocumentoGenerado.find_one({"_id": ObjectId(pk)})
+        if not doc:
+            return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        inspector_id = doc.inspector_id or request.data.get("inspector_id")
+        estudiante_id = doc.estudiante_id
+
+        if not estudiante_id or not inspector_id:
+            return Response(
+                {"error": "El documento no tiene estudiante_id o inspector_id"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        estudiante = Estudiante.find_one({"_id": ObjectId(estudiante_id)})
+        inspector = Usuario.find_one({"_id": ObjectId(inspector_id)})
+        establecimiento = _get_establecimiento_config()
+
+        if not estudiante or not inspector:
+            return Response({"error": "Estudiante o inspector no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        if estudiante.curso_id:
+            curso = Curso.find_one({"_id": ObjectId(estudiante.curso_id)})
+            if curso:
+                estudiante.curso_nombre = f"{curso.nivel} {curso.nombre}"
+
+        tipo = doc.tipo_documento
+        pdf_buffer = None
+
+        if tipo == "certificado_alumno_regular":
+            from .pdf_generator import generar_certificado_alumno_regular as generar_pdf
+            pdf_buffer = generar_pdf(estudiante.to_dict(), establecimiento, inspector.to_dict())
+
+        elif tipo == "certificado_notas":
+            from .pdf_generator import generar_certificado_notas as generar_pdf
+            ano = doc.datos_adicionales.get("ano_escolar") if doc.datos_adicionales else None
+            pdf_buffer = generar_pdf(estudiante.to_dict(), establecimiento, inspector.to_dict(), ano_escolar=ano)
+
+        elif tipo == "autorizacion_retiro":
+            retiro_id = doc.datos_adicionales.get("retiro_id") if doc.datos_adicionales else None
+            if retiro_id:
+                retiro = RetiroAlumno.find_one({"_id": ObjectId(retiro_id)})
+                if retiro:
+                    from .pdf_generator import generar_autorizacion_retiro as generar_pdf
+                    pdf_buffer = generar_pdf(
+                        estudiante.to_dict(),
+                        retiro.to_dict(),
+                        establecimiento,
+                        inspector.to_dict(),
+                    )
+            if not pdf_buffer:
+                return Response({"error": "No se encontraron datos del retiro asociado"}, status=status.HTTP_404_NOT_FOUND)
+
+        elif tipo == "seguro_escolar":
+            accidente_id = doc.datos_adicionales.get("accidente_id") if doc.datos_adicionales else None
+            if accidente_id:
+                accidente = AccidenteEscolar.find_one({"_id": ObjectId(accidente_id)})
+                if accidente:
+                    accidente_data = {
+                        "fecha_accidente": accidente.fecha_accidente,
+                        "hora_accidente": getattr(accidente, "hora_accidente", ""),
+                        "lugar": getattr(accidente, "lugar", ""),
+                        "descripcion": accidente.descripcion,
+                        "tipo_lesion": getattr(accidente, "tipo_lesion", ""),
+                        "testigos": getattr(accidente, "testigos", ""),
+                        "derivacion": getattr(accidente, "derivacion", ""),
+                    }
+                    from .pdf_generator import generar_declaracion_accidente as generar_pdf
+                    pdf_buffer = generar_pdf(
+                        estudiante.to_dict(),
+                        accidente_data,
+                        establecimiento,
+                        inspector.to_dict(),
+                    )
+            if not pdf_buffer:
+                return Response({"error": "No se encontraron datos del accidente asociado"}, status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            return Response({"error": f"Tipo de documento no soportado: {tipo}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "success": True,
+            "documento_id": doc._id,
+            "pdf_base64": _buffer_to_base64(pdf_buffer),
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ============================================================

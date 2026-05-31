@@ -140,13 +140,14 @@
               <div class="empty-state"><div class="empty-icon"><span class="material-icons">description</span></div><p>Sin documentos emitidos hoy</p></div>
             } @else {
               @for (doc of dashboardData()?.documentos_recientes; track doc.id) {
-                <div class="list-item">
+                <button class="list-item clickable" (click)="verDetalleDocumento(doc)">
                   <div class="list-icon docs"><span class="material-icons">description</span></div>
                   <div class="list-content">
-                    <span class="title">{{ doc.tipo_documento.replace(/_/g, ' ') }}</span>
+                    <span class="title">{{ getTipoDocumentoLabel(doc.tipo_documento) }}</span>
                     <span class="subtitle">{{ doc.fecha_emision | slice:0:10 }}</span>
                   </div>
-                </div>
+                  <span class="material-icons list-chevron">chevron_right</span>
+                </button>
               }
             }
           </div>
@@ -796,6 +797,115 @@
         <button class="btn btn-secondary" (click)="showLibroModal.set(false)">Cancelar</button>
         <button class="btn btn-primary" (click)="guardarLibro()" [disabled]="saving()">
           {{ saving() ? 'Guardando...' : 'Guardar Registro' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Documento Detail Modal -->
+@if (showDocumentoDetail() && selectedDocumento()) {
+  <div class="modal-overlay" (click)="closeDocumentoDetail()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><span class="material-icons">description</span> Detalle del Documento</h2>
+        <button class="close-btn" (click)="closeDocumentoDetail()"><span class="material-icons">close</span></button>
+      </div>
+      <div class="modal-body">
+        @let doc = selectedDocumento()!;
+
+        <!-- Tipo Documento -->
+        <div class="detail-row">
+          <span class="detail-label">Tipo de Documento</span>
+          <span class="detail-value">{{ getTipoDocumentoLabel(doc.tipo_documento) }}</span>
+        </div>
+
+        <!-- Estado -->
+        <div class="detail-row">
+          <span class="detail-label">Estado</span>
+          <span class="detail-value">
+            <span class="status-badge" [class.emitido]="doc.estado === 'emitido'">
+              {{ doc.estado }}
+            </span>
+          </span>
+        </div>
+
+        <!-- Estudiante -->
+        @if (doc.estudiante_nombre) {
+          <div class="detail-row">
+            <span class="detail-label">Estudiante</span>
+            <span class="detail-value">{{ doc.estudiante_nombre }}</span>
+          </div>
+        }
+        @if (doc.estudiante_rut) {
+          <div class="detail-row">
+            <span class="detail-label">RUT</span>
+            <span class="detail-value">{{ doc.estudiante_rut }}</span>
+          </div>
+        }
+        @if (doc.curso_nombre) {
+          <div class="detail-row">
+            <span class="detail-label">Curso</span>
+            <span class="detail-value">{{ doc.curso_nombre }}</span>
+          </div>
+        }
+
+        <!-- Fecha Emisión -->
+        <div class="detail-row">
+          <span class="detail-label">Fecha de Emisión</span>
+          <span class="detail-value">{{ doc.fecha_emision | slice:0:10 }}</span>
+        </div>
+
+        <!-- Inspector -->
+        <div class="detail-row">
+          <span class="detail-label">Inspector ID</span>
+          <span class="detail-value">{{ doc.inspector_id }}</span>
+        </div>
+
+        <!-- Datos adicionales según tipo -->
+        @if (doc.tipo_documento === 'autorizacion_retiro') {
+          <div class="detail-section-title">Datos del Retiro</div>
+          @if (doc.datos_adicionales?.retiro_id) {
+            <div class="detail-row">
+              <span class="detail-label">ID Retiro</span>
+              <span class="detail-value">{{ doc.datos_adicionales.retiro_id }}</span>
+            </div>
+          }
+        }
+        @if (doc.tipo_documento === 'seguro_escolar') {
+          <div class="detail-section-title">Datos del Accidente</div>
+          @if (doc.datos_adicionales?.accidente_id) {
+            <div class="detail-row">
+              <span class="detail-label">ID Accidente</span>
+              <span class="detail-value">{{ doc.datos_adicionales.accidente_id }}</span>
+            </div>
+          }
+          @if (doc.datos_adicionales?.tipo_lesion) {
+            <div class="detail-row">
+              <span class="detail-label">Tipo Lesión</span>
+              <span class="detail-value">{{ doc.datos_adicionales.tipo_lesion }}</span>
+            </div>
+          }
+        }
+        @if (doc.tipo_documento === 'certificado_notas' && doc.datos_adicionales?.ano_escolar) {
+          <div class="detail-row">
+            <span class="detail-label">Año Escolar</span>
+            <span class="detail-value">{{ doc.datos_adicionales.ano_escolar }}</span>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeDocumentoDetail()">Cerrar</button>
+        <button class="btn btn-outline" (click)="regenerarPdfDocumento()" [disabled]="saving()">
+          <span class="material-icons">picture_as_pdf</span> Ver PDF
+        </button>
+        @if (doc.tipo_documento === 'autorizacion_retiro' || doc.tipo_documento === 'seguro_escolar') {
+          <button class="btn btn-primary" (click)="editarDocumento(doc)">
+            <span class="material-icons">edit</span> Editar
+          </button>
+        }
+        <button class="btn btn-danger" (click)="eliminarDocumento(doc.id)">
+          <span class="material-icons">delete</span> Eliminar
         </button>
       </div>
     </div>

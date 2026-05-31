@@ -56,6 +56,14 @@ export class DashboardInspectorPage implements OnInit {
   pdfPreviewData = signal<string>('');
   lastGeneratedDocType = signal<string>('');
 
+  // Documento detail modal
+  showDocumentoDetail = signal(false);
+  selectedDocumento = signal<any>(null);
+  documentoEditMode = signal(false);
+
+  // Documento editing (reuse existing modals with preloaded data)
+  editingDocumentoId = signal<string | null>(null);
+
   // Modal student search (shared: only one modal at a time)
   showModalStudentSearch = signal(false);
   modalSearchQuery = signal('');
@@ -324,6 +332,7 @@ export class DashboardInspectorPage implements OnInit {
   guardarRetiro(): void {
     const userId = this.auth.user()?.id;
     const est = this.selectedEstudiante();
+    const editingDocId = this.editingDocumentoId();
     if (!userId) return;
     if (!est?.id) {
       alert('Debe seleccionar un estudiante');
@@ -337,24 +346,56 @@ export class DashboardInspectorPage implements OnInit {
     this.saving.set(true);
     this.lastGeneratedDocType.set('autorizacion_retiro');
     this.retiroForm.estudiante_id = est.id;
-    this.api.generarAutorizacionRetiro({
-      ...this.retiroForm,
-      inspector_id: userId,
-    }).subscribe({
-      next: (res) => {
-        this.saving.set(false);
-        this.showRetiroModal.set(false);
-        this.showPdfPreview.set(true);
-        this.pdfPreviewData.set(res.pdf_base64);
-        this.showSuccess('Autorización de retiro generada');
-        this.loadRetiros();
-        this.loadInitialData();
-      },
-      error: () => {
-        this.saving.set(false);
-        alert('Error al generar autorización de retiro');
-      },
-    });
+
+    if (editingDocId) {
+      // Edición desde documento existente
+      this.api.updateDocumento(editingDocId, {
+        estudiante_id: est.id,
+        inspector_id: userId,
+      }).subscribe({
+        next: () => {
+          this.api.regenerarPdf(editingDocId).subscribe({
+            next: (res) => {
+              this.saving.set(false);
+              this.showRetiroModal.set(false);
+              this.editingDocumentoId.set(null);
+              this.pdfPreviewData.set(res.pdf_base64);
+              this.showPdfPreview.set(true);
+              this.showSuccess('Documento actualizado y PDF regenerado');
+              this.loadInitialData();
+            },
+            error: () => {
+              this.saving.set(false);
+              alert('Documento actualizado pero error al regenerar PDF');
+            },
+          });
+        },
+        error: () => {
+          this.saving.set(false);
+          alert('Error al actualizar documento');
+        },
+      });
+    } else {
+      // Creación normal
+      this.api.generarAutorizacionRetiro({
+        ...this.retiroForm,
+        inspector_id: userId,
+      }).subscribe({
+        next: (res) => {
+          this.saving.set(false);
+          this.showRetiroModal.set(false);
+          this.showPdfPreview.set(true);
+          this.pdfPreviewData.set(res.pdf_base64);
+          this.showSuccess('Autorización de retiro generada');
+          this.loadRetiros();
+          this.loadInitialData();
+        },
+        error: () => {
+          this.saving.set(false);
+          alert('Error al generar autorización de retiro');
+        },
+      });
+    }
   }
 
   eliminarRetiro(id: string): void {
@@ -397,6 +438,7 @@ export class DashboardInspectorPage implements OnInit {
   guardarAccidente(): void {
     const userId = this.auth.user()?.id;
     const est = this.selectedEstudiante();
+    const editingDocId = this.editingDocumentoId();
     if (!userId) return;
     if (!est?.id) {
       alert('Debe seleccionar un estudiante');
@@ -410,20 +452,55 @@ export class DashboardInspectorPage implements OnInit {
     this.saving.set(true);
     this.lastGeneratedDocType.set('declaracion_accidente');
     this.accidenteForm.estudiante_id = est.id;
-    this.api.generarDeclaracionAccidente({
-      ...this.accidenteForm,
-      inspector_id: userId,
-    }).subscribe({
-      next: (res) => {
-        this.saving.set(false);
-        this.showAccidenteModal.set(false);
-        this.showPdfPreview.set(true);
-        this.pdfPreviewData.set(res.pdf_base64);
-        this.showSuccess('Declaración de accidente generada');
-        this.loadAccidentes();
-        this.loadInitialData();
-      },
-      error: () => {
+
+    if (editingDocId) {
+      // Edición desde documento existente
+      this.api.updateDocumento(editingDocId, {
+        estudiante_id: est.id,
+        inspector_id: userId,
+        datos_adicionales: {
+          ...this.selectedDocumento()?.datos_adicionales,
+          tipo_lesion: this.accidenteForm.tipo_lesion,
+        },
+      }).subscribe({
+        next: () => {
+          this.api.regenerarPdf(editingDocId).subscribe({
+            next: (res) => {
+              this.saving.set(false);
+              this.showAccidenteModal.set(false);
+              this.editingDocumentoId.set(null);
+              this.pdfPreviewData.set(res.pdf_base64);
+              this.showPdfPreview.set(true);
+              this.showSuccess('Documento actualizado y PDF regenerado');
+              this.loadInitialData();
+            },
+            error: () => {
+              this.saving.set(false);
+              alert('Documento actualizado pero error al regenerar PDF');
+            },
+          });
+        },
+        error: () => {
+          this.saving.set(false);
+          alert('Error al actualizar documento');
+        },
+      });
+    } else {
+      // Creación normal
+      this.api.generarDeclaracionAccidente({
+        ...this.accidenteForm,
+        inspector_id: userId,
+      }).subscribe({
+        next: (res) => {
+          this.saving.set(false);
+          this.showAccidenteModal.set(false);
+          this.showPdfPreview.set(true);
+          this.pdfPreviewData.set(res.pdf_base64);
+          this.showSuccess('Declaración de accidente generada');
+          this.loadAccidentes();
+          this.loadInitialData();
+        },
+        error: () => {
         this.saving.set(false);
         alert('Error al generar declaración de accidente');
       },
@@ -456,6 +533,142 @@ export class DashboardInspectorPage implements OnInit {
         error: () => alert('Error al actualizar estado'),
       });
     }
+  }
+
+  // ============ DOCUMENTOS - DETALLE Y ACCIONES ============
+
+  verDetalleDocumento(doc: DocumentoGenerado): void {
+    if (!doc.id) return;
+    this.api.getDocumento(doc.id).subscribe({
+      next: (data) => {
+        this.selectedDocumento.set(data);
+        this.documentoEditMode.set(false);
+        this.showDocumentoDetail.set(true);
+      },
+      error: () => alert('Error al cargar detalle del documento'),
+    });
+  }
+
+  closeDocumentoDetail(): void {
+    this.showDocumentoDetail.set(false);
+    this.selectedDocumento.set(null);
+    this.documentoEditMode.set(false);
+  }
+
+  eliminarDocumento(id: string): void {
+    this.openConfirmModal(
+      'Eliminar documento',
+      '¿Estás seguro de eliminar este documento? Esta acción no se puede deshacer.',
+      () => {
+        this.api.deleteDocumento(id).subscribe({
+          next: () => {
+            this.showSuccess('Documento eliminado');
+            this.closeDocumentoDetail();
+            this.loadInitialData();
+          },
+          error: () => alert('Error al eliminar documento'),
+        });
+      },
+    );
+  }
+
+  regenerarPdfDocumento(): void {
+    const doc = this.selectedDocumento();
+    if (!doc?.id) return;
+    this.saving.set(true);
+    this.api.regenerarPdf(doc.id).subscribe({
+      next: (res) => {
+        this.saving.set(false);
+        this.pdfPreviewData.set(res.pdf_base64);
+        this.lastGeneratedDocType.set('regenerado');
+        this.showPdfPreview.set(true);
+      },
+      error: () => {
+        this.saving.set(false);
+        alert('Error al regenerar el PDF');
+      },
+    });
+  }
+
+  descargarPdfDesdeDetalle(): void {
+    const pdfData = this.pdfPreviewData();
+    if (!pdfData) return;
+    const byteCharacters = atob(pdfData);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const doc = this.selectedDocumento();
+    const filename = `${doc?.tipo_documento?.replace(/_/g, '-') || 'documento'}.pdf`;
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  editarDocumento(doc: any): void {
+    const tipo = doc.tipo_documento;
+    this.editingDocumentoId.set(doc.id);
+
+    if (tipo === 'autorizacion_retiro') {
+      const retiroId = doc.datos_adicionales?.retiro_id;
+      if (retiroId) {
+        this.api.getRetiro(retiroId).subscribe({
+          next: (retiro) => {
+            this.retiroForm = {
+              estudiante_id: doc.estudiante_id || '',
+              apoderado_autorizante: retiro.apoderado_autorizante || '',
+              motivo: retiro.motivo || '',
+              fecha: retiro.fecha || '',
+              hora_salida: retiro.hora_salida || '',
+              observacion: retiro.observacion || '',
+            };
+            this.showDocumentoDetail.set(false);
+            this.showRetiroModal.set(true);
+          },
+          error: () => alert('Error al cargar datos del retiro'),
+        });
+      }
+    } else if (tipo === 'seguro_escolar') {
+      const accidenteId = doc.datos_adicionales?.accidente_id;
+      if (accidenteId) {
+        this.api.getAccidente(accidenteId).subscribe({
+          next: (accidente) => {
+            this.accidenteForm = {
+              estudiante_id: doc.estudiante_id || '',
+              fecha_accidente: accidente.fecha_accidente || '',
+              hora_accidente: accidente.hora_accidente || '',
+              lugar: accidente.lugar || '',
+              descripcion: accidente.descripcion || '',
+              tipo_lesion: accidente.tipo_lesion || '',
+              testigos: accidente.testigos || '',
+              derivacion: accidente.derivacion || '',
+            };
+            this.showDocumentoDetail.set(false);
+            this.showAccidenteModal.set(true);
+          },
+          error: () => alert('Error al cargar datos del accidente'),
+        });
+      }
+    } else {
+      alert('Este tipo de documento no se puede editar');
+    }
+  }
+
+  getTipoDocumentoLabel(tipo: string): string {
+    const labels: Record<string, string> = {
+      certificado_alumno_regular: 'Certificado Alumno Regular',
+      certificado_notas: 'Certificado de Notas',
+      autorizacion_retiro: 'Autorización de Retiro',
+      seguro_escolar: 'Declaración Accidente Escolar',
+      pase_hora: 'Pase de Hora',
+      libro_clases: 'Libro de Clases',
+    };
+    return labels[tipo] || tipo.replace(/_/g, ' ');
   }
 
   // ============ ASISTENCIA GENERAL ============

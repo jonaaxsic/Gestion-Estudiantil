@@ -414,6 +414,23 @@ export class ApiService {
     return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/accidente-escolar`, data, { headers: this.jsonHeaders });
   }
 
+  // Documento individual
+  getDocumento(id: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/documentos/${id}`, { headers: this.jsonHeaders });
+  }
+
+  deleteDocumento(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/documentos/${id}`, { headers: this.jsonHeaders });
+  }
+
+  updateDocumento(id: string, data: Partial<DocumentoGenerado>): Observable<DocumentoGenerado> {
+    return this.http.put<DocumentoGenerado>(`${this.baseUrl}/documentos/${id}`, data, { headers: this.jsonHeaders });
+  }
+
+  regenerarPdf(documentoId: string): Observable<PdfResponse> {
+    return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/${documentoId}/regenerar-pdf`, {}, { headers: this.jsonHeaders });
+  }
+
   // Retiros
   getRetiros(filters?: { fecha?: string; curso_id?: string }): Observable<RetiroAlumno[]> {
     let url = `${this.baseUrl}/retiros`;
@@ -426,6 +443,10 @@ export class ApiService {
 
   getRetiro(id: string): Observable<RetiroAlumno> {
     return this.http.get<RetiroAlumno>(`${this.baseUrl}/retiros/${id}`, { headers: this.jsonHeaders });
+  }
+
+  updateRetiro(id: string, data: Partial<RetiroAlumno>): Observable<RetiroAlumno> {
+    return this.http.put<RetiroAlumno>(`${this.baseUrl}/retiros/${id}`, data, { headers: this.jsonHeaders });
   }
 
   deleteRetiro(id: string): Observable<void> {
