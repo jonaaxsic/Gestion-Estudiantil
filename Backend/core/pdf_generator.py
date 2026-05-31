@@ -479,6 +479,17 @@ def _build_datos_estudiante_highlight(estudiante, estilos):
     return _build_highlight_box(datos, estilos), nombre_completo, curso_nombre
 
 
+def _formatear_fecha(fecha_str):
+    """Convierte YYYY-MM-DD a DD-MM-YYYY para los documentos"""
+    if not fecha_str:
+        return ""
+    try:
+        fecha = datetime.strptime(fecha_str[:10], "%Y-%m-%d")
+        return fecha.strftime("%d-%m-%Y")
+    except (ValueError, TypeError):
+        return fecha_str
+
+
 def _build_fecha_emision():
     """Retorna fecha formateada para el pie del documento"""
     now = datetime.now()
@@ -758,7 +769,7 @@ def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspec
     datos_retiro = [
         ["Apoderado que retira:", retiro_data.get("apoderado_autorizante", "")],
         ["Motivo del Retiro:", retiro_data.get("motivo", "")],
-        ["Fecha del Retiro:", retiro_data.get("fecha", "")],
+        ["Fecha del Retiro:", _formatear_fecha(retiro_data.get("fecha", ""))],
         ["Hora de Salida:", retiro_data.get("hora_salida", "")],
     ]
     if observacion:
@@ -786,7 +797,7 @@ def generar_autorizacion_retiro(estudiante, retiro_data, establecimiento, inspec
         "curso": curso_nombre,
         "apoderado": apoderado,
         "motivo": retiro_data.get("motivo", ""),
-        "fecha_retiro": retiro_data.get("fecha", ""),
+        "fecha_retiro": _formatear_fecha(retiro_data.get("fecha", "")),
         "hora_salida": retiro_data.get("hora_salida", ""),
         "observacion": observacion,
         "nombre_colegio": establecimiento.get("nombre", ""),
@@ -852,7 +863,7 @@ def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, i
         ["Curso:", curso_nombre],
     ]
     if fecha_nac:
-        datos_est.append(["Fecha de Nacimiento:", str(fecha_nac)])
+        datos_est.append(["Fecha de Nacimiento:", _formatear_fecha(str(fecha_nac))])
 
     elements.append(_build_highlight_box(datos_est, estilos))
     elements.append(Spacer(1, 8))
@@ -894,7 +905,7 @@ def generar_declaracion_accidente(estudiante, accidente_data, establecimiento, i
 
     # ---- DATOS DEL ACCIDENTE ----
     datos_accidente = [
-        ["Fecha del Accidente:", accidente_data.get("fecha_accidente", "")],
+        ["Fecha del Accidente:", _formatear_fecha(accidente_data.get("fecha_accidente", ""))],
         ["Hora del Accidente:", accidente_data.get("hora_accidente", "")],
         ["Lugar:", accidente_data.get("lugar", "")],
         ["Descripción:", accidente_data.get("descripcion", "")],

@@ -262,6 +262,7 @@ def generar_autorizacion_retiro(request):
             "motivo": motivo,
             "fecha": fecha,
             "hora_salida": hora_salida,
+            "observacion": observacion,
         }
 
         # Guardar retiro
