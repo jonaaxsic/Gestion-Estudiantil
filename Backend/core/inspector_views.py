@@ -67,7 +67,15 @@ class DocumentoGeneradoList(APIView, MongoObjectIdMixin):
 
         docs = DocumentoGenerado.find(query, sort=[("fecha_emision", -1)])
         serializer = DocumentoGeneradoSerializer(docs, many=True)
-        return Response(serializer.data)
+        data = serializer.data
+        # Enriquecer con nombre del inspector para cada documento
+        for item in data:
+            insp_id = item.get("inspector_id")
+            if insp_id:
+                inspector = Usuario.find_one({"_id": ObjectId(insp_id)})
+                if inspector:
+                    item["inspector_nombre"] = f"{inspector.nombre} {inspector.apellido}"
+        return Response(data)
 
     def post(self, request):
         data = request.data.copy()
@@ -98,6 +106,11 @@ class DocumentoGeneradoDetail(APIView, MongoObjectIdMixin):
                     curso = Curso.find_one({"_id": ObjectId(estudiante.curso_id)})
                     if curso:
                         data["curso_nombre"] = f"{curso.nivel} {curso.nombre}"
+        # Enriquecer con nombre del inspector
+        if doc.inspector_id:
+            inspector = Usuario.find_one({"_id": ObjectId(doc.inspector_id)})
+            if inspector:
+                data["inspector_nombre"] = f"{inspector.nombre} {inspector.apellido}"
         return Response(data)
 
     def put(self, request, pk):
@@ -107,9 +120,9 @@ class DocumentoGeneradoDetail(APIView, MongoObjectIdMixin):
         serializer = DocumentoGeneradoSerializer(doc, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            # Si el tipo es autorizacion_retiro, actualizar el retiro asociado
+            # Si el tipo es retiro_alumno, actualizar el retiro asociado
             tipo = doc.tipo_documento
-            if tipo == "autorizacion_retiro" and doc.datos_adicionales.get("retiro_id"):
+            if tipo in ("autorizacion_retiro", "retiro_alumno") and doc.datos_adicionales.get("retiro_id"):
                 retiro_id = doc.datos_adicionales["retiro_id"]
                 retiro = RetiroAlumno.find_one({"_id": ObjectId(retiro_id)})
                 if retiro:
@@ -184,7 +197,7 @@ def regenerar_pdf_documento(request, pk):
             ano = doc.datos_adicionales.get("ano_escolar") if doc.datos_adicionales else None
             pdf_buffer = generar_pdf(estudiante.to_dict(), establecimiento, inspector.to_dict(), ano_escolar=ano)
 
-        elif tipo == "autorizacion_retiro":
+        elif tipo in ("autorizacion_retiro", "retiro_alumno"):
             retiro_id = doc.datos_adicionales.get("retiro_id") if doc.datos_adicionales else None
             if retiro_id:
                 retiro = RetiroAlumno.find_one({"_id": ObjectId(retiro_id)})

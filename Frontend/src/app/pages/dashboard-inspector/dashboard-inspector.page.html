@@ -858,12 +858,12 @@
 
         <!-- Inspector -->
         <div class="detail-row">
-          <span class="detail-label">Inspector ID</span>
-          <span class="detail-value">{{ doc.inspector_id }}</span>
+          <span class="detail-label">Inspector</span>
+          <span class="detail-value">{{ doc.inspector_nombre || doc.inspector_id }}</span>
         </div>
 
         <!-- Datos adicionales según tipo -->
-        @if (doc.tipo_documento === 'autorizacion_retiro') {
+        @if (doc.tipo_documento === 'retiro_alumno') {
           <div class="detail-section-title">Datos del Retiro</div>
           @if (doc.datos_adicionales?.retiro_id) {
             <div class="detail-row">
@@ -899,7 +899,7 @@
         <button class="btn btn-outline" (click)="descargarPdfDocumento()" [disabled]="saving()">
           <span class="material-icons">download</span> Descargar PDF
         </button>
-        @if (doc.tipo_documento === 'autorizacion_retiro' || doc.tipo_documento === 'seguro_escolar') {
+        @if (doc.tipo_documento === 'retiro_alumno' || doc.tipo_documento === 'seguro_escolar') {
           <button class="btn btn-primary" (click)="editarDocumento(doc)">
             <span class="material-icons">edit</span> Editar
           </button>

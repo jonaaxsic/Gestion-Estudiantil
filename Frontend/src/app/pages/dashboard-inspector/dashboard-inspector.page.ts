@@ -627,7 +627,7 @@ export class DashboardInspectorPage implements OnInit {
     const tipo = doc.tipo_documento;
     this.editingDocumentoId.set(doc.id);
 
-    if (tipo === 'autorizacion_retiro') {
+    if (tipo === 'retiro_alumno' || tipo === 'autorizacion_retiro') {
       const retiroId = doc.datos_adicionales?.retiro_id;
       if (retiroId) {
         this.api.getRetiro(retiroId).subscribe({
