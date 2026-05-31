@@ -896,8 +896,8 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeDocumentoDetail()">Cerrar</button>
-        <button class="btn btn-outline" (click)="regenerarPdfDocumento()" [disabled]="saving()">
-          <span class="material-icons">picture_as_pdf</span> Ver PDF
+        <button class="btn btn-outline" (click)="descargarPdfDocumento()" [disabled]="saving()">
+          <span class="material-icons">download</span> Descargar PDF
         </button>
         @if (doc.tipo_documento === 'autorizacion_retiro' || doc.tipo_documento === 'seguro_escolar') {
           <button class="btn btn-primary" (click)="editarDocumento(doc)">

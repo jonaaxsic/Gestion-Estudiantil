@@ -573,20 +573,32 @@ export class DashboardInspectorPage implements OnInit {
     );
   }
 
-  regenerarPdfDocumento(): void {
+  descargarPdfDocumento(): void {
     const doc = this.selectedDocumento();
     if (!doc?.id) return;
     this.saving.set(true);
     this.api.regenerarPdf(doc.id).subscribe({
       next: (res) => {
         this.saving.set(false);
-        this.pdfPreviewData.set(res.pdf_base64);
-        this.lastGeneratedDocType.set('regenerado');
-        this.showPdfPreview.set(true);
+        // Descargar directamente como cuando se genera por primera vez
+        const byteCharacters = atob(res.pdf_base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${doc.tipo_documento?.replace(/_/g, '-') || 'documento'}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showSuccess('PDF descargado');
       },
       error: () => {
         this.saving.set(false);
-        alert('Error al regenerar el PDF');
+        alert('Error al descargar el PDF');
       },
     });
   }
