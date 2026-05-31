@@ -380,11 +380,11 @@ export class ApiService {
   }
 
   // Certificados PDF
-  generarCertificadoAlumnoRegular(data: { estudiante_id: string; inspector_id: string }): Observable<PdfResponse> {
+  generarCertificadoAlumnoRegular(data: { estudiante_id: string; inspector_id: string; documento_id?: string }): Observable<PdfResponse> {
     return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/certificado-alumno-regular`, data, { headers: this.jsonHeaders });
   }
 
-  generarCertificadoNotas(data: { estudiante_id: string; inspector_id: string; ano_escolar?: number }): Observable<PdfResponse> {
+  generarCertificadoNotas(data: { estudiante_id: string; inspector_id: string; ano_escolar?: number; documento_id?: string }): Observable<PdfResponse> {
     return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/certificado-notas`, data, { headers: this.jsonHeaders });
   }
 
@@ -396,6 +396,7 @@ export class ApiService {
     fecha: string;
     hora_salida: string;
     observacion?: string;
+    documento_id?: string;
   }): Observable<PdfResponse> {
     return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/autorizacion-retiro`, data, { headers: this.jsonHeaders });
   }
@@ -410,6 +411,7 @@ export class ApiService {
     tipo_lesion?: string;
     testigos?: string;
     derivacion?: string;
+    documento_id?: string;
   }): Observable<PdfResponse> {
     return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/accidente-escolar`, data, { headers: this.jsonHeaders });
   }
@@ -425,10 +427,6 @@ export class ApiService {
 
   updateDocumento(id: string, data: Partial<DocumentoGenerado>): Observable<DocumentoGenerado> {
     return this.http.put<DocumentoGenerado>(`${this.baseUrl}/documentos/${id}`, data, { headers: this.jsonHeaders });
-  }
-
-  regenerarPdf(documentoId: string): Observable<PdfResponse> {
-    return this.http.post<PdfResponse>(`${this.baseUrl}/documentos/${documentoId}/regenerar-pdf`, {}, { headers: this.jsonHeaders });
   }
 
   // Retiros

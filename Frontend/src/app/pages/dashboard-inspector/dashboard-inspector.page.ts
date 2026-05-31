@@ -10,6 +10,7 @@ import {
   Estudiante, Curso, Asistencia,
   DocumentoGenerado, AccidenteEscolar, RetiroAlumno,
   LibroInspectoria, DashboardInspector, InasistenciaCritica,
+  PdfResponse,
 } from '../../shared/models';
 
 @Component({
@@ -348,31 +349,24 @@ export class DashboardInspectorPage implements OnInit {
     this.retiroForm.estudiante_id = est.id;
 
     if (editingDocId) {
-      // Edición desde documento existente
-      this.api.updateDocumento(editingDocId, {
-        estudiante_id: est.id,
+      // Edición desde documento existente — misma lógica que crear nuevo
+      this.api.generarAutorizacionRetiro({
+        ...this.retiroForm,
         inspector_id: userId,
+        documento_id: editingDocId,
       }).subscribe({
-        next: () => {
-          this.api.regenerarPdf(editingDocId).subscribe({
-            next: (res) => {
-              this.saving.set(false);
-              this.showRetiroModal.set(false);
-              this.editingDocumentoId.set(null);
-              this.pdfPreviewData.set(res.pdf_base64);
-              this.showPdfPreview.set(true);
-              this.showSuccess('Documento actualizado y PDF regenerado');
-              this.loadInitialData();
-            },
-            error: () => {
-              this.saving.set(false);
-              alert('Documento actualizado pero error al regenerar PDF');
-            },
-          });
+        next: (res) => {
+          this.saving.set(false);
+          this.showRetiroModal.set(false);
+          this.editingDocumentoId.set(null);
+          this.pdfPreviewData.set(res.pdf_base64);
+          this.showPdfPreview.set(true);
+          this.showSuccess('Documento actualizado');
+          this.loadInitialData();
         },
         error: () => {
           this.saving.set(false);
-          alert('Error al actualizar documento');
+          alert('Error al generar documento');
         },
       });
     } else {
@@ -454,35 +448,24 @@ export class DashboardInspectorPage implements OnInit {
     this.accidenteForm.estudiante_id = est.id;
 
     if (editingDocId) {
-      // Edición desde documento existente
-      this.api.updateDocumento(editingDocId, {
-        estudiante_id: est.id,
+      // Edición desde documento existente — misma lógica que crear nuevo
+      this.api.generarDeclaracionAccidente({
+        ...this.accidenteForm,
         inspector_id: userId,
-        datos_adicionales: {
-          ...this.selectedDocumento()?.datos_adicionales,
-          tipo_lesion: this.accidenteForm.tipo_lesion,
-        },
+        documento_id: editingDocId,
       }).subscribe({
-        next: () => {
-          this.api.regenerarPdf(editingDocId).subscribe({
-            next: (res) => {
-              this.saving.set(false);
-              this.showAccidenteModal.set(false);
-              this.editingDocumentoId.set(null);
-              this.pdfPreviewData.set(res.pdf_base64);
-              this.showPdfPreview.set(true);
-              this.showSuccess('Documento actualizado y PDF regenerado');
-              this.loadInitialData();
-            },
-            error: () => {
-              this.saving.set(false);
-              alert('Documento actualizado pero error al regenerar PDF');
-            },
-          });
+        next: (res) => {
+          this.saving.set(false);
+          this.showAccidenteModal.set(false);
+          this.editingDocumentoId.set(null);
+          this.pdfPreviewData.set(res.pdf_base64);
+          this.showPdfPreview.set(true);
+          this.showSuccess('Documento actualizado');
+          this.loadInitialData();
         },
         error: () => {
           this.saving.set(false);
-          alert('Error al actualizar documento');
+          alert('Error al generar documento');
         },
       });
     } else {
@@ -573,34 +556,90 @@ export class DashboardInspectorPage implements OnInit {
     );
   }
 
+  /** Descarga el PDF de un documento usando el MISMO endpoint de generación */
   descargarPdfDocumento(): void {
     const doc = this.selectedDocumento();
     if (!doc?.id) return;
     this.saving.set(true);
-    this.api.regenerarPdf(doc.id).subscribe({
-      next: (res) => {
-        this.saving.set(false);
-        // Descargar directamente como cuando se genera por primera vez
-        const byteCharacters = atob(res.pdf_base64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${doc.tipo_documento?.replace(/_/g, '-') || 'documento'}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-        this.showSuccess('PDF descargado');
-      },
-      error: () => {
-        this.saving.set(false);
-        alert('Error al descargar el PDF');
-      },
-    });
+
+    const tipo = doc.tipo_documento;
+    const inspector_id = doc.inspector_id;
+    const estudiante_id = doc.estudiante_id;
+    const documento_id = doc.id;
+
+    // Helper para descargar
+    const procesarRespuesta = (res: PdfResponse) => {
+      this.saving.set(false);
+      if (!res.pdf_base64) { alert('Error: PDF vacío'); return; }
+      const byteCharacters = atob(res.pdf_base64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${tipo?.replace(/_/g, '-') || 'documento'}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      this.showSuccess('PDF descargado');
+    };
+
+    const onError = () => {
+      this.saving.set(false);
+      alert('Error al descargar el PDF');
+    };
+
+    // Usar el MISMO endpoint de generación que cuando se crea el documento
+    if (tipo === 'certificado_alumno_regular') {
+      this.api.generarCertificadoAlumnoRegular({ estudiante_id, inspector_id, documento_id }).subscribe({
+        next: procesarRespuesta, error: onError,
+      });
+    } else if (tipo === 'certificado_notas') {
+      const ano = doc.datos_adicionales?.ano_escolar;
+      this.api.generarCertificadoNotas({ estudiante_id, inspector_id, documento_id, ano_escolar: ano }).subscribe({
+        next: procesarRespuesta, error: onError,
+      });
+    } else if (tipo === 'retiro_alumno' || tipo === 'autorizacion_retiro') {
+      const retiroId = doc.datos_adicionales?.retiro_id;
+      if (!retiroId) { alert('No hay datos del retiro asociado'); this.saving.set(false); return; }
+      this.api.getRetiro(retiroId).subscribe({
+        next: (retiro) => {
+          this.api.generarAutorizacionRetiro({
+            estudiante_id, inspector_id, documento_id,
+            apoderado_autorizante: retiro.apoderado_autorizante,
+            motivo: retiro.motivo,
+            fecha: retiro.fecha,
+            hora_salida: retiro.hora_salida,
+            observacion: retiro.observacion || '',
+          }).subscribe({ next: procesarRespuesta, error: onError });
+        },
+        error: onError,
+      });
+    } else if (tipo === 'seguro_escolar') {
+      const accidenteId = doc.datos_adicionales?.accidente_id;
+      if (!accidenteId) { alert('No hay datos del accidente asociado'); this.saving.set(false); return; }
+      this.api.getAccidente(accidenteId).subscribe({
+        next: (accidente) => {
+          this.api.generarDeclaracionAccidente({
+            estudiante_id, inspector_id, documento_id,
+            fecha_accidente: accidente.fecha_accidente,
+            hora_accidente: accidente.hora_accidente || '',
+            lugar: accidente.lugar || '',
+            descripcion: accidente.descripcion,
+            tipo_lesion: accidente.tipo_lesion || '',
+            testigos: accidente.testigos || '',
+            derivacion: accidente.derivacion || '',
+          }).subscribe({ next: procesarRespuesta, error: onError });
+        },
+        error: onError,
+      });
+    } else {
+      alert(`Tipo de documento no soportado: ${tipo}`);
+      this.saving.set(false);
+    }
   }
 
   descargarPdfDesdeDetalle(): void {

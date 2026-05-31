@@ -152,16 +152,6 @@ urlpatterns = [
         name="accidente-escolar-noslash",
     ),
     path(
-        "documentos/<str:pk>/regenerar-pdf/",
-        inspector_views.regenerar_pdf_documento,
-        name="documento-regenerar-pdf",
-    ),
-    path(
-        "documentos/<str:pk>/regenerar-pdf",
-        inspector_views.regenerar_pdf_documento,
-        name="documento-regenerar-pdf-noslash",
-    ),
-    path(
         "documentos/<str:pk>/",
         inspector_views.DocumentoGeneradoDetail.as_view(),
         name="documento-detail",
