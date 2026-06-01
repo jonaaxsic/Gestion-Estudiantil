@@ -166,6 +166,7 @@ No necesitas modificarlo si levantaste el backend en el paso anterior.
 #### Paso 3 — Levantar el servidor de desarrollo
 
 ```bash
+Dentro del directorio /Frontend en consola 
 ng serve
 ```
 
