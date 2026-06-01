@@ -295,7 +295,7 @@
                 </div>
                 <div class="curso-info">
                   <span class="curso-nivel">{{ curso.nivel }}</span>
-                  <span class="curso-nombre">{{ curso.nombre }}</span>
+                  <span class="curso-nombre">{{ getNombreLimpio(curso) }}</span>
                   <span class="curso-asignatura">{{ curso.asignatura }}</span>
                 </div>
                 <div class="curso-arrow">
@@ -319,7 +319,7 @@
           <div class="curso-detail-info">
             <h3 class="card-title">
               <span class="material-icons">assignment</span>
-              {{ selectedCurso()?.nombre }} {{ selectedCurso()?.nivel }} - {{ selectedAsignatura() }}
+              {{ getNombreLimpio(selectedCurso()!) }} - {{ selectedAsignatura() }}
             </h3>
             <button class="btn-icon" (click)="selectedCurso.set(null)">
               <span class="material-icons">close</span>

@@ -1167,6 +1167,26 @@
   flex-shrink: 0;
 }
 
+/* En mobile la X se posiciona absoluta para no romper el layout */
+@media (max-width: 768px) {
+  .curso-detail-info {
+    position: relative;
+    padding-right: 36px; /* espacio para la X */
+  }
+  .curso-detail-info .btn-icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .curso-detail-info .card-title {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 /* ── CURSO TABS ─────────────────────────────────────────── */
 .curso-tabs {
   display: flex;

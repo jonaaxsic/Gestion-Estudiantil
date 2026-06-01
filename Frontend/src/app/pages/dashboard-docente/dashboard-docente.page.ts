@@ -1136,6 +1136,14 @@ export class DashboardDocentePage implements OnInit {
     }
   }
   
+  // Limpiar nombre del curso quitando el prefijo del nivel (ej: "Básico 5ºA" → "5ºA")
+  getNombreLimpio(curso: { nombre: string; nivel?: string }): string {
+    if (curso.nivel && curso.nombre.startsWith(curso.nivel)) {
+      return curso.nombre.substring(curso.nivel.length).trim();
+    }
+    return curso.nombre;
+  }
+
   // Obtener nombre del estudiante por ID
   getEstudianteNombre(estudianteId?: string): string {
     if (!estudianteId) return 'Estudiante desconocido';
