@@ -63,14 +63,13 @@
   </div>
 }
 
-<!-- Tabs usando componente compartido -->
-<app-shared-tabs
-  [tabs]="apoderadoTabs"
-  [selectedIndex]="tabIndex"
-  (tabChanged)="onApoderadoTabChanged($event)">
-</app-shared-tabs>
-
 <div class="page-container">
+  <!-- Tabs usando componente compartido -->
+  <app-shared-tabs
+    [tabs]="apoderadoTabs"
+    [selectedIndex]="tabIndex"
+    (tabChanged)="onApoderadoTabChanged($event)">
+  </app-shared-tabs>
   <div class="tab-content">
   <!-- Solo mostrar tarjetas de info y stats en vista Inicio -->
   @if (activeSection() === 'inicio') {
