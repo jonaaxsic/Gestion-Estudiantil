@@ -58,6 +58,11 @@ class UsuarioSerializer(serializers.Serializer):
         return instance
 
 
+def _empty_str_to_none(value):
+    """Convierte strings vacíos a None para campos opcionales"""
+    return None if isinstance(value, str) and value.strip() == "" else value
+
+
 class EstudianteSerializer(serializers.Serializer):
     """Serializer para Estudiante"""
 
@@ -72,6 +77,14 @@ class EstudianteSerializer(serializers.Serializer):
     apoderado_id = serializers.CharField(required=False, allow_null=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+
+    def to_internal_value(self, data):
+        # Convertir strings vacíos a None ANTES de que los fields validen
+        data = data.copy()
+        for field in ("fecha_nacimiento", "direccion", "telefono", "curso_id", "apoderado_id"):
+            if field in data:
+                data[field] = _empty_str_to_none(data[field])
+        return super().to_internal_value(data)
 
     def create(self, validated_data):
         estudiante = Estudiante(validated_data)
