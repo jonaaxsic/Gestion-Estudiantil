@@ -781,13 +781,19 @@ export class DashboardDocentePage implements OnInit {
   // Cuando el usuario escribe en un input (tracking local, NO guarda)
   onNotaInput(estudianteId: string, numeroNota: string, event: Event): void {
     const input = event.target as HTMLInputElement;
-    const valor = input.value;
+    // Normalizar coma → punto para el formato chileno (5,8 → 5.8)
+    let valor = input.value.replace(',', '.');
+
+    // Solo permitir: dígitos, un punto decimal, vacío
+    if (valor !== '' && !/^\d*\.?\d*$/.test(valor)) {
+      return;
+    }
 
     // Validar rango mientras escribe
     if (valor !== '') {
       const num = parseFloat(valor);
       if (!isNaN(num) && (num < 1 || num > 7)) {
-        return; // No actualizar si está fuera de rango
+        return;
       }
     }
 
@@ -795,7 +801,7 @@ export class DashboardDocentePage implements OnInit {
       ...state,
       [estudianteId]: {
         ...(state[estudianteId] || {}),
-        [numeroNota]: valor
+        [numeroNota]: valor // guarda con punto (5.8)
       }
     }));
   }
@@ -805,12 +811,14 @@ export class DashboardDocentePage implements OnInit {
     // Primero revisar si hay un valor local sin guardar
     const localEdit = this.notasEditando();
     if (localEdit[estudianteId]?.[num] !== undefined) {
-      return localEdit[estudianteId][num];
+      const stored = localEdit[estudianteId][num];
+      return stored.replace('.', ','); // Mostrar con coma (formato chileno)
     }
     // Si no, mostrar el valor de la BD
     if (!nota?.notas) return '';
     const val = nota.notas[num];
-    return val !== undefined && val !== null ? String(val) : '';
+    if (val === undefined || val === null) return '';
+    return String(val).replace('.', ',');
   }
 
   // Calcular promedio en tiempo real, combinando datos de BD + ediciones locales

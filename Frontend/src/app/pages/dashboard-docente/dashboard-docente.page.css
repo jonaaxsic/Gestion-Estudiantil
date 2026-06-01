@@ -1072,6 +1072,12 @@
   color: var(--text-primary);
   transition: border-color 0.2s;
   font-family: inherit;
+  -moz-appearance: textfield;
+}
+.nota-input::-webkit-outer-spin-button,
+.nota-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .nota-input:focus {
@@ -1134,6 +1140,32 @@
   .nota-input { width: 52px; font-size: 0.82rem; }
 }
 
+/* ── CURSO DETAIL HEADER ──────────────────────────────────── */
+.curso-detail-header {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.curso-detail-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.curso-detail-info .card-title {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.curso-detail-info .btn-icon {
+  flex-shrink: 0;
+}
+
 /* ── CURSO TABS ─────────────────────────────────────────── */
 .curso-tabs {
   display: flex;
@@ -1141,6 +1173,7 @@
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-subtle);
+  margin-bottom: 4px;
 }
 
 .curso-tab {
@@ -1470,11 +1503,18 @@
     font-size: 0.85rem;
   }
   
-  .btn-back {
+  .curso-detail-header {
+    flex-direction: column;
+  }
+
+  .curso-detail-header .btn-back {
     width: 100%;
     justify-content: center;
     padding: 12px;
-    margin-bottom: 12px;
+  }
+
+  .curso-detail-info {
+    width: 100%;
   }
 }
 

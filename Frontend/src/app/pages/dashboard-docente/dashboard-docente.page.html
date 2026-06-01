@@ -311,18 +311,20 @@
     <!-- Detalle del Curso -->
     @if (selectedCurso()) {
       <div class="content-card" style="margin-top: 24px;">
-        <div class="card-header">
+        <div class="card-header curso-detail-header">
           <button class="btn-back" (click)="selectedCurso.set(null)">
             <span class="material-icons">arrow_back</span>
             Volver a Cursos
           </button>
-          <h3 class="card-title">
-            <span class="material-icons">assignment</span>
-            {{ selectedCurso()?.nombre }} - {{ selectedAsignatura() }}
-          </h3>
-          <button class="btn-icon" (click)="selectedCurso.set(null)">
-            <span class="material-icons">close</span>
-          </button>
+          <div class="curso-detail-info">
+            <h3 class="card-title">
+              <span class="material-icons">assignment</span>
+              {{ selectedCurso()?.nombre }} - {{ selectedAsignatura() }}
+            </h3>
+            <button class="btn-icon" (click)="selectedCurso.set(null)">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
         </div>
         
         <!-- Tabs -->
@@ -391,22 +393,22 @@
                         {{ est.apellido }} {{ est.nombre }}
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota1')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota1', $event)" [disabled]="notaEst?.cerrado">
+                        <input type="text" inputmode="decimal" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota1')" (input)="onNotaInput(est.id!, 'nota1', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota2')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota2', $event)" [disabled]="notaEst?.cerrado">
+                        <input type="text" inputmode="decimal" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota2')" (input)="onNotaInput(est.id!, 'nota2', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota3')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota3', $event)" [disabled]="notaEst?.cerrado">
+                        <input type="text" inputmode="decimal" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota3')" (input)="onNotaInput(est.id!, 'nota3', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota4')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota4', $event)" [disabled]="notaEst?.cerrado">
+                        <input type="text" inputmode="decimal" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota4')" (input)="onNotaInput(est.id!, 'nota4', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota5')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota5', $event)" [disabled]="notaEst?.cerrado">
+                        <input type="text" inputmode="decimal" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota5')" (input)="onNotaInput(est.id!, 'nota5', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota6')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota6', $event)" [disabled]="notaEst?.cerrado">
+                        <input type="text" inputmode="decimal" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota6')" (input)="onNotaInput(est.id!, 'nota6', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td class="promedio-cell">
                         {{ calcularPromedio(notaEst, est.id!) }}
