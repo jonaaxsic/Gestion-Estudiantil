@@ -431,25 +431,20 @@
             </h4>
             
             <!-- Selector de fecha -->
-            <div class="fecha-selector" style="margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-              <label class="form-label" style="margin: 0;">Fecha:</label>
-              <input type="date" class="form-input" [value]="fechaSeleccionada()" (change)="onFechaSeleccionadaChange($event)">
-              <span class="help-text">Seleccione una fecha para ver/registrar asistencia</span>
+            <div class="fecha-selector">
+              <label class="fecha-label">Fecha:</label>
+              <input type="date" class="fecha-input" [value]="fechaSeleccionada()" (change)="onFechaSeleccionadaChange($event)">
+              <span class="fecha-ayuda">Seleccione una fecha para ver/registrar asistencia</span>
             </div>
             
-            <!-- Stats de asistencia -->
-            <div class="asistencia-stats" style="display: flex; gap: 20px; margin-bottom: 16px; padding: 12px; background: var(--bg-subtle); border-radius: 8px;">
-              <div class="stat-item">
-                <span class="stat-num">{{ getEstadisticasAsistenciaMes().porcentaje }}%</span>
-                <span class="stat-label">Asistencia</span>
+            <!-- Stats de asistencia con círculo de porcentaje -->
+            <div class="asistencia-header">
+              <div class="asistencia-circulo" [class.bajo]="getEstadisticasAsistenciaMes().porcentaje < 50" [class.medio]="getEstadisticasAsistenciaMes().porcentaje >= 50 && getEstadisticasAsistenciaMes().porcentaje < 75" [class.alto]="getEstadisticasAsistenciaMes().porcentaje >= 75">
+                <span class="circulo-valor">{{ getEstadisticasAsistenciaMes().porcentaje }}%</span>
               </div>
-              <div class="stat-item">
-                <span class="stat-num success">{{ getEstadisticasAsistenciaMes().presentes }}</span>
-                <span class="stat-label">Presentes</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-num danger">{{ getEstadisticasAsistenciaMes().ausentes }}</span>
-                <span class="stat-label">Ausentes</span>
+              <div class="asistencia-info">
+                <span class="asistencia-titulo">Asistencia del Mes</span>
+                <span class="asistencia-subtitulo">{{ getEstadisticasAsistenciaMes().presentes }} presentes · {{ getEstadisticasAsistenciaMes().ausentes }} ausentes</span>
               </div>
             </div>
             
