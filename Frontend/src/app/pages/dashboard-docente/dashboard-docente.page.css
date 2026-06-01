@@ -1575,6 +1575,33 @@
   }
 }
 
+/* ── MEJORAS REUNIONES/EVALUACIONES/ANOTACIONES MÓVIL ──── */
+@media (max-width: 768px) {
+  .reuniones-list {
+    padding: 8px 12px;
+  }
+
+  .reunion-card {
+    padding: 14px;
+  }
+
+  .eval-card {
+    padding: 14px;
+  }
+
+  .eval-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .estudiante-anotaciones {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 /* ── MENÚ MÓVIL MEJORADO ───────────────────────────────── */
 @media (max-width: 768px) {
   .mobile-menu-overlay {
@@ -1739,6 +1766,170 @@
   margin-top: 4px;
 }
 
+/* ── REUNIONES TAB (dentro del curso) ───────────────────────── */
+.reuniones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 20px 16px;
+}
+
+.reunion-card {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.reunion-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--brand-light);
+}
+
+.reunion-card.proxima {
+  border-left-color: var(--brand);
+  background: linear-gradient(135deg, var(--brand-light), var(--bg-subtle));
+}
+
+.reunion-card.pasada {
+  opacity: 0.7;
+  border-left-color: var(--text-muted);
+}
+
+.reunion-card .reunion-fecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.reunion-card .reunion-lugar {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.reunion-card .reunion-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ── EVALUACIONES TAB (dentro del curso) ──────────────────── */
+.eval-card {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--text-muted);
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.eval-card:hover {
+  background: var(--bg-hover);
+  border-color: var(--brand-light);
+}
+
+.eval-card.proxima {
+  border-left-color: var(--success);
+  background: linear-gradient(135deg, #ecfdf5, var(--bg-subtle));
+}
+
+.eval-card.pasada {
+  opacity: 0.7;
+  border-left-color: var(--text-muted);
+}
+
+.eval-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.eval-titulo {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.eval-fecha {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.eval-materia {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.eval-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ── ANOTACIONES TAB (dentro del curso) ───────────────────── */
+.estudiante-anotaciones {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.estudiante-anotaciones:last-child {
+  border-bottom: none;
+}
+
+.estudiante-nombre {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.anotaciones-count {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-positiva {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-negativa {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 /* ── SUBSECTION TITLE ───────────────────────────────────────── */
 .subsection-title {
   display: flex;
@@ -1747,7 +1938,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--text-primary);
-  padding: 12px 0 8px;
+  padding: 16px 20px 8px;
   border-bottom: 1px solid var(--border-light);
   text-transform: uppercase;
   letter-spacing: 0.04em;
