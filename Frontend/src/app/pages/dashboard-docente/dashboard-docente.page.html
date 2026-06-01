@@ -319,7 +319,7 @@
           <div class="curso-detail-info">
             <h3 class="card-title">
               <span class="material-icons">assignment</span>
-              {{ selectedCurso()?.nombre }} - {{ selectedAsignatura() }}
+              {{ selectedCurso()?.nombre }} {{ selectedCurso()?.nivel }} - {{ selectedAsignatura() }}
             </h3>
             <button class="btn-icon" (click)="selectedCurso.set(null)">
               <span class="material-icons">close</span>
