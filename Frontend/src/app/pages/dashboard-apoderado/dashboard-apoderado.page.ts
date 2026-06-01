@@ -320,7 +320,7 @@ export class DashboardApoderadoPage implements OnInit {
       if (!nota?.notas) return false;
       for (const key of ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6']) {
         const v = nota.notas[key];
-        if (v !== undefined && v !== null && v !== '') return true;
+        if (v != null) return true;
       }
       return false; // Todas las notas son null → no mostrar
     });
@@ -332,7 +332,7 @@ export class DashboardApoderadoPage implements OnInit {
     const valores: number[] = [];
     for (const key of ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6']) {
       const v = nota.notas[key];
-      if (v !== undefined && v !== null && v !== '') {
+      if (v != null) {
         valores.push(Number(v));
       }
     }
