@@ -757,6 +757,7 @@ export class DashboardDocentePage implements OnInit {
   seleccionarCurso(curso: CursoAsignado): void {
     this.selectedCurso.set(curso);
     this.selectedAsignatura.set(curso.asignatura || '');
+    this.notasEditando.set({}); // Limpiar ediciones pendientes
     
     // Cargar estudiantes del curso
     if (curso.id) {
@@ -767,49 +768,142 @@ export class DashboardDocentePage implements OnInit {
     }
   }
 
+  // Estado local para notas que el usuario está editando (aún no guardadas)
+  notasEditando = signal<Record<string, Record<string, string>>>({});
+
   loadNotasEstudiantes(cursoId: string, asignatura: string): void {
     this.api.getNotas({ curso_id: cursoId, ano_escolar: this.anoEscolar }).subscribe(data => {
-      // Filtrar por asignatura
       this.notasEstudiantes.set(data.filter(n => n.asignatura === asignatura));
+      this.notasEditando.set({}); // Limpiar ediciones pendientes al recargar
     });
   }
 
-  // Guardar nota de un estudiante
-  guardarNota(estudianteId: string, numeroNota: string, valor: string): void {
+  // Cuando el usuario escribe en un input (tracking local, NO guarda)
+  onNotaInput(estudianteId: string, numeroNota: string, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const valor = input.value;
+
+    // Validar rango mientras escribe
+    if (valor !== '') {
+      const num = parseFloat(valor);
+      if (!isNaN(num) && (num < 1 || num > 7)) {
+        return; // No actualizar si está fuera de rango
+      }
+    }
+
+    this.notasEditando.update(state => ({
+      ...state,
+      [estudianteId]: {
+        ...(state[estudianteId] || {}),
+        [numeroNota]: valor
+      }
+    }));
+  }
+
+  // Obtener el valor a mostrar en el input (local si se está editando, o de BD)
+  getNotaValor(nota: Nota | undefined, estudianteId: string, num: string): string {
+    // Primero revisar si hay un valor local sin guardar
+    const localEdit = this.notasEditando();
+    if (localEdit[estudianteId]?.[num] !== undefined) {
+      return localEdit[estudianteId][num];
+    }
+    // Si no, mostrar el valor de la BD
+    if (!nota?.notas) return '';
+    const val = nota.notas[num];
+    return val !== undefined && val !== null ? String(val) : '';
+  }
+
+  // Calcular promedio en tiempo real, combinando datos de BD + ediciones locales
+  calcularPromedio(notaEst: Nota | undefined, estudianteId: string): string {
+    const localEdit = this.notasEditando();
+    const valores: number[] = [];
+
+    for (const key of ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6']) {
+      // Priorizar valor local (lo que el usuario está escribiendo)
+      let v: any = localEdit[estudianteId]?.[key];
+      if (v === undefined || v === '') {
+        // Si no hay local, usar valor de BD
+        v = notaEst?.notas?.[key];
+      }
+      if (v !== undefined && v !== null && v !== '') {
+        const num = Number(v);
+        if (!isNaN(num)) {
+          valores.push(num);
+        }
+      }
+    }
+    if (valores.length === 0) return '-';
+    const suma = valores.reduce((a, b) => a + b, 0);
+    return (suma / valores.length).toFixed(1);
+  }
+
+  // Guardar TODAS las notas pendientes de TODOS los estudiantes
+  guardarTodasLasNotas(): void {
     const curso = this.selectedCurso();
     if (!curso?.id || !this.selectedAsignatura()) return;
 
-    // Convertir valor a número, si es vacío usar undefined
-    const notaValor = valor ? parseFloat(valor) : undefined;
-    if (notaValor !== undefined && (notaValor < 1 || notaValor > 7)) {
-      alert('La nota debe estar entre 1 y 7');
+    const editando = this.notasEditando();
+    const estudianteIds = Object.keys(editando);
+    if (estudianteIds.length === 0) {
+      alert('No hay notas pendientes por guardar');
       return;
     }
 
-    this.api.actualizarNotaSimple({
-      estudiante_id: estudianteId,
-      curso_id: curso.id,
-      asignatura: this.selectedAsignatura(),
-      ano_escolar: this.anoEscolar,
-      numero_nota: numeroNota,
-      valor: notaValor as number
-    }).subscribe({
-      next: () => {
-        this.showSuccess('Nota guardada correctamente');
-        this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
-      },
-      error: () => alert('Error al guardar nota')
-    });
+    this.saving.set(true);
+    let completadas = 0;
+    const total = estudianteIds.length;
+
+    for (const estId of estudianteIds) {
+      const notasEst = editando[estId];
+      const notasPendientes = Object.keys(notasEst).filter(k => notasEst[k] !== '');
+
+      // Guardar cada nota pendiente una por una
+      let guardadas = 0;
+      for (const numNota of notasPendientes) {
+        const valor = parseFloat(notasEst[numNota]);
+        if (isNaN(valor) || valor < 1 || valor > 7) {
+          continue; // Saltar valores inválidos
+        }
+
+        this.api.actualizarNotaSimple({
+          estudiante_id: estId,
+          curso_id: curso.id,
+          asignatura: this.selectedAsignatura(),
+          ano_escolar: this.anoEscolar,
+          numero_nota: numNota,
+          valor: valor
+        }).subscribe({
+          next: () => {
+            guardadas++;
+            if (guardadas === notasPendientes.length) {
+              completadas++;
+              if (completadas === total) {
+                this.saving.set(false);
+                this.showSuccess('Notas guardadas correctamente');
+                this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+              }
+            }
+          },
+          error: () => {
+            completadas++;
+            if (completadas === total) {
+              this.saving.set(false);
+              this.showSuccess('Algunas notas no se pudieron guardar');
+              this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+            }
+          }
+        });
+      }
+    }
+  }
+
+  // Verificar si hay cambios sin guardar
+  get hayCambiosSinGuardar(): boolean {
+    return Object.keys(this.notasEditando()).length > 0;
   }
 
   getNotaEstudiante(estudianteId: string): Nota | undefined {
     return this.notasEstudiantes().find(n => n.estudiante_id === estudianteId);
-  }
-
-  getNotaValor(nota: Nota | undefined, num: string): string {
-    if (!nota?.notas) return '';
-    const val = nota.notas[num];
-    return val !== undefined && val !== null ? String(val) : '';
   }
 
   // Estudiantes ordenados alfabéticamente

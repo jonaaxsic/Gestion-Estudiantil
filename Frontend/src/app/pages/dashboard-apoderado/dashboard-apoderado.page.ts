@@ -314,18 +314,55 @@ export class DashboardApoderadoPage implements OnInit {
     return valor >= 5;
   }
   
-  // Promedio general
+  // Filtrar solo asignaturas que tienen al menos una nota ingresada
+  get notasConDatos(): Nota[] {
+    return this.notas().filter(nota => {
+      if (!nota?.notas) return false;
+      for (const key of ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6']) {
+        const v = nota.notas[key];
+        if (v !== undefined && v !== null && v !== '') return true;
+      }
+      return false; // Todas las notas son null → no mostrar
+    });
+  }
+
+  // Calcular promedio por asignatura desde notas individuales
+  calcularPromedioAsignatura(nota: Nota): string {
+    if (!nota?.notas) return '-';
+    const valores: number[] = [];
+    for (const key of ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6']) {
+      const v = nota.notas[key];
+      if (v !== undefined && v !== null && v !== '') {
+        valores.push(Number(v));
+      }
+    }
+    if (valores.length === 0) return '-';
+    const suma = valores.reduce((a, b) => a + b, 0);
+    return (suma / valores.length).toFixed(1);
+  }
+
+  // Obtener promedio como número para el semáforo de colores
+  getPromedioAsignaturaNumero(nota: Nota): number {
+    const promStr = this.calcularPromedioAsignatura(nota);
+    if (promStr === '-') return 0;
+    return parseFloat(promStr);
+  }
+
+  // Promedio general (solo considera asignaturas con notas)
   getPromedioGeneral(): number {
-    const notasDelEstudiante = this.notas();
+    const notasDelEstudiante = this.notasConDatos;
     if (notasDelEstudiante.length === 0) return 0;
     
-    const promedios = notasDelEstudiante
-      .map(n => n.nota_final)
-      .filter((p): p is number => p !== undefined && p !== null && p > 0);
+    const promedios: number[] = [];
+    for (const nota of notasDelEstudiante) {
+      const promStr = this.calcularPromedioAsignatura(nota);
+      if (promStr !== '-') {
+        promedios.push(parseFloat(promStr));
+      }
+    }
     
     if (promedios.length === 0) return 0;
-    
-    const suma = promedios.reduce((acc: number, curr: number) => acc + curr, 0);
+    const suma = promedios.reduce((acc, curr) => acc + curr, 0);
     return suma / promedios.length;
   }
   

@@ -596,21 +596,31 @@ def generar_certificado_alumno_regular(estudiante, establecimiento, inspector):
 # 2. CERTIFICADO DE NOTAS
 # ============================================================
 def _build_tabla_notas(notas_por_asignatura):
-    """Construye la tabla de notas con estilo profesional"""
+    """Construye la tabla de notas con estilo profesional.
+    Solo incluye asignaturas donde el alumno tenga al menos 1 nota ingresada."""
     encabezados_tabla = ["Asignatura", "N1", "N2", "N3", "N4", "N5", "N6", "Prom."]
     data_tabla = [encabezados_tabla]
     total_promedios = []
 
     for item in notas_por_asignatura:
         notas = item.get("notas", {})
+        valores = []
+        for i in range(1, 7):
+            val = notas.get(f"nota{i}")
+            if val is not None:
+                valores.append(float(val))
+
+        # Saltar asignaturas sin ninguna nota ingresada
+        if not valores:
+            continue
+
         fila = [item.get("asignatura", "")]
         for i in range(1, 7):
             val = notas.get(f"nota{i}")
             fila.append(str(val) if val is not None else "-")
-        prom = item.get("nota_final", "-")
-        fila.append(str(prom) if prom else "-")
-        if prom:
-            total_promedios.append(float(prom))
+        prom = round(sum(valores) / len(valores), 1)
+        fila.append(str(prom))
+        total_promedios.append(prom)
         data_tabla.append(fila)
 
     if total_promedios:

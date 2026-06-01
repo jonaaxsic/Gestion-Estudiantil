@@ -357,6 +357,18 @@
               Notas de Alumnos ({{ anoEscolar }})
             </h4>
             
+            <div style="padding: 8px 20px; display: flex; align-items: center; gap: 12px;">
+              <button class="btn btn-primary" (click)="guardarTodasLasNotas()" [disabled]="saving() || !hayCambiosSinGuardar">
+                <span class="material-icons">save</span>
+                {{ saving() ? 'Guardando...' : 'Guardar Notas' }}
+              </button>
+              @if (hayCambiosSinGuardar) {
+                <span class="help-text" style="margin: 0; padding: 4px 12px; background: var(--warning); color: #fff; border-radius: var(--radius-pill); font-size: 0.75rem;">
+                  Hay cambios sin guardar
+                </span>
+              }
+            </div>
+            
             <div class="notas-table-wrapper">
               <table class="notas-table">
                 <thead>
@@ -379,25 +391,25 @@
                         {{ est.apellido }} {{ est.nombre }}
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota1')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota1', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota1')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota1', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota2')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota2', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota2')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota2', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota3')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota3', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota3')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota3', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota4')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota4', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota4')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota4', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota5')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota5', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota5')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota5', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td>
-                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, 'nota6')" min="1" max="7" step="0.1" (blur)="guardarNota(est.id!, 'nota6', $any($event.target).value)" [disabled]="notaEst?.cerrado">
+                        <input type="number" class="nota-input" [value]="getNotaValor(notaEst, est.id!, 'nota6')" min="1" max="7" step="0.1" (input)="onNotaInput(est.id!, 'nota6', $event)" [disabled]="notaEst?.cerrado">
                       </td>
                       <td class="promedio-cell">
-                        {{ notaEst?.nota_final || '-' }}
+                        {{ calcularPromedio(notaEst, est.id!) }}
                       </td>
                     </tr>
                   }
@@ -407,7 +419,7 @@
             
             <p class="help-text">
               <span class="material-icons">info</span>
-              Las notas se guardan automáticamente al salir del campo. Cada curso tiene 6 notas anuales.
+              Escriba las notas y presione "Guardar Notas" para guardar todos los cambios. El promedio se calcula en tiempo real.
             </p>
           }
           

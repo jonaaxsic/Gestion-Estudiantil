@@ -270,7 +270,7 @@
         </h3>
       </div>
       <div class="card-body">
-          @if (notas().length === 0) {
+          @if (notasConDatos.length === 0) {
           <div class="empty-state">
             <span class="material-icons">info</span>
             <p>No hay notas registradas</p>
@@ -287,7 +287,7 @@
             </div>
           }
           
-          @for (nota of notas(); track nota.id) {
+          @for (nota of notasConDatos; track nota.id) {
             <div class="nota-asignatura">
               <h4 class="asignatura-titulo">{{ nota.asignatura }}</h4>
               <div class="notas-grid">
@@ -329,7 +329,7 @@
                 </div>
                 <div class="nota-item promedio">
                   <span class="nota-label">Promedio</span>
-                  <span class="nota-value" [class.rojo]="(nota.nota_final || 0) < 4" [class.amarillo]="(nota.nota_final || 0) >= 4 && (nota.nota_final || 0) < 5" [class.verde]="(nota.nota_final || 0) >= 5">{{ nota.nota_final || '-' }}</span>
+                  <span class="nota-value" [class.rojo]="getPromedioAsignaturaNumero(nota) > 0 && getPromedioAsignaturaNumero(nota) < 4" [class.amarillo]="getPromedioAsignaturaNumero(nota) >= 4 && getPromedioAsignaturaNumero(nota) < 5" [class.verde]="getPromedioAsignaturaNumero(nota) >= 5">{{ calcularPromedioAsignatura(nota) }}</span>
                 </div>
               </div>
             </div>
