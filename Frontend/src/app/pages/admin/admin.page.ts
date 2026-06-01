@@ -522,8 +522,7 @@ export class AdminPage implements OnInit {
   }
   
   saveStudent(): void {
-    const student = this.editingStudent();
-    
+    const student = this.selectedStudent();
     if (student?.id) {
       this.api.updateEstudiante(student.id, this.studentForm).subscribe({
         next: () => {

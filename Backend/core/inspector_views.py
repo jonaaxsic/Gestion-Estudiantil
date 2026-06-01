@@ -49,31 +49,6 @@ class MongoObjectIdMixin:
         return data
 
 
-def _save_or_update_documento(request, tipo, estudiante_id, inspector_id, datos_adicionales):
-    """Guarda un nuevo documento o actualiza uno existente si se pasa documento_id"""
-    documento_id = request.data.get("documento_id")
-    if documento_id:
-        doc = DocumentoGenerado.find_one({"_id": ObjectId(documento_id)})
-        if doc:
-            doc.fecha_emision = datetime.now().isoformat()
-            doc.estado = "emitido"
-            if datos_adicionales:
-                doc.datos_adicionales = datos_adicionales
-            doc.save()
-            return doc
-    # Crear nuevo documento
-    doc = DocumentoGenerado({
-        "tipo_documento": tipo,
-        "estudiante_id": estudiante_id,
-        "inspector_id": inspector_id,
-        "fecha_emision": datetime.now().isoformat(),
-        "datos_adicionales": datos_adicionales or {},
-        "estado": "emitido",
-    })
-    doc.save()
-    return doc
-
-
 # ============================================================
 # DOCUMENTOS GENERADOS
 # ============================================================
@@ -178,6 +153,105 @@ class DocumentoGeneradoDetail(APIView, MongoObjectIdMixin):
 
 
 # ============================================================
+# REGENERAR PDF DE DOCUMENTO EXISTENTE
+# ============================================================
+
+@api_view(["POST"])
+def regenerar_pdf_documento(request, pk):
+    """Regenera el PDF de un documento existente"""
+    try:
+        doc = DocumentoGenerado.find_one({"_id": ObjectId(pk)})
+        if not doc:
+            return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        inspector_id = doc.inspector_id or request.data.get("inspector_id")
+        estudiante_id = doc.estudiante_id
+
+        if not estudiante_id or not inspector_id:
+            return Response(
+                {"error": "El documento no tiene estudiante_id o inspector_id"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        estudiante = Estudiante.find_one({"_id": ObjectId(estudiante_id)})
+        inspector = Usuario.find_one({"_id": ObjectId(inspector_id)})
+        establecimiento = _get_establecimiento_config()
+
+        if not estudiante or not inspector:
+            return Response({"error": "Estudiante o inspector no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        if estudiante.curso_id:
+            curso = Curso.find_one({"_id": ObjectId(estudiante.curso_id)})
+            if curso:
+                estudiante.curso_nombre = f"{curso.nivel} {curso.nombre}"
+
+        tipo = doc.tipo_documento
+        pdf_buffer = None
+
+        if tipo == "certificado_alumno_regular":
+            from .pdf_generator import generar_certificado_alumno_regular as generar_pdf
+            pdf_buffer = generar_pdf(estudiante.to_dict(), establecimiento, inspector.to_dict())
+
+        elif tipo == "certificado_notas":
+            from .pdf_generator import generar_certificado_notas as generar_pdf
+            ano = doc.datos_adicionales.get("ano_escolar") if doc.datos_adicionales else None
+            pdf_buffer = generar_pdf(estudiante.to_dict(), establecimiento, inspector.to_dict(), ano_escolar=ano)
+
+        elif tipo in ("autorizacion_retiro", "retiro_alumno"):
+            retiro_id = doc.datos_adicionales.get("retiro_id") if doc.datos_adicionales else None
+            if retiro_id:
+                retiro = RetiroAlumno.find_one({"_id": ObjectId(retiro_id)})
+                if retiro:
+                    from .pdf_generator import generar_autorizacion_retiro as generar_pdf
+                    pdf_buffer = generar_pdf(
+                        estudiante.to_dict(),
+                        retiro.to_dict(),
+                        establecimiento,
+                        inspector.to_dict(),
+                    )
+            if not pdf_buffer:
+                return Response({"error": "No se encontraron datos del retiro asociado"}, status=status.HTTP_404_NOT_FOUND)
+
+        elif tipo == "seguro_escolar":
+            accidente_id = doc.datos_adicionales.get("accidente_id") if doc.datos_adicionales else None
+            if accidente_id:
+                accidente = AccidenteEscolar.find_one({"_id": ObjectId(accidente_id)})
+                if accidente:
+                    accidente_data = {
+                        "fecha_accidente": accidente.fecha_accidente,
+                        "hora_accidente": getattr(accidente, "hora_accidente", ""),
+                        "lugar": getattr(accidente, "lugar", ""),
+                        "descripcion": accidente.descripcion,
+                        "tipo_lesion": getattr(accidente, "tipo_lesion", ""),
+                        "testigos": getattr(accidente, "testigos", ""),
+                        "derivacion": getattr(accidente, "derivacion", ""),
+                    }
+                    from .pdf_generator import generar_declaracion_accidente as generar_pdf
+                    pdf_buffer = generar_pdf(
+                        estudiante.to_dict(),
+                        accidente_data,
+                        establecimiento,
+                        inspector.to_dict(),
+                    )
+            if not pdf_buffer:
+                return Response({"error": "No se encontraron datos del accidente asociado"}, status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            return Response({"error": f"Tipo de documento no soportado: {tipo}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            "success": True,
+            "documento_id": doc._id,
+            "pdf_base64": _buffer_to_base64(pdf_buffer),
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ============================================================
 # CERTIFICADOS PDF
 # ============================================================
 
@@ -217,12 +291,15 @@ def generar_certificado_alumno_regular(request):
         )
 
         # Registrar en documentos_generados
-        doc = _save_or_update_documento(
-            request,
-            "certificado_alumno_regular",
-            estudiante_id, inspector_id,
-            {"nombre_estudiante": f"{estudiante.nombre} {estudiante.apellido}"},
-        )
+        doc = DocumentoGenerado({
+            "tipo_documento": "certificado_alumno_regular",
+            "estudiante_id": estudiante_id,
+            "inspector_id": inspector_id,
+            "fecha_emision": datetime.now().isoformat(),
+            "datos_adicionales": {"nombre_estudiante": f"{estudiante.nombre} {estudiante.apellido}"},
+            "estado": "emitido",
+        })
+        doc.save()
 
         return Response({
             "success": True,
@@ -284,15 +361,18 @@ def generar_certificado_notas(request):
         )
 
         # Registrar documento
-        doc = _save_or_update_documento(
-            request,
-            "certificado_notas",
-            estudiante_id, inspector_id,
-            {
+        doc = DocumentoGenerado({
+            "tipo_documento": "certificado_notas",
+            "estudiante_id": estudiante_id,
+            "inspector_id": inspector_id,
+            "fecha_emision": datetime.now().isoformat(),
+            "datos_adicionales": {
                 "nombre_estudiante": f"{estudiante.nombre} {estudiante.apellido}",
                 "ano_escolar": ano_escolar,
             },
-        )
+            "estado": "emitido",
+        })
+        doc.save()
 
         return Response({
             "success": True,
@@ -346,34 +426,17 @@ def generar_autorizacion_retiro(request):
             "observacion": observacion,
         }
 
-        documento_id = request.data.get("documento_id")
-        if documento_id:
-            # Regenerando documento existente — NO crear nuevo retiro
-            doc = DocumentoGenerado.find_one({"_id": ObjectId(documento_id)})
-            if not doc:
-                return Response({"error": "Documento no encontrado"}, status=status.HTTP_404_NOT_FOUND)
-            retiro_id = doc.datos_adicionales.get("retiro_id") if doc.datos_adicionales else None
-            if retiro_id:
-                retiro_obj = RetiroAlumno.find_one({"_id": ObjectId(retiro_id)})
-                if retiro_obj:
-                    # Actualizar retiro existente
-                    for key, val in retiro_data.items():
-                        setattr(retiro_obj, key, val)
-                    retiro_obj.save()
-        else:
-            # Guardar nuevo retiro
-            retiro_obj = RetiroAlumno({
-                "estudiante_id": estudiante_id,
-                "apoderado_autorizante": apoderado_autorizante,
-                "motivo": motivo,
-                "fecha": fecha,
-                "hora_salida": hora_salida,
-                "inspector_id": inspector_id,
-                "observacion": observacion,
-            })
-            retiro_obj.save()
-
-        retiro_id = str(getattr(retiro_obj, '_id', '')) if retiro_obj else None
+        # Guardar retiro
+        retiro = RetiroAlumno({
+            "estudiante_id": estudiante_id,
+            "apoderado_autorizante": apoderado_autorizante,
+            "motivo": motivo,
+            "fecha": fecha,
+            "hora_salida": hora_salida,
+            "inspector_id": inspector_id,
+            "observacion": observacion,
+        })
+        retiro.save()
 
         # Generar PDF
         from .pdf_generator import generar_autorizacion_retiro as generar_pdf
@@ -385,20 +448,23 @@ def generar_autorizacion_retiro(request):
         )
 
         # Registrar en documentos_generados
-        doc = _save_or_update_documento(
-            request,
-            "retiro_alumno",
-            estudiante_id, inspector_id,
-            {
+        doc = DocumentoGenerado({
+            "tipo_documento": "retiro_alumno",
+            "estudiante_id": estudiante_id,
+            "inspector_id": inspector_id,
+            "fecha_emision": datetime.now().isoformat(),
+            "datos_adicionales": {
                 "motivo": motivo,
-                "retiro_id": retiro_id,
+                "retiro_id": retiro._id,
             },
-        )
+            "estado": "emitido",
+        })
+        doc.save()
 
         return Response({
             "success": True,
             "message": "Autorización de retiro generada correctamente",
-            "retiro_id": retiro_id,
+            "retiro_id": retiro._id,
             "documento_id": doc._id,
             "pdf_base64": _buffer_to_base64(pdf_buffer),
         })
@@ -451,34 +517,20 @@ def generar_declaracion_accidente(request):
             "derivacion": derivacion,
         }
 
-        documento_id = request.data.get("documento_id")
-        if documento_id:
-            # Regenerando — no crear nuevo accidente
-            doc = DocumentoGenerado.find_one({"_id": ObjectId(documento_id)})
-            accidente_id = doc.datos_adicionales.get("accidente_id") if doc and doc.datos_adicionales else None
-            if accidente_id:
-                acc_obj = AccidenteEscolar.find_one({"_id": ObjectId(accidente_id)})
-                if acc_obj:
-                    for key, val in accidente_data.items():
-                        setattr(acc_obj, key, val)
-                    acc_obj.save()
-        else:
-            # Guardar nuevo accidente
-            acc_obj = AccidenteEscolar({
-                "estudiante_id": estudiante_id,
-                "fecha_accidente": fecha_accidente,
-                "hora_accidente": hora_accidente,
-                "lugar": lugar,
-                "descripcion": descripcion,
-                "tipo_lesion": tipo_lesion,
-                "testigos": testigos,
-                "inspector_id": inspector_id,
-                "derivacion": derivacion,
-                "estado": "derivado" if derivacion else "pendiente",
-            })
-            acc_obj.save()
-
-        accidente_id = str(getattr(acc_obj, '_id', '')) if acc_obj else None
+        # Guardar accidente
+        accidente = AccidenteEscolar({
+            "estudiante_id": estudiante_id,
+            "fecha_accidente": fecha_accidente,
+            "hora_accidente": hora_accidente,
+            "lugar": lugar,
+            "descripcion": descripcion,
+            "tipo_lesion": tipo_lesion,
+            "testigos": testigos,
+            "inspector_id": inspector_id,
+            "derivacion": derivacion,
+            "estado": "derivado" if derivacion else "pendiente",
+        })
+        accidente.save()
 
         # Generar PDF
         from .pdf_generator import generar_declaracion_accidente as generar_pdf
@@ -490,20 +542,23 @@ def generar_declaracion_accidente(request):
         )
 
         # Registrar documento
-        doc = _save_or_update_documento(
-            request,
-            "seguro_escolar",
-            estudiante_id, inspector_id,
-            {
-                "accidente_id": accidente_id,
+        doc = DocumentoGenerado({
+            "tipo_documento": "seguro_escolar",
+            "estudiante_id": estudiante_id,
+            "inspector_id": inspector_id,
+            "fecha_emision": datetime.now().isoformat(),
+            "datos_adicionales": {
+                "accidente_id": accidente._id,
                 "tipo_lesion": tipo_lesion,
             },
-        )
+            "estado": "emitido",
+        })
+        doc.save()
 
         return Response({
             "success": True,
             "message": "Declaración de accidente generada correctamente",
-            "accidente_id": accidente_id,
+            "accidente_id": accidente._id,
             "documento_id": doc._id,
             "pdf_base64": _buffer_to_base64(pdf_buffer),
         })
