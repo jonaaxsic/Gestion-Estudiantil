@@ -167,7 +167,7 @@
                   <div class="list-icon retiros"><span class="material-icons">exit_to_app</span></div>
                   <div class="list-content">
                     <span class="title">{{ ret.apoderado_autorizante }}</span>
-                    <span class="subtitle">{{ ret.fecha }} - {{ ret.motivo }}</span>
+                    <span class="subtitle">{{ formatFecha(ret.fecha) }} - {{ ret.motivo }}</span>
                   </div>
                 </div>
               }
@@ -305,7 +305,7 @@
                   <div class="list-icon retiros"><span class="material-icons">exit_to_app</span></div>
                   <div class="list-content">
                     <span class="title">{{ ret.apoderado_autorizante }}</span>
-                    <span class="subtitle">{{ ret.fecha }} {{ ret.hora_salida }} - {{ ret.motivo }}</span>
+                    <span class="subtitle">{{ formatFecha(ret.fecha) }} {{ ret.hora_salida }} - {{ ret.motivo }}</span>
                     @if (ret.observacion) {
                       <span class="subtitle">Obs: {{ ret.observacion }}</span>
                     }
@@ -343,7 +343,7 @@
                   </div>
                   <div class="list-content">
                     <span class="title">{{ acc.tipo_lesion || 'Sin especificar' }}</span>
-                    <span class="subtitle">{{ acc.fecha_accidente }} - {{ acc.lugar || 'Sin lugar' }}</span>
+                    <span class="subtitle">{{ formatFecha(acc.fecha_accidente) }} - {{ acc.lugar || 'Sin lugar' }}</span>
                     @if (acc.descripcion) {
                       <span class="subtitle">{{ acc.descripcion }}</span>
                     }
@@ -484,7 +484,7 @@
                   </div>
                   <div class="list-content">
                     <span class="title">{{ getTipoLabel(reg.tipo) }}</span>
-                    <span class="subtitle">{{ reg.fecha }} - {{ getCursoNombre(reg.curso_id) }}</span>
+                    <span class="subtitle">{{ formatFecha(reg.fecha) }} - {{ getCursoNombre(reg.curso_id) }}</span>
                     <span class="subtitle">{{ reg.descripcion }}</span>
                   </div>
                   <button class="btn-icon delete" (click)="eliminarLibroRegistro(reg.id!)" title="Eliminar">

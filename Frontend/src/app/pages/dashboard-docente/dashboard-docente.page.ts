@@ -1060,6 +1060,15 @@ export class DashboardDocentePage implements OnInit {
       .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
   }
   
+  // Formatear fecha ISO (YYYY-MM-DD) a DD-MM-YYYY para mostrar
+  formatFecha(isoDate: string | undefined): string {
+    if (!isoDate) return '';
+    if (/^\d{2}-\d{2}-\d{4}$/.test(isoDate)) return isoDate;
+    const parts = isoDate.split('T')[0].split('-');
+    if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return isoDate;
+  }
+
   // Cargar asistencia por curso seleccionado
   onVerAsistenciaCurso(event: Event): void {
     const select = event.target as HTMLSelectElement;

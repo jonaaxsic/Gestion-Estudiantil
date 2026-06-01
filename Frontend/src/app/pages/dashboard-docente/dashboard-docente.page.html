@@ -159,7 +159,7 @@
                 <div class="list-content">
                   <span class="title" [style.text-decoration]="rec.completada ? 'line-through' : 'none'">{{ rec.titulo }}</span>
                   <span class="subtitle">{{ rec.descripcion || 'Sin descripción' }}</span>
-                  <span class="subtitle">{{ rec.fecha_limite ? 'Para: ' + rec.fecha_limite : 'Sin fecha límite' }}</span>
+                  <span class="subtitle">{{ rec.fecha_limite ? 'Para: ' + formatFecha(rec.fecha_limite) : 'Sin fecha límite' }}</span>
                 </div>
                 <button class="btn-icon-small" (click)="toggleRecordatorioCompleted(rec)" title="Marcar como completada">
                   <span class="material-icons">{{ rec.completada ? 'undo' : 'check' }}</span>
@@ -203,7 +203,7 @@
                 </div>
                 <div class="list-content">
                   <span class="title">{{ reunion.lugar }}</span>
-                  <span class="subtitle">{{ reunion.fecha }} - {{ reunion.hora }}</span>
+                  <span class="subtitle">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
                   @if (reunion.descripcion) {
                     <span class="subtitle">{{ reunion.descripcion }}</span>
                   }
@@ -249,7 +249,7 @@
                 </div>
                 <div class="list-content">
                   <span class="title">{{ eval.titulo }}</span>
-                  <span class="subtitle">{{ eval.materia }} - {{ eval.fecha }} - {{ eval.ponderacion }}%</span>
+                  <span class="subtitle">{{ eval.materia }} - {{ formatFecha(eval.fecha) }} - {{ eval.ponderacion }}%</span>
                   @if (eval.descripcion) {
                     <span class="subtitle">{{ eval.descripcion }}</span>
                   }
@@ -499,7 +499,7 @@
               <div class="reuniones-list">
                 @for (reunion of getReunionesDelCurso(); track reunion.id) {
                   <div class="reunion-card" [class.proxima]="esReunionProxima(reunion.fecha)" [class.pasada]="esReunionPasada(reunion.fecha)">
-                    <div class="reunion-fecha">{{ reunion.fecha }} - {{ reunion.hora }}</div>
+                    <div class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</div>
                     <div class="reunion-lugar">{{ reunion.lugar }}</div>
                     @if (reunion.descripcion) {
                       <div class="reunion-desc">{{ reunion.descripcion }}</div>
@@ -566,7 +566,7 @@
                 <div class="eval-card" [class.proxima]="esEvaluacionProxima(eval.fecha)" [class.pasada]="esEvaluacionPasada(eval.fecha)">
                   <div class="eval-header">
                     <span class="eval-titulo">{{ eval.titulo }}</span>
-                    <span class="eval-fecha">{{ eval.fecha }}</span>
+                    <span class="eval-fecha">{{ formatFecha(eval.fecha) }}</span>
                   </div>
                   <div class="eval-materia">{{ eval.materia }}</div>
                   @if (eval.descripcion) {
@@ -645,7 +645,7 @@
                 </div>
                 <div class="list-content">
                   <span class="title">{{ getEstudianteNombre(asist.estudiante_id) }}</span>
-                  <span class="subtitle">{{ asist.fecha }} - {{ asist.presente ? 'Presente' : 'Ausente' }}</span>
+                  <span class="subtitle">{{ formatFecha(asist.fecha) }} - {{ asist.presente ? 'Presente' : 'Ausente' }}</span>
                   @if (asist.observacion) {
                     <span class="subtitle">{{ asist.observacion }}</span>
                   }
@@ -695,7 +695,7 @@
                 </div>
                 <div class="list-content">
                   <span class="title">{{ eval.titulo }}</span>
-                  <span class="subtitle">{{ eval.materia }} - {{ eval.fecha }} - {{ eval.ponderacion }}%</span>
+                  <span class="subtitle">{{ eval.materia }} - {{ formatFecha(eval.fecha) }} - {{ eval.ponderacion }}%</span>
                   @if (eval.descripcion) {
                     <span class="subtitle">{{ eval.descripcion }}</span>
                   }
@@ -753,7 +753,7 @@
                 </div>
                 <div class="list-content">
                   <span class="title">{{ anot.descripcion }}</span>
-                  <span class="subtitle">{{ anot.fecha }} - {{ getEstudianteNombre(anot.estudiante_id) }}</span>
+                  <span class="subtitle">{{ formatFecha(anot.fecha) }} - {{ getEstudianteNombre(anot.estudiante_id) }}</span>
                 </div>
                 <button class="btn-icon delete" (click)="deleteAnotacion(anot)" title="Eliminar">
                   <span class="material-icons">delete</span>
@@ -808,7 +808,7 @@
                     <span class="material-icons">event</span>
                   </div>
                   <div class="reunion-info">
-                    <span class="reunion-fecha">{{ reunion.fecha }} - {{ reunion.hora }}</span>
+                    <span class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
                     <span class="reunion-lugar">{{ reunion.lugar }}</span>
                     @if (reunion.descripcion) {
                       <span class="reunion-desc">{{ reunion.descripcion }}</span>
@@ -832,7 +832,7 @@
                     <span class="material-icons">history</span>
                   </div>
                   <div class="reunion-info">
-                    <span class="reunion-fecha">{{ reunion.fecha }} - {{ reunion.hora }}</span>
+                    <span class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
                     <span class="reunion-lugar">{{ reunion.lugar }}</span>
                   </div>
                 </div>

@@ -219,7 +219,7 @@
               </div>
               <div class="list-content">
                 <span class="title">{{ anot.descripcion }}</span>
-                <span class="subtitle">{{ anot.fecha }}</span>
+                <span class="subtitle">{{ formatFecha(anot.fecha) }}</span>
               </div>
             </div>
           }
@@ -249,7 +249,7 @@
               </div>
               <div class="list-content">
                 <span class="title">{{ anot.descripcion }}</span>
-                <span class="subtitle">{{ anot.fecha }}</span>
+                <span class="subtitle">{{ formatFecha(anot.fecha) }}</span>
               </div>
             </div>
           }
@@ -392,7 +392,7 @@
                   <span class="material-icons">{{ asist.presente ? 'check_circle' : 'cancel' }}</span>
                 </div>
                 <div class="asistencia-info">
-                  <span class="asistencia-fecha">{{ asist.fecha }}</span>
+                  <span class="asistencia-fecha">{{ formatFecha(asist.fecha) }}</span>
                   <span class="asistencia-estado">{{ asist.presente ? 'Presente' : 'Ausente' }}</span>
                   @if (asist.observacion) {
                     <span class="asistencia-obs">{{ asist.observacion }}</span>
@@ -432,7 +432,7 @@
                   <span class="material-icons">event</span>
                 </div>
                 <div class="reunion-info">
-                  <span class="reunion-fecha">{{ reunion.fecha }} - {{ reunion.hora }}</span>
+                  <span class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
                   <span class="reunion-lugar">{{ reunion.lugar }}</span>
                   @if (reunion.descripcion) {
                     <span class="reunion-desc">{{ reunion.descripcion }}</span>
@@ -449,7 +449,7 @@
                   <span class="material-icons">history</span>
                 </div>
                 <div class="reunion-info">
-                  <span class="reunion-fecha">{{ reunion.fecha }} - {{ reunion.hora }}</span>
+                  <span class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
                   <span class="reunion-lugar">{{ reunion.lugar }}</span>
                 </div>
               </div>

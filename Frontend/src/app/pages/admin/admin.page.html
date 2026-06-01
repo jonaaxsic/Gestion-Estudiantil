@@ -477,7 +477,7 @@
               </div>
               <div class="list-content">
                 <span class="title" [style.text-decoration]="rec.completada ? 'line-through' : 'none'">{{ rec.titulo }}</span>
-                <span class="subtitle">{{ rec.fecha_limite ? 'Para: ' + rec.fecha_limite : 'Sin fecha' }}</span>
+                <span class="subtitle">{{ rec.fecha_limite ? 'Para: ' + formatFecha(rec.fecha_limite) : 'Sin fecha' }}</span>
               </div>
               <button class="btn-icon" (click)="toggleRecordatorioCompleted(rec)">
                 <span class="material-icons">{{ rec.completada ? 'undo' : 'check' }}</span>

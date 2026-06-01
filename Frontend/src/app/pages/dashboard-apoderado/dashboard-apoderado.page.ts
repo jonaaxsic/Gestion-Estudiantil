@@ -333,6 +333,15 @@ export class DashboardApoderadoPage implements OnInit {
     this.auth.logout();
   }
   
+  // Formatear fecha ISO (YYYY-MM-DD) a DD-MM-YYYY para mostrar
+  formatFecha(isoDate: string | undefined): string {
+    if (!isoDate) return '';
+    if (/^\d{2}-\d{2}-\d{4}$/.test(isoDate)) return isoDate;
+    const parts = isoDate.split('T')[0].split('-');
+    if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return isoDate;
+  }
+
   // Normalizar fecha para el backend
   private normalizeDate(dateStr: string | undefined): string | undefined {
     if (!dateStr) return dateStr;
