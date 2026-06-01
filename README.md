@@ -166,9 +166,7 @@ No necesitas modificarlo si levantaste el backend en el paso anterior.
 #### Paso 3 — Levantar el servidor de desarrollo
 
 ```bash
-bun run start
-# o con npm:
-npm start
+ng serve
 ```
 
 La aplicación quedará disponible en **http://localhost:4200**
