@@ -129,6 +129,7 @@ export class DashboardDocentePage implements OnInit {
   selectedCurso = signal<Curso | null>(null);
   selectedAsignatura = signal<string>('');
   selectedEvaluacion = signal<Evaluacion | null>(null);
+  selectedReunion = signal<Reunione | null>(null);
   saving = signal(false);
   successMessage = signal('');
   anoEscolar = new Date().getFullYear();
@@ -421,6 +422,7 @@ export class DashboardDocentePage implements OnInit {
     this.showReunionModal.set(false);
     this.showRecordatorioModal.set(false);
     this.selectedEvaluacion.set(null);
+    this.selectedReunion.set(null);
   }
   
   openAnotacionDialog(): void {
@@ -437,6 +439,7 @@ export class DashboardDocentePage implements OnInit {
   }
   
   openReunionDialog(): void {
+    this.selectedReunion.set(null);
     this.reunionForm = {
       cursoId: '',
       fecha: '',
@@ -444,6 +447,18 @@ export class DashboardDocentePage implements OnInit {
       lugar: '',
       descripcion: ''
     };
+    this.showReunionModal.set(true);
+  }
+
+  openReunionEditDialog(reunion: Reunione): void {
+    this.reunionForm = {
+      cursoId: reunion.curso_id || '',
+      fecha: reunion.fecha || '',
+      hora: reunion.hora || '',
+      lugar: reunion.lugar || '',
+      descripcion: reunion.descripcion || ''
+    };
+    this.selectedReunion.set(reunion);
     this.showReunionModal.set(true);
   }
   
@@ -613,21 +628,25 @@ export class DashboardDocentePage implements OnInit {
       descripcion: this.reunionForm.descripcion || '',
       notificacion_enviada: false
     };
-    console.log('Enviando reunión:', reunionData);
     
-    this.api.createReunion(reunionData).subscribe({
+    const existing = this.selectedReunion();
+    const request = existing?.id
+      ? this.api.updateReunion(existing.id, reunionData)
+      : this.api.createReunion(reunionData);
+
+    request.subscribe({
       next: (response) => {
         this.saving.set(false);
-        console.log('Reunión creada:', response);
+        console.log('Reunión guardada:', response);
         this.closeModals();
-        this.showSuccess('Reunión programada correctamente');
+        this.showSuccess(existing ? 'Reunión actualizada correctamente' : 'Reunión programada correctamente');
         this.loadData();
       },
       error: (err) => {
         this.saving.set(false);
-        console.error('Error completo al crear reunión:', err);
-        const errorMsg = err?.error?.error || err?.error || err?.message || 'Error al programar reunión';
-        alert('Error al programar reunión: ' + errorMsg);
+        console.error('Error completo al guardar reunión:', err);
+        const errorMsg = err?.error?.error || err?.error || err?.message || 'Error al guardar reunión';
+        alert('Error al guardar reunión: ' + errorMsg);
       }
     });
   }

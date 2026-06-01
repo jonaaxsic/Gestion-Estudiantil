@@ -1604,6 +1604,12 @@
 
   .reunion-card {
     padding: 14px;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .reunion-card .action-buttons {
+    align-self: flex-end;
   }
 
   .eval-card {
@@ -1802,6 +1808,9 @@
   border: 1px solid var(--border-light);
   border-left: 4px solid var(--text-muted);
   transition: all 0.2s ease;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .reunion-card:hover {

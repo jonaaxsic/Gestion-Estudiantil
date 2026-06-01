@@ -319,7 +319,7 @@
           <div class="curso-detail-info">
             <h3 class="card-title">
               <span class="material-icons">assignment</span>
-              {{ getNombreLimpio(selectedCurso()!) }} - {{ selectedAsignatura() }}
+              {{ getNombreLimpio(selectedCurso()!) }} {{ selectedAsignatura() }}
             </h3>
             <button class="btn-icon" (click)="selectedCurso.set(null)">
               <span class="material-icons">close</span>
@@ -508,11 +508,21 @@
               <div class="reuniones-list">
                 @for (reunion of getReunionesDelCurso(); track reunion.id) {
                   <div class="reunion-card" [class.proxima]="esReunionProxima(reunion.fecha)" [class.pasada]="esReunionPasada(reunion.fecha)">
-                    <div class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</div>
-                    <div class="reunion-lugar">{{ reunion.lugar }}</div>
-                    @if (reunion.descripcion) {
-                      <div class="reunion-desc">{{ reunion.descripcion }}</div>
-                    }
+                    <div style="flex:1">
+                      <div class="reunion-fecha">{{ formatFecha(reunion.fecha) }} - {{ reunion.hora }}</div>
+                      <div class="reunion-lugar">{{ reunion.lugar }}</div>
+                      @if (reunion.descripcion) {
+                        <div class="reunion-desc">{{ reunion.descripcion }}</div>
+                      }
+                    </div>
+                    <div class="action-buttons" style="flex-shrink:0">
+                      <button class="btn-icon edit" (click)="openReunionEditDialog(reunion)" title="Editar">
+                        <span class="material-icons">edit</span>
+                      </button>
+                      <button class="btn-icon delete" (click)="deleteReunion(reunion)" title="Eliminar">
+                        <span class="material-icons">delete</span>
+                      </button>
+                    </div>
                   </div>
                 }
               </div>
@@ -1084,7 +1094,7 @@
   <div class="modal-overlay" (click)="closeModals()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2><span class="material-icons">event_available</span> Programar Reunión</h2>
+        <h2><span class="material-icons">event_available</span> {{ selectedReunion() ? 'Editar Reunión' : 'Programar Reunión' }}</h2>
         <button class="close-btn" (click)="closeModals()">
           <span class="material-icons">close</span>
         </button>
@@ -1119,7 +1129,7 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeModals()">Cancelar</button>
         <button class="btn btn-primary" (click)="saveReunion()" [disabled]="saving()">
-          {{ saving() ? 'Guardando...' : 'Programar Reunión' }}
+          {{ saving() ? 'Guardando...' : (selectedReunion() ? 'Actualizar Reunión' : 'Programar Reunión') }}
         </button>
       </div>
     </div>
