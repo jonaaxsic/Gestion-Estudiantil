@@ -508,6 +508,14 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/inasistencias-criticas`, { headers: this.jsonHeaders });
   }
 
+  // Cambio de contraseña
+  changePassword(userId: string, currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/usuarios/${userId}/change-password/`, {
+      current_password: currentPassword,
+      new_password: newPassword,
+    }, { headers: this.jsonHeaders });
+  }
+
   // Configuración del Establecimiento
   getConfiguracionEstablecimiento(): Observable<ConfiguracionEstablecimiento> {
     return this.http.get<ConfiguracionEstablecimiento>(`${this.baseUrl}/configuracion-establecimiento`, { headers: this.jsonHeaders });

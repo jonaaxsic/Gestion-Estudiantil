@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -12,7 +11,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, SharedHeaderComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, SharedHeaderComponent, TabItem, SettingsPanelComponent } from '../../shared/components';
 import { Curso, Evaluacion, Anotacion, Estudiante, Asistencia, Reunione, Recordatorio, AsignacionDocente, Nota } from '../../shared/models';
 
 interface CursoAsignado extends Curso {
@@ -28,7 +27,6 @@ interface CursoAsignado extends Curso {
     FormsModule,
     MatIconModule,
     MatDialogModule,
-    MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatDatepickerModule,
@@ -36,6 +34,7 @@ interface CursoAsignado extends Curso {
     MatCheckboxModule,
     SharedTabsComponent,
     SharedHeaderComponent,
+    SettingsPanelComponent,
   ],
   templateUrl: './dashboard-docente.page.html',
   styleUrls: ['./dashboard-docente.page.css']
@@ -65,7 +64,7 @@ export class DashboardDocentePage implements OnInit {
   verAsistenciaCursoId = signal<string>('');
   
   // Vista actual
-  activeView = signal<'dashboard' | 'cursos' | 'asistencia' | 'evaluaciones' | 'anotaciones' | 'reuniones' | 'notas'>('dashboard');
+  activeView = signal<'dashboard' | 'cursos' | 'asistencia' | 'evaluaciones' | 'anotaciones' | 'reuniones' | 'notas' | 'configuracion'>('dashboard');
   
   // Tab index para el componente compartido
   get tabIndex(): number {
@@ -87,7 +86,8 @@ export class DashboardDocentePage implements OnInit {
     { id: 'asistencia', label: 'Asistencia', icon: 'how_to_reg' },
     { id: 'evaluaciones', label: 'Evaluaciones', icon: 'assignment' },
     { id: 'anotaciones', label: 'Anotaciones', icon: 'note_add' },
-    { id: 'reuniones', label: 'Reuniones', icon: 'event' }
+    { id: 'reuniones', label: 'Reuniones', icon: 'event' },
+    { id: 'configuracion', label: 'Configuración', icon: 'settings' }
   ];
   
   onDocenteTabChanged(tabId: string): void {

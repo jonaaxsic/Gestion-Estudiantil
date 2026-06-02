@@ -50,19 +50,27 @@
 }
 
 .stat-icon .material-icons {
-  color: #fff;
   font-size: 24px;
 }
 
 .stat-icon.users      { background: var(--stat-icon-1); }
+.stat-icon.users .material-icons      { color: var(--text-on-stat-1); }
 .stat-icon.admins     { background: var(--stat-icon-2); }
+.stat-icon.admins .material-icons     { color: var(--text-on-stat-2); }
 .stat-icon.docentes   { background: var(--stat-icon-3); }
+.stat-icon.docentes .material-icons   { color: var(--text-on-stat-3); }
 .stat-icon.apoderados { background: var(--stat-icon-4); }
+.stat-icon.apoderados .material-icons { color: var(--text-on-stat-4); }
 .stat-icon.inspectors { background: #8b5cf6; }
+.stat-icon.inspectors .material-icons { color: #fff; }
 .stat-icon.students   { background: var(--stat-icon-1); }
+.stat-icon.students .material-icons   { color: var(--text-on-stat-1); }
 .stat-icon.courses    { background: var(--stat-icon-3); }
+.stat-icon.courses .material-icons    { color: var(--text-on-stat-3); }
 .stat-icon.guardian   { background: var(--success); }
+.stat-icon.guardian .material-icons   { color: var(--text-on-success); }
 .stat-icon.no-guardian{ background: var(--stat-danger); }
+.stat-icon.no-guardian .material-icons { color: var(--text-on-danger); }
 
 .stat-value {
   font-size: 2.25rem;
@@ -175,7 +183,7 @@
   height: 38px;
   border-radius: 50%;
   background: var(--brand);
-  color: #fff;
+  color: var(--color-text-on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -412,11 +420,8 @@
 }
 
 .stat-icon .material-icons {
-  color: #fff;
   font-size: 24px;
 }
-
-/* ── DIALOG ─────────────────────────────────────────────── */
 .dialog-overlay {
   position: fixed;
   inset: 0;
@@ -701,9 +706,11 @@
   flex-shrink: 0;
 }
 
-.list-icon .material-icons { color: #fff; font-size: 20px; }
+.list-icon .material-icons { font-size: 20px; }
 .list-icon.completed { background: var(--success); }
+.list-icon.completed .material-icons { color: var(--text-on-success); }
 .list-icon.pending   { background: var(--warning); }
+.list-icon.pending .material-icons   { color: var(--text-on-warning); }
 
 .list-content { flex: 1; }
 
@@ -813,10 +820,10 @@
 }
 .mobile-menu-item.logout:hover { 
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
 }
 .mobile-menu-item.logout:hover .material-icons {
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-btn { display: none; }

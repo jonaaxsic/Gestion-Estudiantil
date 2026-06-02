@@ -35,19 +35,13 @@
 }
 
 .btn-primary {
-  background: var(--brand);
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-txt);
   transition:
     background-color var(--dur-fast) var(--ease-out),
     box-shadow var(--dur-fast) var(--ease-out),
     transform var(--dur-instant) var(--ease-out);
 }
-.btn-primary:hover {
-  background: var(--brand-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(71, 78, 188, 0.35);
-}
-
 .btn-primary:hover {
   background: var(--btn-primary-hover);
   transform: translateY(-1px);
@@ -78,7 +72,7 @@
 
 .btn-logout:hover {
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
   border-color: var(--danger);
   transform: translateY(-1px);
 }
@@ -245,7 +239,7 @@
 
 .btn-logout:hover {
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
   border-color: var(--danger);
   transform: translateY(-1px);
 }
@@ -447,14 +441,17 @@
 }
 
 .stat-icon .material-icons {
-  color: #fff;
   font-size: 24px;
 }
 
 .stat-icon.asistencia { background: var(--success); }
+.stat-icon.asistencia .material-icons { color: var(--text-on-success); }
 .stat-icon.evaluaciones { background: var(--warning); }
+.stat-icon.evaluaciones .material-icons { color: var(--text-on-warning); }
 .stat-icon.positivas { background: var(--brand); }
+.stat-icon.positivas .material-icons { color: var(--color-text-on-brand); }
 .stat-icon.negativas { background: var(--danger); }
+.stat-icon.negativas .material-icons { color: var(--text-on-danger); }
 
 .stat-value {
   font-size: 2.25rem;
@@ -544,12 +541,17 @@
   flex-shrink: 0;
 }
 
-.list-icon .material-icons { font-size: 20px; color: #fff; }
+.list-icon .material-icons { font-size: 20px; }
 .list-icon.eval      { background: var(--warning); }
+.list-icon.eval .material-icons      { color: var(--text-on-warning); }
 .list-icon.positiva  { background: var(--success); }
+.list-icon.positiva .material-icons  { color: var(--text-on-success); }
 .list-icon.negativa  { background: var(--danger); }
+.list-icon.negativa .material-icons  { color: var(--text-on-danger); }
 .list-icon.presente  { background: var(--success); }
+.list-icon.presente .material-icons  { color: var(--text-on-success); }
 .list-icon.falta     { background: var(--danger); }
+.list-icon.falta .material-icons     { color: var(--text-on-danger); }
 
 .list-content {
   flex: 1;
@@ -838,11 +840,11 @@
 
 .mobile-menu-item.logout:hover { 
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-item.logout:hover .material-icons {
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-btn { 
@@ -997,10 +999,10 @@
 }
 .mobile-menu-item.logout:hover { 
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
 }
 .mobile-menu-item.logout:hover .material-icons {
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-btn { display: none; }
@@ -1287,7 +1289,7 @@
 .porcentaje-valor {
   font-size: 1.2rem;
   font-weight: 800;
-  color: white;
+  color: var(--text-on-success);
 }
 
 .porcentaje-info {
@@ -1387,11 +1389,12 @@
 
 .asistencia-icon .material-icons {
   font-size: 20px;
-  color: white;
 }
 
 .asistencia-icon.presente { background: var(--success); }
+.asistencia-icon.presente .material-icons { color: var(--text-on-success); }
 .asistencia-icon.falta { background: var(--danger); }
+.asistencia-icon.falta .material-icons { color: var(--text-on-danger); }
 
 .asistencia-info {
   display: flex;
@@ -1467,11 +1470,12 @@
 
 .asistencia-icon .material-icons {
   font-size: 20px;
-  color: white;
 }
 
 .asistencia-icon.presente { background: var(--success); }
+.asistencia-icon.presente .material-icons { color: var(--text-on-success); }
 .asistencia-icon.falta { background: var(--danger); }
+.asistencia-icon.falta .material-icons { color: var(--text-on-danger); }
 
 .asistencia-info {
   display: flex;
@@ -1747,17 +1751,17 @@
 
 .solicitud-estado.pendiente {
   background: var(--warning);
-  color: white;
+  color: var(--text-on-warning);
 }
 
 .solicitud-estado.aprobada {
   background: var(--success);
-  color: white;
+  color: var(--text-on-success);
 }
 
 .solicitud-estado.rechazada {
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
 }
 
 /* Vista de Perfil */
@@ -1835,7 +1839,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text-on-brand);
   font-size: 2rem;
   font-weight: 700;
 }

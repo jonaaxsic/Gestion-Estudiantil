@@ -54,14 +54,17 @@
 }
 
 .stat-icon .material-icons {
-  color: #fff;
   font-size: 24px;
 }
 
 .stat-icon.cursos       { background: var(--stat-icon-1); }
+.stat-icon.cursos .material-icons       { color: var(--text-on-stat-1); }
 .stat-icon.estudiantes  { background: var(--stat-icon-2); }
+.stat-icon.estudiantes .material-icons  { color: var(--text-on-stat-2); }
 .stat-icon.evaluaciones { background: var(--stat-icon-3); }
+.stat-icon.evaluaciones .material-icons { color: var(--text-on-stat-3); }
 .stat-icon.anotaciones  { background: var(--stat-icon-4); }
+.stat-icon.anotaciones .material-icons  { color: var(--text-on-stat-4); }
 
 .stat-value {
   font-size: 2.25rem;
@@ -179,8 +182,8 @@
 }
 
 .card-header .btn-back:hover {
-  background: var(--brand);
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-txt);
 }
 
 .card-header .btn-back .material-icons {
@@ -205,8 +208,8 @@
   padding: 6px 12px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--brand);
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-txt);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -215,7 +218,7 @@
 }
 
 .btn-new:hover {
-  background: var(--brand-dark);
+  background: var(--btn-primary-hover);
 }
 
 .btn-new .material-icons {
@@ -245,8 +248,8 @@
 }
 
 .btn-primary {
-  background: var(--brand);
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-txt);
 }
 
 .btn-primary:hover {
@@ -298,7 +301,7 @@
 
 .btn-icon:hover {
   background: var(--danger);
-  color: #fff;
+  color: var(--text-on-danger);
   transform: scale(1.05);
 }
 
@@ -377,15 +380,23 @@
   flex-shrink: 0;
 }
 
-.list-icon .material-icons { font-size: 20px; color: #fff; }
+.list-icon .material-icons { font-size: 20px; }
 .list-icon.eval      { background: var(--warning); }
+.list-icon.eval .material-icons      { color: var(--text-on-warning); }
 .list-icon.reunion   { background: var(--brand); }
+.list-icon.reunion .material-icons   { color: var(--color-text-on-brand); }
 .list-icon.positiva  { background: var(--success); }
+.list-icon.positiva .material-icons  { color: var(--text-on-success); }
 .list-icon.negativa  { background: var(--danger); }
+.list-icon.negativa .material-icons  { color: var(--text-on-danger); }
 .list-icon.completed { background: var(--success); }
+.list-icon.completed .material-icons { color: var(--text-on-success); }
 .list-icon.pending   { background: var(--warning); }
+.list-icon.pending .material-icons   { color: var(--text-on-warning); }
 .list-icon.presente  { background: var(--success); }
+.list-icon.presente .material-icons  { color: var(--text-on-success); }
 .list-icon.falta     { background: var(--danger); }
+.list-icon.falta .material-icons     { color: var(--text-on-danger); }
 
 .list-content {
   flex: 1;
@@ -614,7 +625,7 @@
 .att-btn.presente.active,
 .att-btn.presente:hover {
   background: var(--success);
-  color: #fff;
+  color: var(--text-on-success);
   border-color: var(--success);
 }
 
@@ -622,7 +633,7 @@
 .att-btn.falta.active,
 .att-btn.falta:hover {
   background: var(--danger);
-  color: #fff;
+  color: var(--text-on-danger);
   border-color: var(--danger);
 }
 
@@ -653,7 +664,7 @@
 .tipo-btn.positiva.active,
 .tipo-btn.positiva:hover {
   background: var(--success);
-  color: #fff;
+  color: var(--text-on-success);
   border-color: var(--success);
 }
 
@@ -661,7 +672,7 @@
 .tipo-btn.negativa.active,
 .tipo-btn.negativa:hover {
   background: var(--danger);
-  color: #fff;
+  color: var(--text-on-danger);
   border-color: var(--danger);
 }
 
@@ -682,7 +693,7 @@
   box-shadow: var(--shadow-lg);
 }
 
-.toast.success { background: var(--success); color: #fff; }
+.toast.success { background: var(--success); color: var(--text-on-success); }
 .toast .material-icons { font-size: 22px; }
 
 @keyframes slideInToast {
@@ -763,7 +774,7 @@
 .course-item.active .course-name,
 .course-item.active .course-asignatura,
 .course-item.active .course-icon .material-icons {
-  color: #fff;
+  color: var(--color-text-on-brand);
 }
 
 .course-icon {
@@ -889,10 +900,10 @@
 }
 .mobile-menu-item.logout:hover { 
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
 }
 .mobile-menu-item.logout:hover .material-icons {
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-btn { display: none; }
@@ -1214,7 +1225,7 @@
 }
 
 .curso-tab:hover { background: var(--bg-hover); color: var(--brand); }
-.curso-tab.active { background: var(--brand); color: #fff; }
+.curso-tab.active { background: var(--brand); color: var(--tab-active-txt); }
 .curso-tab .material-icons { font-size: 16px; }
 
 /* ── FECHA SELECTOR ─────────────────────────────────────── */
@@ -1293,7 +1304,7 @@
 .circulo-valor {
   font-size: 1.2rem;
   font-weight: 800;
-  color: white;
+  color: var(--text-on-success);
 }
 
 .asistencia-info {

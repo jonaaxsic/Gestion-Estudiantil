@@ -6,6 +6,7 @@
 
 @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 /* ══════════════════════════════════════════════════════════
    MODO CLARO  (Cloud Fresh)
@@ -246,8 +247,8 @@ html, body {
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   transition:
-    background-color var(--dur-slow) var(--ease-out),
-    color var(--dur-slow) var(--ease-out);
+    background-color 300ms ease,
+    color 300ms ease;
 }
 
 * { box-sizing: border-box; }
@@ -260,23 +261,6 @@ html, body {
   /* Sin transición — debe aparecer instantáneamente */
 }
 
-/* ── SKIP LINK ──────────────────────────────────────────── */
-.skip-link {
-  position: absolute;
-  top: -100%;
-  left: 8px;
-  padding: 8px 16px;
-  background: var(--brand);
-  color: var(--color-text-on-brand);
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  z-index: 10000;
-  text-decoration: none;
-}
-.skip-link:focus {
-  top: 8px;
-}
-
 /* ── ANIMACIONES GLOBALES ───────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -285,10 +269,10 @@ html, body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+
 }
 
 /* ── UTILIDADES ─────────────────────────────────────────── */
-.container { padding: 20px; }
 .full-width { width: 100%; }
 
 /* Angular Material overrides */
@@ -298,38 +282,155 @@ html, body {
   background-color: var(--bg-card) !important;
 }
 
-.mat-mdc-form-field { width: 100%; }
-.mat-mdc-table { width: 100%; }
+/* ══════════════════════════════════════════════════════════
+   THEME ROOT — fondo y vars por defecto
+   ══════════════════════════════════════════════════════════ */
+.theme-root {
+  background: var(--bg-page);
+  min-height: 100vh;
+}
 
-/* ── THEME TOGGLE BUTTON (global) ───────────────────────── */
-.btn-theme-toggle {
+/* Transiciones suaves al cambiar modo (claro ↔ oscuro)
+   Se aplican a .theme-root y todos sus hijos.
+   Cambia SOLO propiedades visuales — sin transicionar layout.
+   Duración corta (250ms) para sentir el cambio inmediato pero suave. */
+.theme-root,
+.theme-root *,
+.theme-root *::before,
+.theme-root *::after {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   FONT FAMILY CLASSES — applied to .theme-root only
+   ══════════════════════════════════════════════════════════ */
+.theme-root.font-inter  :not(.material-icons):not(.material-icons-outlined) { font-family: 'Inter', 'DM Sans', sans-serif; }
+.theme-root.font-roboto :not(.material-icons):not(.material-icons-outlined) { font-family: 'Roboto', 'DM Sans', sans-serif; }
+.theme-root.font-poppins:not(.material-icons):not(.material-icons-outlined) { font-family: 'Poppins', 'DM Sans', sans-serif; }
+
+/* ══════════════════════════════════════════════════════════
+   FONT SIZE — escala sobre .theme-root
+   Las clases se aplican via JavaScript desde settings.service
+   ══════════════════════════════════════════════════════════ */
+.theme-root.text-size-xs { font-size: 0.75rem; }
+.theme-root.text-size-sm { font-size: 0.875rem; }
+.theme-root.text-size-base { font-size: 1rem; }
+.theme-root.text-size-lg { font-size: 1.125rem; }
+.theme-root.text-size-xl { font-size: 1.25rem; }
+
+/* ══════════════════════════════════════════════════════════
+   HIGH CONTRAST MODE — applied to .theme-root only
+   ══════════════════════════════════════════════════════════ */
+.theme-root.high-contrast {
+  --border: #333 !important;
+  --border-light: #999 !important;
+  --text-primary: #000 !important;
+  --text-secondary: #222 !important;
+  --text-muted: #555 !important;
+  --bg-page: #fff !important;
+  --bg-card: #fff !important;
+}
+
+body.dark .theme-root.high-contrast {
+  --border: #ccc !important;
+  --border-light: #888 !important;
+  --text-primary: #fff !important;
+  --text-secondary: #ddd !important;
+  --text-muted: #aaa !important;
+  --bg-page: #000 !important;
+  --bg-card: #111 !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   GLOBAL BUTTON STYLES — available to all components
+   ══════════════════════════════════════════════════════════ */
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 2px solid var(--toggle-border);
-  border-radius: 50%;
-  background: var(--toggle-bg);
-  color: var(--toggle-icon);
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
   cursor: pointer;
   transition:
-    background-color var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out),
-    transform var(--dur-fast) var(--ease-spring),
-    color var(--dur-base) var(--ease-out);
-  font-size: 0;
-  flex-shrink: 0;
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+  white-space: nowrap;
+  text-decoration: none;
+  font-family: inherit;
 }
 
-.btn-theme-toggle:hover {
-  background: var(--brand-light);
+.btn-primary {
+  background: var(--btn-primary-bg, var(--brand));
+  color: var(--btn-primary-txt, var(--color-text-on-brand, #fff));
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* ══════════════════════════════════════════════════════════
+   GLOBAL FORM INPUT STYLES
+   ══════════════════════════════════════════════════════════ */
+.form-input {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: border-color var(--dur-fast) var(--ease-out);
+  width: 100%;
+}
+
+.form-input:focus {
+  outline: none;
   border-color: var(--brand);
-  transform: rotate(15deg) scale(1.05);
+  box-shadow: 0 0 0 3px var(--brand-light);
 }
 
-.btn-theme-toggle .material-icons {
-  font-size: 20px;
-  color: var(--toggle-icon);
-  transition: color var(--dur-base) var(--ease-out);
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
 }

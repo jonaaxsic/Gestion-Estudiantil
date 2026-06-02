@@ -1,3 +1,4 @@
+<div class="theme-root">
 <app-shared-header
   title="Inspectoría General"
   icon="badge"
@@ -32,7 +33,12 @@
           <span class="material-icons">how_to_reg</span> Asistencia
         </button>
         <button class="mobile-menu-item" (click)="activeView.set('libro'); closeMobileMenu(); loadLibro()">
-          <span class="material-icons">book</span> Libro Inspectoría
+          <span class="material-icons">book</span>
+          <span>Libro</span>
+        </button>
+        <button class="mobile-menu-item" (click)="activeView.set('configuracion'); closeMobileMenu()">
+          <span class="material-icons">settings</span>
+          <span>Configuración</span>
         </button>
         <button class="mobile-menu-item logout" (click)="logout()">
           <span class="material-icons">logout</span> Cerrar Sesión
@@ -496,6 +502,10 @@
           </div>
         </div>
       </div>
+    }
+
+    @if (activeView() === 'configuracion') {
+      <app-settings-panel role="inspector"></app-settings-panel>
     }
 
   </div>

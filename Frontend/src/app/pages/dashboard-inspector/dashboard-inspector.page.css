@@ -86,7 +86,7 @@
 
 .btn-logout:hover {
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
   border-color: var(--danger);
   transform: translateY(-1px);
 }
@@ -139,8 +139,8 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: var(--brand);
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-txt);
   border: none;
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
@@ -623,7 +623,7 @@
 
 /* Icon wrapper con fondo */
 .quick-action-btn .material-icons {
-  color: #fff;
+  color: var(--color-text-on-brand);
   font-size: 20px;
   width: 40px;
   height: 40px;
@@ -1149,7 +1149,7 @@
   height: 46px;
   border-radius: 14px;
   background: linear-gradient(135deg, var(--brand), #4f46e5);
-  color: #fff;
+  color: var(--color-text-on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1270,7 +1270,7 @@
 
 .doc-action-btn:hover .material-icons {
   background: var(--brand);
-  color: #fff;
+  color: var(--color-text-on-brand);
   transform: scale(1.05);
 }
 
@@ -1514,7 +1514,7 @@
 .attendance-stat.presente { color: #10b981; }
 .attendance-stat.ausente { color: #ef4444; }
 .attendance-stat.porcentaje {
-  color: #fff;
+  color: var(--color-text-on-brand);
   margin-left: auto;
   background: var(--brand);
   padding: 3px 10px;
@@ -2012,7 +2012,7 @@ button.list-item:hover .list-chevron {
 }
 
 .modal-header h2 .material-icons {
-  color: #fff;
+  color: var(--color-text-on-brand);
   width: 32px;
   height: 32px;
   display: flex;
@@ -2063,7 +2063,7 @@ button.list-item:hover .list-chevron {
   height: 36px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--brand), var(--brand-muted));
-  color: #fff;
+  color: var(--color-text-on-brand);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2204,7 +2204,7 @@ button.list-item:hover .list-chevron {
   box-shadow: var(--shadow-lg);
 }
 
-.toast.success { background: var(--success); color: #fff; }
+.toast.success { background: var(--success); color: var(--text-on-success); }
 .toast .material-icons { font-size: 22px; }
 
 @keyframes slideInToast {
@@ -2308,11 +2308,11 @@ button.list-item:hover .list-chevron {
 
 .mobile-menu-item.logout:hover {
   background: var(--danger);
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-item.logout:hover .material-icons {
-  color: white;
+  color: var(--text-on-danger);
 }
 
 .mobile-menu-btn { display: none; }

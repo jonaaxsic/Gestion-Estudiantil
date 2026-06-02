@@ -122,7 +122,7 @@ import { CommonModule } from "@angular/common";
 
       .btn-logout:hover {
         background: var(--danger);
-        color: white;
+        color: var(--text-on-danger);
         border-color: var(--danger);
         transform: translateY(-1px);
       }

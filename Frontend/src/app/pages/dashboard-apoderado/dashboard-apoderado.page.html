@@ -1,3 +1,4 @@
+<div class="theme-root">
 <app-shared-header
   title="Panel del Apoderado"
   icon="family_restroom"
@@ -47,8 +48,8 @@
           <span>Solicitudes</span>
         </button>
         <button class="mobile-menu-item" (click)="setSection('perfil'); closeMobileMenu()">
-          <span class="material-icons">person</span>
-          <span>Perfil</span>
+          <span class="material-icons">settings</span>
+          <span>Configuración</span>
         </button>
         <button class="mobile-menu-item" (click)="openRecordatorioDialog()">
           <span class="material-icons">add_alert</span>
@@ -553,61 +554,9 @@
   </div>
   }
   
-  <!-- Vista de Perfil -->
+  <!-- Vista de Configuración -->
   @if (activeSection() === 'perfil') {
-  <div class="perfil-view">
-    <div class="perfil-card">
-      <h3><span class="material-icons">person</span> Mi Perfil</h3>
-      <div class="perfil-readonly">
-        <label>Nombre completo</label>
-        <span>{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
-      </div>
-      <div class="perfil-readonly">
-        <label>RUT</label>
-        <span>{{ auth.user()?.rut || 'Sin RUT' }}</span>
-      </div>
-      <div class="perfil-readonly">
-        <label>Email</label>
-        <span>{{ auth.user()?.email }}</span>
-      </div>
-      <div class="perfil-field">
-        <label>Teléfono</label>
-        <input type="tel" class="form-input" [value]="auth.user()?.telefono || ''" placeholder="Ingrese teléfono">
-      </div>
-      <div class="perfil-field">
-        <label>Dirección</label>
-        <input type="text" class="form-input" [value]="auth.user()?.direccion || ''" placeholder="Ingrese dirección">
-      </div>
-      <div style="margin-top: 16px;">
-        <button class="btn btn-primary">
-          <span class="material-icons">save</span>
-          Guardar Cambios
-        </button>
-      </div>
-    </div>
-    
-    <div class="perfil-card">
-      <h3><span class="material-icons">lock</span> Cambiar Contraseña</h3>
-      <div class="perfil-field">
-        <label>Contraseña Actual</label>
-        <input type="password" class="form-input" placeholder="Ingrese contraseña actual">
-      </div>
-      <div class="perfil-field">
-        <label>Nueva Contraseña</label>
-        <input type="password" class="form-input" placeholder="Ingrese nueva contraseña">
-      </div>
-      <div class="perfil-field">
-        <label>Confirmar Contraseña</label>
-        <input type="password" class="form-input" placeholder="Confirme nueva contraseña">
-      </div>
-      <div style="margin-top: 16px;">
-        <button class="btn btn-primary">
-          <span class="material-icons">lock</span>
-          Cambiar Contraseña
-        </button>
-      </div>
-    </div>
-  </div>
+    <app-settings-panel role="apoderado"></app-settings-panel>
   }
 </div>
 

@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, SharedHeaderComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, SharedHeaderComponent, TabItem, SettingsPanelComponent } from '../../shared/components';
 import {
   Estudiante, Curso, Asistencia,
   DocumentoGenerado, AccidenteEscolar, RetiroAlumno,
@@ -21,6 +21,7 @@ import {
     MatIconModule,
     SharedTabsComponent,
     SharedHeaderComponent,
+    SettingsPanelComponent,
   ],
   templateUrl: './dashboard-inspector.page.html',
   styleUrls: ['./dashboard-inspector.page.css'],
@@ -31,7 +32,7 @@ export class DashboardInspectorPage implements OnInit {
   readonly theme = inject(ThemeService);
 
   // ============ ESTADOS ============
-  activeView = signal<'dashboard' | 'documentos' | 'retiros' | 'accidentes' | 'asistencia' | 'libro'>('dashboard');
+  activeView = signal<'dashboard' | 'documentos' | 'retiros' | 'accidentes' | 'asistencia' | 'libro' | 'configuracion'>('dashboard');
 
   // Dashboard data
   dashboardData = signal<DashboardInspector | null>(null);
@@ -138,10 +139,11 @@ export class DashboardInspectorPage implements OnInit {
     { id: 'accidentes', label: 'Accidentes', icon: 'local_hospital' },
     { id: 'asistencia', label: 'Asistencia', icon: 'how_to_reg' },
     { id: 'libro', label: 'Libro', icon: 'book' },
+    { id: 'configuracion', label: 'Configuración', icon: 'settings' },
   ];
 
   get tabIndex(): number {
-    const tabs = ['dashboard', 'documentos', 'retiros', 'accidentes', 'asistencia', 'libro'];
+    const tabs = ['dashboard', 'documentos', 'retiros', 'accidentes', 'asistencia', 'libro', 'configuracion'];
     return tabs.indexOf(this.activeView());
   }
 

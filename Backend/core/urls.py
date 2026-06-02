@@ -33,9 +33,14 @@ urlpatterns = [
     # Evaluaciones
     path("evaluaciones/", views.EvaluacionList.as_view(), name="evaluacion-list"),
     path(
-        "evaluaciones/<str:pk>/",
-        views.EvaluacionDetail.as_view(),
-        name="evaluacion-detail",
+        "usuarios/<str:pk>/",
+        views.UsuarioDetail.as_view(),
+        name="usuario-detail",
+    ),
+    path(
+        "usuarios/<str:pk>/change-password/",
+        views.change_password,
+        name="change-password",
     ),
     # Anotaciones
     path("anotaciones/", views.AnotacionList.as_view(), name="anotacion-list"),

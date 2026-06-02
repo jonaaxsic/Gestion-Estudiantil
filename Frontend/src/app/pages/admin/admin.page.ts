@@ -8,7 +8,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
-import { SharedTabsComponent, SharedHeaderComponent, TabItem } from '../../shared/components';
+import { SharedTabsComponent, SharedHeaderComponent, TabItem, SettingsPanelComponent } from '../../shared/components';
 import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado } from '../../shared/models';
 
 @Component({
@@ -23,6 +23,7 @@ import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado 
     MatCardModule,
     SharedTabsComponent,
     SharedHeaderComponent,
+    SettingsPanelComponent,
   ],
   templateUrl: './admin.page.html',
   styleUrls: ['./admin.page.css']
@@ -42,18 +43,18 @@ export class AdminPage implements OnInit {
   apoderados = signal<Apoderado[]>([]);
   
   // Tab state
-  activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados'>('usuarios');
+  activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados' | 'configuracion'>('usuarios');
   
   // Tab index para el componente SharedTabs
   get tabIndex(): number {
-    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados'];
+    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados', 'configuracion'];
     return tabs.indexOf(this.activeTab());
   }
   
   set tabIndex(index: number) {
-    const tabs: ('usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados')[] = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados'];
+    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados', 'configuracion'];
     if (index >= 0 && index < tabs.length) {
-      this.activeTab.set(tabs[index]);
+      this.activeTab.set(tabs[index] as any);
     }
   }
   
@@ -158,7 +159,8 @@ export class AdminPage implements OnInit {
     { id: 'estudiantes', label: 'Estudiantes', icon: 'school' },
     { id: 'cursos', label: 'Cursos', icon: 'class' },
     { id: 'docentes', label: 'Docentes', icon: 'co_present' },
-    { id: 'apoderados', label: 'Apoderados', icon: 'family_restroom' }
+    { id: 'apoderados', label: 'Apoderados', icon: 'family_restroom' },
+    { id: 'configuracion', label: 'Configuración', icon: 'settings' }
   ];
   
   onTabChanged(tabId: string): void {

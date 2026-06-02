@@ -1,0 +1,273 @@
+<div class="settings-panel">
+  <!-- Tabs -->
+  <div class="settings-tabs">
+    <button class="settings-tab" [class.active]="activeTab === 'apariencia'" (click)="activeTab = 'apariencia'">
+      <span class="material-icons">palette</span> Apariencia
+    </button>
+    <button class="settings-tab" [class.active]="activeTab === 'cuenta'" (click)="activeTab = 'cuenta'">
+      <span class="material-icons">lock</span> Cuenta
+    </button>
+    <button class="settings-tab" [class.active]="activeTab === 'notificaciones'" (click)="activeTab = 'notificaciones'">
+      <span class="material-icons">notifications</span> Notificaciones
+    </button>
+    @if (isAdmin()) {
+      <button class="settings-tab" [class.active]="activeTab === 'sistema'" (click)="activeTab = 'sistema'; loadConfigEstablecimiento()">
+        <span class="material-icons">settings_applications</span> Sistema
+      </button>
+    }
+  </div>
+
+  <!-- ═════════ APARIENCIA ═════════ -->
+  @if (activeTab === 'apariencia') {
+    <div class="settings-section">
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Tema de colores</span>
+          <span class="setting-desc">Define la paleta visual de tu dashboard</span>
+        </div>
+        <select class="form-select" [ngModel]="settings.theme" (ngModelChange)="selectTheme($event)">
+          @for (t of themes; track t.id) {
+            <option [value]="t.id">{{ t.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Fuente</span>
+          <span class="setting-desc">Estilo de letra para toda la interfaz</span>
+        </div>
+        <select class="form-select" [ngModel]="settings.font" (ngModelChange)="selectFont($event)">
+          @for (f of fonts; track f.id) {
+            <option [value]="f.id">{{ f.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Tamaño de texto</span>
+          <span class="setting-desc">Ajusta el tamaño de la letra en la interfaz</span>
+        </div>
+        <div class="size-selector">
+          @for (opt of fontSizeOptions; track opt.value) {
+            <button class="size-btn"
+              [class.active]="settings.fontSize === opt.value"
+              (click)="selectFontSize(opt.value)">{{ opt.label }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Alto contraste</span>
+          <span class="setting-desc">Maximiza el contraste para mejorar la legibilidad</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="settings.highContrast" (change)="toggleHighContrast()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      @if (appearanceSaved) {
+        <div class="alert success" style="margin: 16px 0 0;">
+          <span class="material-icons">check_circle</span>
+          Configuración guardada correctamente
+        </div>
+      }
+
+      <button class="btn btn-primary" style="margin-top: 20px;" (click)="saveAppearance()">
+        <span class="material-icons">save</span>
+        Guardar configuración
+      </button>
+
+    </div>
+  }
+
+  <!-- ═════════ CUENTA ═════════ -->
+  @if (activeTab === 'cuenta') {
+    <div class="settings-section">
+
+      @if (passwordSuccess) {
+        <div class="alert success">
+          <span class="material-icons">check_circle</span>
+          {{ passwordSuccess }}
+        </div>
+      }
+      @if (passwordError) {
+        <div class="alert error">
+          <span class="material-icons">error</span>
+          {{ passwordError }}
+        </div>
+      }
+
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">Nombre</span>
+          <span class="info-value">{{ auth.user()?.nombre }} {{ auth.user()?.apellido }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ auth.user()?.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Rol</span>
+          <span class="info-value role-badge">{{ auth.user()?.rol }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Teléfono</span>
+          <span class="info-value">{{ auth.user()?.telefono || 'No registrado' }}</span>
+        </div>
+      </div>
+
+      <h4 class="settings-subtitle">Cambiar contraseña</h4>
+
+      <div class="password-field">
+        <label class="form-label">Contraseña actual</label>
+        <div class="input-wrapper">
+          <input [type]="passwordsVisible.current ? 'text' : 'password'"
+            class="form-input" [(ngModel)]="passwordForm.current"
+            placeholder="Ingrese su contraseña actual">
+          <button class="toggle-pass" (click)="togglePasswordVisibility('current')" type="button"
+            [attr.aria-label]="passwordsVisible.current ? 'Ocultar' : 'Mostrar'">
+            <span class="material-icons">{{ passwordsVisible.current ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="password-field">
+        <label class="form-label">Nueva contraseña</label>
+        <div class="input-wrapper">
+          <input [type]="passwordsVisible.newPass ? 'text' : 'password'"
+            class="form-input" [(ngModel)]="passwordForm.newPass"
+            placeholder="Mínimo 8 caracteres">
+          <button class="toggle-pass" (click)="togglePasswordVisibility('newPass')" type="button"
+            [attr.aria-label]="passwordsVisible.newPass ? 'Ocultar' : 'Mostrar'">
+            <span class="material-icons">{{ passwordsVisible.newPass ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+        @if (passwordForm.newPass) {
+          <div class="password-strength">
+            <div class="strength-bar {{ getPasswordStrength(passwordForm.newPass).class }}"></div>
+            <span class="strength-label">{{ getPasswordStrength(passwordForm.newPass).label }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="password-field">
+        <label class="form-label">Confirmar contraseña</label>
+        <div class="input-wrapper">
+          <input [type]="passwordsVisible.confirm ? 'text' : 'password'"
+            class="form-input" [(ngModel)]="passwordForm.confirm"
+            placeholder="Repita la nueva contraseña">
+          <button class="toggle-pass" (click)="togglePasswordVisibility('confirm')" type="button"
+            [attr.aria-label]="passwordsVisible.confirm ? 'Ocultar' : 'Mostrar'">
+            <span class="material-icons">{{ passwordsVisible.confirm ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" (click)="changePassword()" [disabled]="saving">
+        <span class="material-icons">lock</span>
+        {{ saving ? 'Guardando...' : 'Actualizar Contraseña' }}
+      </button>
+    </div>
+  }
+
+  <!-- ═════════ NOTIFICACIONES ═════════ -->
+  @if (activeTab === 'notificaciones') {
+    <div class="settings-section">
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Notificaciones del navegador</span>
+          <span class="setting-desc">Recibir alertas sobre eventos importantes</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="settings.notifications.browser" (change)="toggleNotification('browser')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <span class="setting-label">Resumen por email</span>
+          <span class="setting-desc">Recibir un resumen periódico en tu correo</span>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [checked]="settings.notifications.email" (change)="toggleNotification('email')">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  }
+
+  <!-- ═════════ SISTEMA (admin) ═════════ -->
+  @if (activeTab === 'sistema' && isAdmin()) {
+    <div class="settings-section">
+      <h4 class="settings-subtitle">Configuración del Establecimiento</h4>
+
+      @if (configLoaded) {
+        <div class="config-grid">
+          <div class="form-group">
+            <label class="form-label">Nombre del establecimiento</label>
+            <input class="form-input" [(ngModel)]="configForm.nombre" placeholder="Ej: Liceo XYZ">
+          </div>
+          <div class="form-group">
+            <label class="form-label">RUT</label>
+            <input class="form-input" [(ngModel)]="configForm.rut" placeholder="Ej: 12.345.678-9">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dirección</label>
+            <input class="form-input" [(ngModel)]="configForm.direccion" placeholder="Ej: Av. Principal 123">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Teléfono</label>
+            <input class="form-input" [(ngModel)]="configForm.telefono" placeholder="Ej: +56 9 1234 5678">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" [(ngModel)]="configForm.email" placeholder="Ej: contacto@liceo.cl">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Director(a)</label>
+            <input class="form-input" [(ngModel)]="configForm.director" placeholder="Nombre del director">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Inspector General</label>
+            <input class="form-input" [(ngModel)]="configForm.inspector_general" placeholder="Nombre del inspector">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Región</label>
+            <input class="form-input" [(ngModel)]="configForm.region" placeholder="Ej: Metropolitana">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comuna</label>
+            <input class="form-input" [(ngModel)]="configForm.comuna" placeholder="Ej: Santiago">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Dependencia</label>
+            <input class="form-input" [(ngModel)]="configForm.dependencia" placeholder="Ej: Municipal, Particular Subvencionado">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Código Sostenedor</label>
+            <input class="form-input" [(ngModel)]="configForm.codigo_sostenedor" placeholder="Código del sostenedor">
+          </div>
+          <div class="form-group">
+            <label class="form-label">URL del Logo</label>
+            <input class="form-input" [(ngModel)]="configForm.logo_url" placeholder="URL del logo del establecimiento">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" (click)="saveConfigEstablecimiento()" style="margin-top: 20px;">
+          <span class="material-icons">save</span>
+          Guardar Configuración
+        </button>
+      } @else {
+        <div class="empty-state">
+          <span class="material-icons">hourglass_empty</span>
+          <p>Cargando configuración...</p>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1453,3 +1453,56 @@ def registro_apoderado(request):
     return Response(
         {"success": True, "user": serializer.data}, status=status.HTTP_201_CREATED
     )
+
+
+# ============================================================
+# CAMBIO DE CONTRASEÑA
+# ============================================================
+@api_view(["POST"])
+def change_password(request, pk):
+    """
+    Cambia la contraseña de un usuario.
+    Recibe: { "current_password": "...", "new_password": "..." }
+    Verifica la actual, hashea la nueva y guarda en MongoDB.
+    """
+    usuario = Usuario.find_one({"_id": ObjectId(pk)})
+    if not usuario:
+        return Response(
+            {"error": "Usuario no encontrado"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    current_password = request.data.get("current_password")
+    new_password = request.data.get("new_password")
+
+    if not current_password or not new_password:
+        return Response(
+            {"error": "Debe proporcionar contraseña actual y nueva"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Verificar contraseña actual
+    if not check_password(current_password, usuario.password):
+        return Response(
+            {"error": "Contraseña actual incorrecta"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Validar nueva contraseña
+    if len(new_password) < 8:
+        return Response(
+            {"error": "La nueva contraseña debe tener al menos 8 caracteres"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if current_password == new_password:
+        return Response(
+            {"error": "La nueva contraseña debe ser diferente a la actual"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Hashear y guardar
+    usuario.password = make_password(new_password)
+    usuario.save()
+
+    return Response({"success": True, "message": "Contraseña actualizada correctamente"})

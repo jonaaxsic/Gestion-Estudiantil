@@ -1,49 +1,27 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
+import { SettingsService } from './settings.service';
 
-export type Theme = 'light' | 'dark';
-
+/**
+ * ThemeService es ahora una CAPA DE COMPATIBILIDAD sobre SettingsService.
+ * 
+ * SettingsService es la única fuente de verdad para el modo claro/oscuro.
+ * ThemeService solo existe para no tener que cambiar todos los templates
+ * que usan `theme.toggle()`, `theme.isDark()` y `theme.theme()`.
+ */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private readonly STORAGE_KEY = 'ge-theme';
+  private readonly settings = inject(SettingsService);
 
-  /** Señal reactiva: 'light' | 'dark' */
-  readonly theme = signal<Theme>(this._getSaved());
+  /** Señal reactiva: 'light' | 'dark' — lee desde SettingsService que es la fuente de verdad */
+  readonly theme = computed<'light' | 'dark'>(() => this.settings.themeMode());
 
-  constructor() {
-    // Aplica el tema inicial al arrancar
-    this._apply(this.theme());
-
-    // Cada vez que cambie la señal, aplica la clase y guarda en localStorage
-    effect(() => {
-      const t = this.theme();
-      this._apply(t);
-      localStorage.setItem(this.STORAGE_KEY, t);
-    });
-  }
-
+  /** Cambia entre modo claro y oscuro delegando en SettingsService */
   toggle(): void {
-    this.theme.update(t => (t === 'light' ? 'dark' : 'light'));
+    this.settings.toggleMode();
   }
 
+  /** ¿Está en modo oscuro? */
   isDark(): boolean {
-    return this.theme() === 'dark';
-  }
-
-  private _getSaved(): Theme {
-    const saved = localStorage.getItem(this.STORAGE_KEY);
-    if (saved === 'dark' || saved === 'light') return saved;
-    // Si no hay preferencia guardada, usa la del sistema operativo
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-
-  private _apply(theme: Theme): void {
-    const body = document.body;
-    if (theme === 'dark') {
-      body.classList.add('dark');
-      body.classList.remove('light');
-    } else {
-      body.classList.add('light');
-      body.classList.remove('dark');
-    }
+    return this.settings.isDark();
   }
 }
