@@ -47,10 +47,6 @@ export class SettingsPanelComponent {
     this.settingsService.updateSettings({ font });
   }
 
-  selectFontSize(size: number) {
-    this.settingsService.updateSettings({ fontSize: size });
-  }
-
   toggleHighContrast() {
     this.settingsService.updateSettings({ highContrast: !this.settings.highContrast });
   }
@@ -162,13 +158,5 @@ export class SettingsPanelComponent {
     { id: 'inter', label: 'Inter' },
     { id: 'roboto', label: 'Roboto' },
     { id: 'poppins', label: 'Poppins' },
-  ];
-
-  readonly fontSizeOptions: { value: number; label: string }[] = [
-    { value: 0, label: 'XS' },
-    { value: 1, label: 'Sm' },
-    { value: 2, label: 'Base' },
-    { value: 3, label: 'Lg' },
-    { value: 4, label: 'XL' },
   ];
 }

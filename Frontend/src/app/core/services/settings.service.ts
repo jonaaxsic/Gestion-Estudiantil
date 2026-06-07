@@ -198,6 +198,15 @@ export class SettingsService {
 
   // ── API pública ────────────────────────────────
 
+  /** Recargar configuraciones para el usuario actual (llamar después de login) */
+  reloadForUser(): void {
+    const newSettings = this._load();
+    this.settings.set(newSettings);
+    if (newSettings.themeMode) {
+      this.themeMode.set(newSettings.themeMode);
+    }
+  }
+
   updateSettings(partial: Partial<UserSettings>): void {
     this.settings.update(s => ({ ...s, ...partial }));
   }

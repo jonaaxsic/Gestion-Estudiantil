@@ -1,5 +1,7 @@
 """
 URL Configuration for Backend API
+⚠️ LEGACY: Este archivo NO está activo. El ROOT_URLCONF apunta a Backend/urls.py.
+No modificar este archivo ya que los cambios no tienen efecto.
 """
 
 from django.urls import path

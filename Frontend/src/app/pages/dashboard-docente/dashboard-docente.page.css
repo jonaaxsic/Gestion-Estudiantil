@@ -1103,6 +1103,88 @@
   cursor: not-allowed;
 }
 
+.nota-input.nota-error {
+  border-color: #e53935;
+  background: #fef2f2;
+}
+
+/* ── Notas: modo solo lectura y edición individual ── */
+.nota-readonly {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+}
+
+.nota-valor {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 0 4px;
+}
+
+.nota-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--primary);
+  opacity: 0.5;
+  transition: opacity 0.2s, background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nota-edit-btn .material-icons {
+  font-size: 16px;
+}
+
+.nota-edit-btn:hover {
+  opacity: 1;
+  background: var(--bg-hover);
+}
+
+.nota-editing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nota-editing .nota-input {
+  flex: 1;
+}
+
+.nota-save-btn {
+  background: var(--success, #18b87a);
+  border: none;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.nota-save-btn .material-icons {
+  font-size: 16px;
+}
+
+.nota-save-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.nota-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .promedio-cell {
   font-weight: 800;
   color: var(--brand);

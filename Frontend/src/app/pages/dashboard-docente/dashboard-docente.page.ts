@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -41,6 +41,7 @@ interface CursoAsignado extends Curso {
 })
 export class DashboardDocentePage implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
   readonly theme = inject(ThemeService);
   
@@ -58,6 +59,9 @@ export class DashboardDocentePage implements OnInit {
   
   // Notas de estudiantes
   notasEstudiantes = signal<Nota[]>([]);
+  
+  // Contador para forzar re-render del @for de notas
+  readonly renderTick = signal(0);
   
   // Asistencia del curso seleccionado
   asistenciaDelCurso = signal<Asistencia[]>([]);
@@ -484,6 +488,11 @@ export class DashboardDocentePage implements OnInit {
     this.successMessage.set(msg);
     setTimeout(() => this.successMessage.set(''), 3000);
   }
+
+  showError(msg: string): void {
+    this.successMessage.set('⚠ ' + msg);
+    setTimeout(() => this.successMessage.set(''), 4000);
+  }
   
   // Save methods
   saveAsistencia(): void {
@@ -777,6 +786,7 @@ export class DashboardDocentePage implements OnInit {
     this.selectedCurso.set(curso);
     this.selectedAsignatura.set(curso.asignatura || '');
     this.notasEditando.set({}); // Limpiar ediciones pendientes
+    this.anotaciones.set([]); // HU-011: Limpiar anotaciones al cambiar de curso
     
     // Cargar estudiantes del curso
     if (curso.id) {
@@ -789,6 +799,9 @@ export class DashboardDocentePage implements OnInit {
 
   // Estado local para notas que el usuario está editando (aún no guardadas)
   notasEditando = signal<Record<string, Record<string, string>>>({});
+  
+  // Estado local: qué celdas de nota están en modo edición (key: "estudianteId-nota1")
+  notasEnEdicion = signal<Set<string>>(new Set());
 
   loadNotasEstudiantes(cursoId: string, asignatura: string): void {
     this.api.getNotas({ curso_id: cursoId, ano_escolar: this.anoEscolar }).subscribe(data => {
@@ -803,17 +816,25 @@ export class DashboardDocentePage implements OnInit {
     // Normalizar coma → punto para el formato chileno (5,8 → 5.8)
     let valor = input.value.replace(',', '.');
 
-    // Solo permitir: dígitos, un punto decimal, vacío
-    if (valor !== '' && !/^\d*\.?\d*$/.test(valor)) {
+    // Si está vacío, permitir (borrar nota)
+    if (valor === '') {
+      this.notasEditando.update(state => ({
+        ...state,
+        [estudianteId]: {
+          ...(state[estudianteId] || {}),
+          [numeroNota]: ''
+        }
+      }));
       return;
     }
 
-    // Validar rango mientras escribe
-    if (valor !== '') {
-      const num = parseFloat(valor);
-      if (!isNaN(num) && (num < 1 || num > 7)) {
-        return;
-      }
+    // Formato: un dígito (1-7) + opcionalmente punto + un dígito decimal
+    // Permite estados intermedios: "5", "5.", "5.3" — rechaza "5.33", "51", "512154.2"
+    if (!/^[1-7](\.\d?)?$/.test(valor)) {
+      // Revertir el campo visual al último valor válido
+      const lastValid = this.notasEditando()[estudianteId]?.[numeroNota] ?? '';
+      input.value = lastValid.replace('.', ',');
+      return;
     }
 
     this.notasEditando.update(state => ({
@@ -838,6 +859,15 @@ export class DashboardDocentePage implements OnInit {
     const val = nota.notas[num];
     if (val === undefined || val === null) return '';
     return String(val).replace('.', ',');
+  }
+
+  // HU-005: Verificar si una nota local tiene valor inválido
+  isNotaInvalida(estudianteId: string, num: string): boolean {
+    const localEdit = this.notasEditando();
+    const val = localEdit[estudianteId]?.[num];
+    if (val === undefined || val === '') return false;
+    const numVal = parseFloat(val);
+    return isNaN(numVal) || numVal < 1 || numVal > 7;
   }
 
   // Calcular promedio en tiempo real, combinando datos de BD + ediciones locales
@@ -867,7 +897,14 @@ export class DashboardDocentePage implements OnInit {
   // Guardar TODAS las notas pendientes de TODOS los estudiantes
   guardarTodasLasNotas(): void {
     const curso = this.selectedCurso();
-    if (!curso?.id || !this.selectedAsignatura()) return;
+    if (!curso?.id) {
+      this.showError('No hay curso seleccionado');
+      return;
+    }
+    if (!this.selectedAsignatura()) {
+      this.showError('No hay asignatura seleccionada para este curso');
+      return;
+    }
 
     const editando = this.notasEditando();
     const estudianteIds = Object.keys(editando);
@@ -884,12 +921,35 @@ export class DashboardDocentePage implements OnInit {
       const notasEst = editando[estId];
       const notasPendientes = Object.keys(notasEst).filter(k => notasEst[k] !== '');
 
+      // Si no hay notas válidas para este estudiante, contar como completada
+      if (notasPendientes.length === 0) {
+        completadas++;
+        if (completadas === total) {
+          this.saving.set(false);
+          this.notasEditando.set({});
+          this.showSuccess('Notas guardadas correctamente');
+          this.renderTick.update(v => v + 1);
+          this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+        }
+        continue;
+      }
+
       // Guardar cada nota pendiente una por una
       let guardadas = 0;
       for (const numNota of notasPendientes) {
         const valor = parseFloat(notasEst[numNota]);
         if (isNaN(valor) || valor < 1 || valor > 7) {
-          continue; // Saltar valores inválidos
+          guardadas++;
+          if (guardadas === notasPendientes.length) {
+            completadas++;
+            if (completadas === total) {
+              this.saving.set(false);
+              this.notasEditando.set({});
+              this.showSuccess('Notas guardadas correctamente');
+              this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+            }
+          }
+          continue;
         }
 
         this.api.actualizarNotaSimple({
@@ -906,17 +966,24 @@ export class DashboardDocentePage implements OnInit {
               completadas++;
               if (completadas === total) {
                 this.saving.set(false);
+                this.notasEditando.set({});
                 this.showSuccess('Notas guardadas correctamente');
+                this.renderTick.update(v => v + 1);
                 this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
               }
             }
           },
           error: () => {
-            completadas++;
-            if (completadas === total) {
-              this.saving.set(false);
-              this.showSuccess('Algunas notas no se pudieron guardar');
-              this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+            guardadas++;
+            if (guardadas === notasPendientes.length) {
+              completadas++;
+              if (completadas === total) {
+                this.saving.set(false);
+                this.notasEditando.set({});
+                this.showSuccess('Algunas notas no se pudieron guardar');
+                this.renderTick.update(v => v + 1);
+                this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+              }
             }
           }
         });
@@ -929,19 +996,102 @@ export class DashboardDocentePage implements OnInit {
     return Object.keys(this.notasEditando()).length > 0;
   }
 
+  // ── Edición individual de notas ──────────────
+
+  isNotaEnEdicion(estudianteId: string, numNota: string): boolean {
+    return this.notasEnEdicion().has(`${estudianteId}-${numNota}`);
+  }
+
+  alternarEdicionNota(estudianteId: string, numNota: string): void {
+    const key = `${estudianteId}-${numNota}`;
+    const actual = new Set(this.notasEnEdicion());
+    if (actual.has(key)) {
+      actual.delete(key);
+    } else {
+      actual.add(key);
+    }
+    this.notasEnEdicion.set(actual);
+  }
+
+  guardarNotaIndividual(estudianteId: string, numNota: string): void {
+    const curso = this.selectedCurso();
+    if (!curso?.id || !this.selectedAsignatura()) return;
+
+    const localEdit = this.notasEditando();
+    const valorStr = localEdit[estudianteId]?.[numNota];
+    if (!valorStr || valorStr === '') {
+      return;
+    }
+
+    const valor = parseFloat(valorStr);
+    if (isNaN(valor) || valor < 1 || valor > 7) return;
+
+    this.saving.set(true);
+
+    this.api.actualizarNotaSimple({
+      estudiante_id: estudianteId,
+      curso_id: curso.id,
+      asignatura: this.selectedAsignatura(),
+      ano_escolar: this.anoEscolar,
+      numero_nota: numNota,
+      valor: valor
+    }).subscribe({
+      next: () => {
+        // 1. Salir del modo edición
+        const key = `${estudianteId}-${numNota}`;
+        const actual = new Set(this.notasEnEdicion());
+        actual.delete(key);
+        this.notasEnEdicion.set(actual);
+        this.notasEditando.set({});
+
+        // 2. Actualizar localmente: crear array 100% nuevo para forzar re-render del template
+        const notas = this.notasEstudiantes();
+        const idx = notas.findIndex(n => n.estudiante_id === estudianteId);
+        if (idx >= 0) {
+          const old = notas[idx];
+          const newNotasObj: Record<string, number | null> = {};
+          for (const k of ['nota1','nota2','nota3','nota4','nota5','nota6']) {
+            newNotasObj[k] = (k === numNota) ? valor : ((old.notas as any)?.[k] ?? null);
+          }
+          const vals = Object.values(newNotasObj).filter((v): v is number => v != null);
+          const avg = vals.length > 0 ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10 : null;
+          const newNota: any = { ...old, notas: newNotasObj, nota_final: avg };
+          const arr2 = notas.map((n, i) => i === idx ? newNota : { ...n, notas: { ...(n.notas || {}) } });
+          this.notasEstudiantes.set(arr2);
+        }
+
+        this.saving.set(false);
+        this.showSuccess(`Nota guardada correctamente`);
+        this.renderTick.update(v => v + 1);
+      },
+      error: (err) => {
+        this.saving.set(false);
+        const msg = err.error?.error || 'Error al guardar la nota';
+        this.showError(msg);
+      }
+    });
+  }
+
+  // Verificar si una nota individual tiene cambios sin guardar
+  tieneCambioSinGuardar(estudianteId: string, numNota: string): boolean {
+    const localEdit = this.notasEditando();
+    return localEdit[estudianteId]?.[numNota] !== undefined && localEdit[estudianteId][numNota] !== '';
+  }
+
   getNotaEstudiante(estudianteId: string): Nota | undefined {
     return this.notasEstudiantes().find(n => n.estudiante_id === estudianteId);
   }
 
-  // Estudiantes ordenados alfabéticamente
-  get estudiantesOrdenados(): Estudiante[] {
+  // Estudiantes ordenados alfabéticamente — lee notasEstudiantes para que el @for re-renderice
+  estudiantesOrdenados = computed(() => {
+    this.notasEstudiantes(); // dependencia reactiva: fuerza re-render del @for cuando cambian notas
     return [...this.estudiantes()].sort((a, b) => {
       const cmp = a.apellido.localeCompare(b.apellido);
       if (cmp !== 0) return cmp;
       const cmp2 = a.nombre.localeCompare(b.nombre);
       return cmp2;
     });
-  }
+  });
 
   // Array para iterar las 6 notas
   get numerosNota(): string[] {
@@ -1027,7 +1177,7 @@ export class DashboardDocentePage implements OnInit {
     this.saving.set(true);
     this.api.createAsistenciaBulk({
       curso_id: curso.id,
-      fecha: this.fechaAsistenciaHoy,
+      fecha: this.fechaSeleccionada(),
       registros
     }).subscribe({
       next: () => {

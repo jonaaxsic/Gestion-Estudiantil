@@ -47,20 +47,6 @@
 
       <div class="setting-row">
         <div class="setting-info">
-          <span class="setting-label">Tamaño de texto</span>
-          <span class="setting-desc">Ajusta el tamaño de la letra en la interfaz</span>
-        </div>
-        <div class="size-selector">
-          @for (opt of fontSizeOptions; track opt.value) {
-            <button class="size-btn"
-              [class.active]="settings.fontSize === opt.value"
-              (click)="selectFontSize(opt.value)">{{ opt.label }}</button>
-          }
-        </div>
-      </div>
-
-      <div class="setting-row">
-        <div class="setting-info">
           <span class="setting-label">Alto contraste</span>
           <span class="setting-desc">Maximiza el contraste para mejorar la legibilidad</span>
         </div>

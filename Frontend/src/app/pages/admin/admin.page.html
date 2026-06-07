@@ -904,4 +904,12 @@
     </div>
   </div>
 }
+
+<!-- Success Message Toast -->
+@if (successMessage()) {
+  <div class="toast success">
+    <span class="material-icons">check_circle</span>
+    {{ successMessage() }}
+  </div>
+}
 </div>

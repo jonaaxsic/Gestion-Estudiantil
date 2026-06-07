@@ -287,7 +287,11 @@ export class DashboardApoderadoPage implements OnInit {
   getNotaDisplay(notas: any, num: string): string {
     if (!notas) return '-';
     const val = notas[num];
-    return val !== undefined && val !== null ? String(val) : '-';
+    if (val !== undefined && val !== null && val !== '') {
+      const numVal = Number(val);
+      return isNaN(numVal) ? String(val) : numVal.toFixed(1);
+    }
+    return '-';
   }
 
   isNotaVacia(notas: any, num: string): boolean {

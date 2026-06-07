@@ -82,6 +82,18 @@ export class RegistroPage {
       return;
     }
 
+    // HU-021: Validar formato RUT chileno
+    if (!/^\d{7,8}-[\dkK]$/.test(this.rut)) {
+      this.error.set('El RUT no tiene un formato válido (ej: 12345678-9)');
+      return;
+    }
+
+    // HU-022: Validar formato de correo electrónico
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
+      this.error.set('El correo electrónico no tiene un formato válido');
+      return;
+    }
+
     this.isLoading.set(true);
 
     this.api.registroApoderado({

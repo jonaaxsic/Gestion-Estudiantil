@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
+import { SettingsService } from './settings.service';
 import { Usuario } from '../../shared/models';
 
 @Injectable({
@@ -8,6 +9,7 @@ import { Usuario } from '../../shared/models';
 })
 export class AuthService {
   private readonly api = inject(ApiService);
+  private readonly settings = inject(SettingsService);
   private readonly router = inject(Router);
   private readonly ngZone = inject(NgZone);
   
@@ -57,32 +59,23 @@ export class AuthService {
   }
 
   private checkStoredAuth(): void {
-    // Primero verificar cookies (prioridad)
+    // Verificar cookie de sesión
     const cookieUser = this.getCookie('user');
     if (cookieUser) {
       try {
         const user = JSON.parse(cookieUser);
         this._user.set(user);
         this._isAuthenticated.set(true);
+        // Restaurar ID en localStorage para SettingsService
+        if (user?.id) {
+          localStorage.setItem('user', JSON.stringify({ id: user.id }));
+        }
+        // Recargar configuraciones del usuario
+        this.settings.reloadForUser();
         this.startSessionTimers();
         return;
       } catch {
         this.deleteCookie('user');
-      }
-    }
-
-    // Fallback a localStorage
-    const stored = localStorage.getItem('user');
-    if (stored) {
-      try {
-        const user = JSON.parse(stored);
-        this._user.set(user);
-        this._isAuthenticated.set(true);
-        // Sincronizar con cookie (8 horas)
-        this.setCookie('user', stored, 8 / 24); // 8 horas = 1/3 día
-        this.startSessionTimers();
-      } catch {
-        this.logout();
       }
     }
   }
@@ -171,9 +164,12 @@ export class AuthService {
             this._user.set(userData);
             this._isAuthenticated.set(true);
             
-            // Guardar en cookie (8 horas) y localStorage
+            // Guardar en cookie (8 horas) y ID en localStorage para settings por usuario
             this.setCookie('user', userString, 8 / 24); // 8 horas
-            localStorage.setItem('user', userString);
+            localStorage.setItem('user', JSON.stringify({ id: userData.id }));
+            
+            // Recargar configuraciones del usuario (tema, fuente, etc.)
+            this.settings.reloadForUser();
             
             // Iniciar timers de sesión
             this.startSessionTimers();
@@ -211,7 +207,6 @@ export class AuthService {
     this._isAuthenticated.set(false);
     this._sessionWarning.set(null);
     this.deleteCookie('user');
-    localStorage.removeItem('user');
     // Reemplazar historial para prevenir volver atrás
     history.replaceState(null, '', '/login');
     this.router.navigate(['/login']);
@@ -224,7 +219,11 @@ export class AuthService {
       // Guardar cookie actualizada
       const userString = JSON.stringify(this._user());
       this.setCookie('user', userString, 8 / 24);
-      localStorage.setItem('user', userString);
+      // Mantener ID en localStorage para SettingsService
+      const user = this._user();
+      if (user?.id) {
+        localStorage.setItem('user', JSON.stringify({ id: user.id }));
+      }
       this._sessionWarning.set(null);
     }
   }

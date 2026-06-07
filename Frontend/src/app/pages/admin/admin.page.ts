@@ -2,7 +2,6 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { ApiService } from '../../core/services/api.service';
@@ -18,7 +17,6 @@ import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado 
     CommonModule, 
     FormsModule, 
     MatIconModule, 
-    MatSnackBarModule,
     MatButtonModule,
     MatCardModule,
     SharedTabsComponent,
@@ -32,7 +30,9 @@ export class AdminPage implements OnInit {
   private readonly api = inject(ApiService);
   readonly auth = inject(AuthService);
   readonly theme = inject(ThemeService);
-  private readonly snackBar = inject(MatSnackBar);
+
+  // Toast notification
+  successMessage = signal('');
 
   // Data signals
   usuarios = signal<Usuario[]>([]);
@@ -469,7 +469,10 @@ export class AdminPage implements OnInit {
           this.loadUsuarios();
           this.closeUserDialog();
         },
-        error: () => this.showMessage('Error al actualizar usuario')
+        error: (err) => {
+          const mensaje = err.error?.error || 'Error al actualizar usuario';
+          this.showMessage(mensaje);
+        }
       });
     } else {
       this.api.createUsuario(this.userForm).subscribe({
@@ -478,7 +481,10 @@ export class AdminPage implements OnInit {
           this.loadUsuarios();
           this.closeUserDialog();
         },
-        error: () => this.showMessage('Error al crear usuario')
+        error: (err) => {
+          const mensaje = err.error?.error || 'Error al crear usuario';
+          this.showMessage(mensaje);
+        }
       });
     }
   }
@@ -625,7 +631,8 @@ export class AdminPage implements OnInit {
   }
 
   showMessage(message: string): void {
-    this.snackBar.open(message, 'Cerrar', { duration: 3000 });
+    this.successMessage.set(message);
+    setTimeout(() => this.successMessage.set(''), 3000);
   }
 
   logout(): void {

@@ -6,34 +6,45 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { of } from 'rxjs';
 import { Estudiante, Curso } from '../../shared/models';
+import { vi } from 'vitest';
+
+type MockApi = {
+  getCursos: ReturnType<typeof vi.fn>;
+  getDashboardInspector: ReturnType<typeof vi.fn>;
+  getEstudiantes: ReturnType<typeof vi.fn>;
+  getCurso: ReturnType<typeof vi.fn>;
+  getRetiros: ReturnType<typeof vi.fn>;
+  getAccidentes: ReturnType<typeof vi.fn>;
+  generarCertificadoAlumnoRegular: ReturnType<typeof vi.fn>;
+};
 
 describe('DashboardInspectorPage', () => {
-  let mockApi: jasmine.SpyObj<ApiService>;
+  let mockApi: MockApi;
   let mockAuth: Partial<AuthService>;
   let mockTheme: Partial<ThemeService>;
 
   beforeEach(async () => {
     // Mock solo lo que el componente usa realmente
-    mockApi = jasmine.createSpyObj('ApiService', [
-      'getCursos',
-      'getDashboardInspector',
-      'getEstudiantes',
-      'getCurso',
-    ]);
-    mockApi.getCursos.and.returnValue(of([]));
-    mockApi.getDashboardInspector.and.returnValue(of({} as any));
-    mockApi.getEstudiantes.and.returnValue(of([]));
+    mockApi = {
+      getCursos: vi.fn().mockReturnValue(of([])),
+      getDashboardInspector: vi.fn().mockReturnValue(of({} as any)),
+      getEstudiantes: vi.fn().mockReturnValue(of([])),
+      getCurso: vi.fn().mockReturnValue(of({} as any)),
+      getRetiros: vi.fn().mockReturnValue(of([])),
+      getAccidentes: vi.fn().mockReturnValue(of([])),
+      generarCertificadoAlumnoRegular: vi.fn().mockReturnValue(of({ pdf_base64: '', success: true, message: '' })),
+    };
 
     // AuthService mock: user tiene id
     mockAuth = {
       user: signal({ id: 'test-inspector-id', nombre: 'Eduardo', rol: 'inspector_general' } as any),
-      logout: jasmine.createSpy('logout'),
+      logout: vi.fn(),
     };
 
     mockTheme = {
       theme: signal('light'),
       isDark: () => false,
-      toggle: jasmine.createSpy('toggle'),
+      toggle: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -61,9 +72,9 @@ describe('DashboardInspectorPage', () => {
   it('should have exactly 6 tabs for inspector', () => {
     const fixture = TestBed.createComponent(DashboardInspectorPage);
     const component = fixture.componentInstance;
-    expect(component.inspectorTabs.length).toBe(6);
+    expect(component.inspectorTabs.length).toBe(7);
     expect(component.inspectorTabs.map(t => t.id)).toEqual([
-      'dashboard', 'documentos', 'retiros', 'accidentes', 'asistencia', 'libro',
+      'dashboard', 'documentos', 'retiros', 'accidentes', 'asistencia', 'libro', 'configuracion',
     ]);
   });
 
@@ -83,7 +94,6 @@ describe('DashboardInspectorPage', () => {
     });
 
     it('should load retiros when switching to retiros tab', () => {
-      mockApi.getRetiros = jasmine.createSpy('getRetiros').and.returnValue(of([]));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
       const component = fixture.componentInstance;
       component.onTabChanged('retiros');
@@ -91,7 +101,6 @@ describe('DashboardInspectorPage', () => {
     });
 
     it('should load accidentes when switching to accidentes tab', () => {
-      mockApi.getAccidentes = jasmine.createSpy('getAccidentes').and.returnValue(of([]));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
       const component = fixture.componentInstance;
       component.onTabChanged('accidentes');
@@ -182,14 +191,14 @@ describe('DashboardInspectorPage', () => {
 
   describe('showSuccess', () => {
     it('should set and clear success message after timeout', () => {
-      jasmine.clock().install();
+      vi.useFakeTimers();
       const fixture = TestBed.createComponent(DashboardInspectorPage);
       const component = fixture.componentInstance;
       component.showSuccess('PDF generado');
       expect(component.successMessage()).toBe('PDF generado');
-      jasmine.clock().tick(3000);
+      vi.advanceTimersByTime(3000);
       expect(component.successMessage()).toBe('');
-      jasmine.clock().uninstall();
+      vi.useRealTimers();
     });
   });
 
@@ -207,7 +216,7 @@ describe('DashboardInspectorPage', () => {
 
   describe('buscarEstudiante', () => {
     it('should search by nombre', () => {
-      mockApi.getEstudiantes.and.returnValue(of([
+      mockApi.getEstudiantes.mockReturnValue(of([
         { id: '1', nombre: 'Diego', apellido: 'Rodriguez', rut: '24.623.073-0' } as Estudiante,
         { id: '2', nombre: 'Ana', apellido: 'Lopez', rut: '11.111.111-1' } as Estudiante,
       ]));
@@ -219,7 +228,7 @@ describe('DashboardInspectorPage', () => {
     });
 
     it('should search by RUT', () => {
-      mockApi.getEstudiantes.and.returnValue(of([
+      mockApi.getEstudiantes.mockReturnValue(of([
         { id: '1', nombre: 'Diego', apellido: 'Rodriguez', rut: '24.623.073-0' } as Estudiante,
       ]));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
@@ -229,7 +238,7 @@ describe('DashboardInspectorPage', () => {
     });
 
     it('should search by apellido', () => {
-      mockApi.getEstudiantes.and.returnValue(of([
+      mockApi.getEstudiantes.mockReturnValue(of([
         { id: '1', nombre: 'Diego', apellido: 'Rodriguez' } as Estudiante,
         { id: '2', nombre: 'Ana', apellido: 'Lopez' } as Estudiante,
       ]));
@@ -241,7 +250,7 @@ describe('DashboardInspectorPage', () => {
     });
 
     it('should return empty results if no match', () => {
-      mockApi.getEstudiantes.and.returnValue(of([
+      mockApi.getEstudiantes.mockReturnValue(of([
         { id: '1', nombre: 'Diego', apellido: 'Rodriguez' } as Estudiante,
       ]));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
@@ -251,7 +260,7 @@ describe('DashboardInspectorPage', () => {
     });
 
     it('should do nothing with empty query', () => {
-      mockApi.getEstudiantes.and.returnValue(of([]));
+      mockApi.getEstudiantes.mockReturnValue(of([]));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
       const component = fixture.componentInstance;
       component.buscarEstudiante('');
@@ -263,7 +272,7 @@ describe('DashboardInspectorPage', () => {
 
   describe('seleccionarEstudiante', () => {
     it('should set selected student and load curso', () => {
-      mockApi.getCurso.and.returnValue(of({ nivel: '1°', nombre: 'Basico A' } as Curso));
+      mockApi.getCurso.mockReturnValue(of({ nivel: '1°', nombre: 'Basico A' } as Curso));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
       const component = fixture.componentInstance;
       const est = { id: 'est-1', nombre: 'Diego', apellido: 'Rodriguez', curso_id: 'curso-1' } as Estudiante;
@@ -275,7 +284,6 @@ describe('DashboardInspectorPage', () => {
 
   describe('download filename', () => {
     it('should set lastGeneratedDocType when generating certificado regular', () => {
-      mockApi.generarCertificadoAlumnoRegular = jasmine.createSpy('generarCertificadoAlumnoRegular').and.returnValue(of({ pdf_base64: '', success: true, message: '' }));
       const fixture = TestBed.createComponent(DashboardInspectorPage);
       const component = fixture.componentInstance;
       component.selectedEstudiante.set({ id: 'est-1', nombre: 'Diego', apellido: 'Rodriguez' } as any);

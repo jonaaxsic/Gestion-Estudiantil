@@ -213,6 +213,11 @@ class AnotacionSerializer(serializers.Serializer):
         # Si no hay tipo, usar 'negativa' por defecto
         if not validated_data.get("tipo"):
             validated_data["tipo"] = "negativa"
+        # Validar que tipo sea 'positiva' o 'negativa'
+        if validated_data.get("tipo") not in ("positiva", "negativa"):
+            raise serializers.ValidationError(
+                {"tipo": "El tipo debe ser 'positiva' o 'negativa'"}
+            )
         anotacion = Anotacion(validated_data)
         anotacion.save()
         return anotacion

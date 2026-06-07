@@ -4,10 +4,9 @@ Implementan los endpoints de la aplicación
 """
 
 from rest_framework import status
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.throttling import AnonRateThrottle
 from django.core.cache import cache
 from django.contrib.auth.hashers import check_password, make_password
 from bson import ObjectId
@@ -549,7 +548,7 @@ class AsistenciaList(APIView, MongoObjectIdMixin):
 
 
 class AsistenciaBulk(APIView, MongoObjectIdMixin):
-    """Crear asistencia masiva para un curso"""
+    """Crear o actualizar asistencia masiva para un curso (upsert)"""
 
     def post(self, request):
         curso_id = request.data.get("curso_id")
@@ -563,20 +562,38 @@ class AsistenciaBulk(APIView, MongoObjectIdMixin):
             )
 
         created = 0
+        updated = 0
         for registro in registros:
-            asistencia = Asistencia(
-                {
-                    "estudiante_id": registro.get("estudiante_id"),
-                    "curso_id": curso_id,
-                    "fecha": fecha,
-                    "presente": registro.get("presente", True),
-                    "observacion": registro.get("observacion"),
-                }
-            )
-            asistencia.save()
-            created += 1
+            estudiante_id = registro.get("estudiante_id")
+            if not estudiante_id:
+                continue
 
-        return Response({"created": created}, status=status.HTTP_201_CREATED)
+            # Upsert: buscar registro existente por estudiante + curso + fecha
+            existente = Asistencia.find_one({
+                "estudiante_id": estudiante_id,
+                "curso_id": curso_id,
+                "fecha": fecha,
+            })
+
+            if existente:
+                existente.presente = registro.get("presente", True)
+                existente.observacion = registro.get("observacion")
+                existente.save()
+                updated += 1
+            else:
+                asistencia = Asistencia(
+                    {
+                        "estudiante_id": estudiante_id,
+                        "curso_id": curso_id,
+                        "fecha": fecha,
+                        "presente": registro.get("presente", True),
+                        "observacion": registro.get("observacion"),
+                    }
+                )
+                asistencia.save()
+                created += 1
+
+        return Response({"created": created, "updated": updated}, status=status.HTTP_201_CREATED)
 
 
 class AsistenciaDetail(APIView, MongoObjectIdMixin):
@@ -884,6 +901,12 @@ def dashboard_docente(request):
             set([a.curso_id for a in asignaciones if a.curso_id])
         )  # Eliminar duplicados
 
+        # Crear mapa curso_id → asignatura (desde AsignacionDocente)
+        curso_asignatura = {}
+        for a in asignaciones:
+            if a.curso_id and a.asignatura:
+                curso_asignatura[a.curso_id] = a.asignatura
+
         # 2. Obtener datos de cursos (sin duplicados)
         cursos = []
         cursos_ya_agregados = (
@@ -901,7 +924,7 @@ def dashboard_docente(request):
                     {
                         "id": str(curso._id) if curso._id else None,
                         "nombre": curso.nivel + " " + curso.nombre,
-                        "asignatura": getattr(curso, "asignatura", ""),
+                        "asignatura": curso_asignatura.get(cid, ""),
                         "estudiantes_count": estudiantes_count,
                     }
                 )
@@ -1212,7 +1235,10 @@ class NotaList(APIView, MongoObjectIdMixin):
         if request.query_params.get("asignatura"):
             query["asignatura"] = request.query_params.get("asignatura")
         if request.query_params.get("ano_escolar"):
-            query["ano_escolar"] = request.query_params.get("ano_escolar")
+            try:
+                query["ano_escolar"] = int(request.query_params.get("ano_escolar"))
+            except (ValueError, TypeError):
+                query["ano_escolar"] = request.query_params.get("ano_escolar")
 
         notas = Nota.find(query, sort=[("created_at", -1)])
         serializer = NotaSerializer(notas, many=True)
@@ -1311,6 +1337,25 @@ def actualizar_nota_simple(request):
             },
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+    # Validar que valor sea numérico
+    try:
+        valor = float(valor)
+    except (TypeError, ValueError):
+        return Response(
+            {"error": "El valor de la nota debe ser un número"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Validar rango [1.0, 7.0]
+    if valor < 1.0 or valor > 7.0:
+        return Response(
+            {"error": "La nota debe estar entre 1.0 y 7.0"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Redondear a 1 decimal
+    valor = round(valor, 1)
 
     # Buscar o crear la nota del estudiante
     nota = Nota.find_one(

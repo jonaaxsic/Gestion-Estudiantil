@@ -1343,3 +1343,28 @@
     border-radius: 3px;
   }
 }
+
+/* ── TOAST ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  animation: slideInToast 0.3s ease;
+  z-index: 1001;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast.success { background: var(--success); color: var(--text-on-success); }
+.toast .material-icons { font-size: 22px; }
+
+@keyframes slideInToast {
+  from { transform: translateY(100px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
