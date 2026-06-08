@@ -353,8 +353,50 @@ export class AdminPage implements OnInit {
       }
     });
   }
-  
-  deleteAsignacionDocente(asignacion: AsignacionDocente): void {
+
+  // Agrupa asignaciones por docente para vista de tarjetas
+  docenteSearchQuery = signal<string>('');
+
+  getDocentesConAsignaciones() {
+    const mapa = new Map<string, {
+      docente_id: string;
+      nombre: string;
+      inicial: string;
+      cursos: Array<{ asignacion_id: string; curso: string; asignatura: string }>;
+    }>();
+
+    for (const asig of this.asignacionesDocente()) {
+      if (!asig.docente_id) continue;
+      if (!mapa.has(asig.docente_id)) {
+        const nombre = this.getDocenteNombre(asig.docente_id);
+        mapa.set(asig.docente_id, {
+          docente_id: asig.docente_id,
+          nombre,
+          inicial: nombre.charAt(0).toUpperCase(),
+          cursos: []
+        });
+      }
+      mapa.get(asig.docente_id)!.cursos.push({
+        asignacion_id: asig.id || '',
+        curso: this.getCursoNombreDisplay(asig.curso_id),
+        asignatura: asig.asignatura || ''
+      });
+    }
+
+    return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
+  getDocentesFiltrados() {
+    const q = this.docenteSearchQuery().toLowerCase().trim();
+    const todos = this.getDocentesConAsignaciones();
+    if (!q) return todos;
+    return todos.filter(d =>
+      d.nombre.toLowerCase().includes(q) ||
+      d.cursos.some(c => c.curso.toLowerCase().includes(q) || c.asignatura.toLowerCase().includes(q))
+    );
+  }
+
+  deleteAsignacionDocente(asignacion: AsignacionDocente | { id: string }): void {
     if (asignacion.id && confirm('¿Eliminar esta asignación?')) {
       this.api.deleteAsignacionDocente(asignacion.id).subscribe({
         next: () => { this.showMessage('Asignación eliminada'); this.loadAsignacionesDocente(); },

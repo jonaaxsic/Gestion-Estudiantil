@@ -198,3 +198,26 @@ CACHES = {
         "LOCATION": "unique-snowflake",
     }
 }
+
+
+# ===========================================
+# EMAIL CONFIGURATION — Gmail SMTP
+# ===========================================
+# Para usar Gmail, necesitas una "App Password" (no tu contraseña regular):
+# 1. Ve a https://myaccount.google.com/security
+# 2. Activa la verificación en 2 pasos (si no está activa)
+# 3. Ve a "App passwords" → Genera una para "Django"
+# 4. Copia la contraseña de 16 caracteres en EMAIL_HOST_PASSWORD
+#
+# En .env agrega:
+# EMAIL_HOST_USER=tu_correo@gmail.com
+# EMAIL_HOST_PASSWORD=xxxx xxxx xxxx xxxx  (App Password de Gmail)
+# DEFAULT_FROM_EMAIL=Tu Nombre <tu_correo@gmail.com>
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", f"Sistema Gestión <{EMAIL_HOST_USER}>")

@@ -13,6 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { SharedTabsComponent, SharedHeaderComponent, TabItem, SettingsPanelComponent } from '../../shared/components';
 import { Curso, Evaluacion, Anotacion, Estudiante, Asistencia, Reunione, Recordatorio, AsignacionDocente, Nota } from '../../shared/models';
+import { forkJoin, concatMap, of, map } from 'rxjs';
 
 interface CursoAsignado extends Curso {
   asignatura?: string;
@@ -805,8 +806,10 @@ export class DashboardDocentePage implements OnInit {
 
   loadNotasEstudiantes(cursoId: string, asignatura: string): void {
     this.api.getNotas({ curso_id: cursoId, ano_escolar: this.anoEscolar }).subscribe(data => {
-      this.notasEstudiantes.set(data.filter(n => n.asignatura === asignatura));
-      this.notasEditando.set({}); // Limpiar ediciones pendientes al recargar
+      this.notasEstudiantes.set(
+        asignatura ? data.filter(n => n.asignatura === asignatura) : data
+      );
+      this.notasEditando.set({});
     });
   }
 
@@ -894,7 +897,7 @@ export class DashboardDocentePage implements OnInit {
     return (suma / valores.length).toFixed(1);
   }
 
-  // Guardar TODAS las notas pendientes de TODOS los estudiantes
+  // Guardar TODAS las notas pendientes — serializado para evitar race conditions
   guardarTodasLasNotas(): void {
     const curso = this.selectedCurso();
     if (!curso?.id) {
@@ -914,81 +917,58 @@ export class DashboardDocentePage implements OnInit {
     }
 
     this.saving.set(true);
-    let completadas = 0;
-    const total = estudianteIds.length;
 
+    // Aplanar todas las notas pendientes en un solo array
+    const operaciones: { estudianteId: string; numNota: string; valor: number }[] = [];
     for (const estId of estudianteIds) {
       const notasEst = editando[estId];
-      const notasPendientes = Object.keys(notasEst).filter(k => notasEst[k] !== '');
-
-      // Si no hay notas válidas para este estudiante, contar como completada
-      if (notasPendientes.length === 0) {
-        completadas++;
-        if (completadas === total) {
-          this.saving.set(false);
-          this.notasEditando.set({});
-          this.showSuccess('Notas guardadas correctamente');
-          this.renderTick.update(v => v + 1);
-          this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
-        }
-        continue;
-      }
-
-      // Guardar cada nota pendiente una por una
-      let guardadas = 0;
-      for (const numNota of notasPendientes) {
+      for (const numNota of Object.keys(notasEst)) {
+        if (notasEst[numNota] === '') continue;
         const valor = parseFloat(notasEst[numNota]);
-        if (isNaN(valor) || valor < 1 || valor > 7) {
-          guardadas++;
-          if (guardadas === notasPendientes.length) {
-            completadas++;
-            if (completadas === total) {
-              this.saving.set(false);
-              this.notasEditando.set({});
-              this.showSuccess('Notas guardadas correctamente');
-              this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
-            }
-          }
-          continue;
-        }
-
-        this.api.actualizarNotaSimple({
-          estudiante_id: estId,
-          curso_id: curso.id,
-          asignatura: this.selectedAsignatura(),
-          ano_escolar: this.anoEscolar,
-          numero_nota: numNota,
-          valor: valor
-        }).subscribe({
-          next: () => {
-            guardadas++;
-            if (guardadas === notasPendientes.length) {
-              completadas++;
-              if (completadas === total) {
-                this.saving.set(false);
-                this.notasEditando.set({});
-                this.showSuccess('Notas guardadas correctamente');
-                this.renderTick.update(v => v + 1);
-                this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
-              }
-            }
-          },
-          error: () => {
-            guardadas++;
-            if (guardadas === notasPendientes.length) {
-              completadas++;
-              if (completadas === total) {
-                this.saving.set(false);
-                this.notasEditando.set({});
-                this.showSuccess('Algunas notas no se pudieron guardar');
-                this.renderTick.update(v => v + 1);
-                this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
-              }
-            }
-          }
-        });
+        if (isNaN(valor) || valor < 1 || valor > 7) continue;
+        operaciones.push({ estudianteId: estId, numNota, valor });
       }
     }
+
+    if (operaciones.length === 0) {
+      this.saving.set(false);
+      alert('No hay notas válidas por guardar');
+      return;
+    }
+
+    let exitosas = 0;
+
+    // Serializar con concatMap — cada llamada espera a que la anterior termine
+    forkJoin(
+      operaciones.map(op =>
+        this.api.actualizarNotaSimple({
+          estudiante_id: op.estudianteId,
+          curso_id: curso.id!,
+          asignatura: this.selectedAsignatura(),
+          ano_escolar: this.anoEscolar,
+          numero_nota: op.numNota,
+          valor: op.valor
+        }).pipe(
+          map(() => exitosas++),
+          concatMap(() => of(null)),
+        )
+      )
+    ).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.notasEditando.set({});
+        this.showSuccess(`${exitosas} de ${operaciones.length} notas guardadas correctamente`);
+        this.renderTick.update(v => v + 1);
+        this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+      },
+      error: () => {
+        this.saving.set(false);
+        this.notasEditando.set({});
+        this.showError('Error al guardar las notas');
+        this.renderTick.update(v => v + 1);
+        this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+      }
+    });
   }
 
   // Verificar si hay cambios sin guardar
@@ -1042,7 +1022,18 @@ export class DashboardDocentePage implements OnInit {
         const actual = new Set(this.notasEnEdicion());
         actual.delete(key);
         this.notasEnEdicion.set(actual);
-        this.notasEditando.set({});
+
+        // Preservar ediciones pendientes de otros estudiantes
+        this.notasEditando.update(state => {
+          const nuevo = { ...state };
+          if (nuevo[estudianteId]) {
+            const estNotas = { ...nuevo[estudianteId] };
+            delete estNotas[numNota];
+            if (Object.keys(estNotas).length === 0) delete nuevo[estudianteId];
+            else nuevo[estudianteId] = estNotas;
+          }
+          return nuevo;
+        });
 
         // 2. Actualizar localmente: crear array 100% nuevo para forzar re-render del template
         const notas = this.notasEstudiantes();
@@ -1080,6 +1071,12 @@ export class DashboardDocentePage implements OnInit {
 
   getNotaEstudiante(estudianteId: string): Nota | undefined {
     return this.notasEstudiantes().find(n => n.estudiante_id === estudianteId);
+  }
+
+  /** Verifica si una nota ya tiene valor guardado. Lee renderTick para forzar re-evaluación. */
+  notaGuardada(estudianteId: string, numNota: string): boolean {
+    this.renderTick();
+    return this.notasEstudiantes().find(n => n.estudiante_id === estudianteId)?.notas?.[numNota] != null;
   }
 
   // Estudiantes ordenados alfabéticamente — lee notasEstudiantes para que el @for re-renderice

@@ -3,6 +3,8 @@ Views/ViewSets para la API REST
 Implementan los endpoints de la aplicación
 """
 
+from collections import defaultdict
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -901,11 +903,11 @@ def dashboard_docente(request):
             set([a.curso_id for a in asignaciones if a.curso_id])
         )  # Eliminar duplicados
 
-        # Crear mapa curso_id → asignatura (desde AsignacionDocente)
-        curso_asignatura = {}
+        # Agrupar asignaturas por curso (un docente puede tener varias)
+        curso_asignaturas = defaultdict(list)
         for a in asignaciones:
-            if a.curso_id and a.asignatura:
-                curso_asignatura[a.curso_id] = a.asignatura
+            if a.curso_id and a.asignatura and a.asignatura not in curso_asignaturas[a.curso_id]:
+                curso_asignaturas[a.curso_id].append(a.asignatura)
 
         # 2. Obtener datos de cursos (sin duplicados)
         cursos = []
@@ -924,7 +926,7 @@ def dashboard_docente(request):
                     {
                         "id": str(curso._id) if curso._id else None,
                         "nombre": curso.nivel + " " + curso.nombre,
-                        "asignatura": curso_asignatura.get(cid, ""),
+                        "asignatura": (curso_asignaturas.get(cid) or [""])[0],
                         "estudiantes_count": estudiantes_count,
                     }
                 )
@@ -1329,6 +1331,15 @@ def actualizar_nota_simple(request):
     ano_escolar = request.data.get("ano_escolar")
     numero_nota = request.data.get("numero_nota")  # "nota1", "nota2", etc.
     valor = request.data.get("valor")  # valor numérico de la nota
+
+    # Normalizar ano_escolar a int (puede llegar como string desde el frontend)
+    try:
+        ano_escolar = int(ano_escolar)
+    except (TypeError, ValueError):
+        return Response(
+            {"error": "ano_escolar debe ser un número entero"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     if not all([estudiante_id, curso_id, asignatura, numero_nota, valor]):
         return Response(

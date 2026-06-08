@@ -417,43 +417,61 @@
         </div>
       </div>
       
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Docente</th>
-              <th>Curso</th>
-              <th>Asignatura</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (asignacion of asignacionesDocente(); track asignacion.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar">{{ getDocenteNombre(asignacion.docente_id).charAt(0) }}</div>
-                    <span class="user-name-table">{{ getDocenteNombre(asignacion.docente_id) }}</span>
+      <div class="card-body">
+        <!-- Barra de búsqueda -->
+        <div class="search-bar-wrapper">
+          <span class="material-icons search-icon">search</span>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Buscar docente, curso o asignatura..."
+            [value]="docenteSearchQuery()"
+            (input)="docenteSearchQuery.set($any($event.target).value)"
+          />
+        </div>
+
+        <!-- Tarjetas de docentes -->
+        <div class="docentes-cards-grid">
+          @for (docente of getDocentesFiltrados(); track docente.docente_id) {
+            <div class="docente-card">
+              <div class="docente-card-header">
+                <div class="docente-avatar-large">{{ docente.inicial }}</div>
+                <div class="docente-info">
+                  <h4 class="docente-nombre">{{ docente.nombre }}</h4>
+                  <span class="docente-cursos-count">
+                    {{ docente.cursos.length }} curso(s) asignado(s)
+                  </span>
+                </div>
+              </div>
+              <div class="docente-cursos-list">
+                @for (curso of docente.cursos; track curso.asignacion_id) {
+                  <div class="docente-curso-item">
+                    <div class="curso-info">
+                      <span class="material-icons curso-icon">class</span>
+                      <div>
+                        <span class="curso-nombre">{{ curso.curso }}</span>
+                        <span class="badge badge-asignatura">{{ curso.asignatura }}</span>
+                      </div>
+                    </div>
+                    <button
+                      class="btn-icon btn-danger-soft"
+                      (click)="deleteAsignacionDocente({ id: curso.asignacion_id })"
+                      title="Quitar asignación"
+                    >
+                      <span class="material-icons">delete</span>
+                    </button>
                   </div>
-                </td>
-                <td>{{ getCursoNombreDisplay(asignacion.curso_id) }}</td>
-                <td>
-                  <span class="badge">{{ asignacion.asignatura }}</span>
-                </td>
-                <td>
-                  <button class="btn-icon" (click)="deleteAsignacionDocente(asignacion)" title="Eliminar">
-                    <span class="material-icons">delete</span>
-                  </button>
-                </td>
-              </tr>
-            }
-            @if (asignacionesDocente().length === 0) {
-              <tr>
-                <td colspan="4" class="text-center">No hay asignaciones registradas</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+                }
+              </div>
+            </div>
+          }
+          @if (getDocentesFiltrados().length === 0) {
+            <div class="empty-state">
+              <span class="material-icons">search_off</span>
+              <p>No se encontraron docentes con esa búsqueda</p>
+            </div>
+          }
+        </div>
       </div>
     </div>
     

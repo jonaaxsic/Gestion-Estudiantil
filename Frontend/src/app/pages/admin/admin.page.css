@@ -1368,3 +1368,82 @@
   from { transform: translateY(100px); opacity: 0; }
   to   { transform: translateY(0);     opacity: 1; }
 }
+
+/* ── DOCENTES: TARJETAS AGRUPADAS ────────────────────── */
+.search-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-color, #f5f5f5);
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+}
+.search-icon { color: var(--text-secondary, #888); font-size: 20px; }
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  outline: none;
+  color: var(--text-primary, #333);
+}
+
+.docentes-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.docente-card {
+  background: var(--card-bg, #fff);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s;
+}
+.docente-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+
+.docente-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color, #eee);
+}
+.docente-avatar-large {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--primary-color, #5b72a8);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: bold;
+  flex-shrink: 0;
+}
+.docente-nombre { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+.docente-cursos-count { font-size: 12px; color: var(--text-secondary, #888); }
+
+.docente-cursos-list { display: flex; flex-direction: column; gap: 10px; }
+.docente-curso-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface-color, #f9f9f9);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.curso-info { display: flex; align-items: center; gap: 10px; }
+.curso-icon { font-size: 18px; color: var(--primary-color, #5b72a8); }
+.curso-nombre { font-size: 13px; font-weight: 500; display: block; }
+.badge-asignatura {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 20px;
+  background: var(--primary-light, #e8ecf5);
+  color: var(--primary-color, #5b72a8);
+}
+.btn-danger-soft { color: var(--danger-color, #e53935); background: transparent; }
+
+@media (max-width: 600px) {
+  .docentes-cards-grid { grid-template-columns: 1fr; }
+}

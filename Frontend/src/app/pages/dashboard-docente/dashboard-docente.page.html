@@ -390,7 +390,7 @@
                       </td>
                       <!-- Nota 1 -->
                       <td>
-                        @if (getNotaEstudiante(est.id!)?.notas?.['nota1'] != null && !isNotaEnEdicion(est.id!, 'nota1')) {
+                        @if (notaGuardada(est.id!, 'nota1') && !isNotaEnEdicion(est.id!, 'nota1')) {
                           <div class="nota-readonly">
                             <span class="nota-valor">{{ getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota1') }}</span>
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
@@ -402,7 +402,7 @@
                         } @else {
                           <div class="nota-editing">
                             <input type="text" inputmode="decimal" class="nota-input" [class.nota-error]="isNotaInvalida(est.id!, 'nota1')" [value]="getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota1')" (input)="onNotaInput(est.id!, 'nota1', $event)" [disabled]="getNotaEstudiante(est.id!)?.cerrado">
-                            @if (getNotaEstudiante(est.id!)?.notas?.['nota1'] != null && isNotaEnEdicion(est.id!, 'nota1')) {
+                            @if (notaGuardada(est.id!, 'nota1') && isNotaEnEdicion(est.id!, 'nota1')) {
                               <button class="nota-save-btn" (click)="guardarNotaIndividual(est.id!, 'nota1')" [disabled]="saving()" title="Actualizar nota">
                                 <span class="material-icons">check</span>
                               </button>
@@ -412,7 +412,7 @@
                       </td>
                       <!-- Nota 2 -->
                       <td>
-                        @if (getNotaEstudiante(est.id!)?.notas?.['nota2'] != null && !isNotaEnEdicion(est.id!, 'nota2')) {
+                        @if (notaGuardada(est.id!, 'nota2') && !isNotaEnEdicion(est.id!, 'nota2')) {
                           <div class="nota-readonly">
                             <span class="nota-valor">{{ getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota2') }}</span>
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
@@ -424,7 +424,7 @@
                         } @else {
                           <div class="nota-editing">
                             <input type="text" inputmode="decimal" class="nota-input" [class.nota-error]="isNotaInvalida(est.id!, 'nota2')" [value]="getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota2')" (input)="onNotaInput(est.id!, 'nota2', $event)" [disabled]="getNotaEstudiante(est.id!)?.cerrado">
-                            @if (getNotaEstudiante(est.id!)?.notas?.['nota2'] != null && isNotaEnEdicion(est.id!, 'nota2')) {
+                            @if (notaGuardada(est.id!, 'nota2') && isNotaEnEdicion(est.id!, 'nota2')) {
                               <button class="nota-save-btn" (click)="guardarNotaIndividual(est.id!, 'nota2')" [disabled]="saving()" title="Actualizar nota">
                                 <span class="material-icons">check</span>
                               </button>
@@ -434,7 +434,7 @@
                       </td>
                       <!-- Nota 3 -->
                       <td>
-                        @if (getNotaEstudiante(est.id!)?.notas?.['nota3'] != null && !isNotaEnEdicion(est.id!, 'nota3')) {
+                        @if (notaGuardada(est.id!, 'nota3') && !isNotaEnEdicion(est.id!, 'nota3')) {
                           <div class="nota-readonly">
                             <span class="nota-valor">{{ getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota3') }}</span>
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
@@ -446,7 +446,7 @@
                         } @else {
                           <div class="nota-editing">
                             <input type="text" inputmode="decimal" class="nota-input" [class.nota-error]="isNotaInvalida(est.id!, 'nota3')" [value]="getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota3')" (input)="onNotaInput(est.id!, 'nota3', $event)" [disabled]="getNotaEstudiante(est.id!)?.cerrado">
-                            @if (getNotaEstudiante(est.id!)?.notas?.['nota3'] != null && isNotaEnEdicion(est.id!, 'nota3')) {
+                            @if (notaGuardada(est.id!, 'nota3') && isNotaEnEdicion(est.id!, 'nota3')) {
                               <button class="nota-save-btn" (click)="guardarNotaIndividual(est.id!, 'nota3')" [disabled]="saving()" title="Actualizar nota">
                                 <span class="material-icons">check</span>
                               </button>
@@ -456,7 +456,7 @@
                       </td>
                       <!-- Nota 4 -->
                       <td>
-                        @if (getNotaEstudiante(est.id!)?.notas?.['nota4'] != null && !isNotaEnEdicion(est.id!, 'nota4')) {
+                        @if (notaGuardada(est.id!, 'nota4') && !isNotaEnEdicion(est.id!, 'nota4')) {
                           <div class="nota-readonly">
                             <span class="nota-valor">{{ getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota4') }}</span>
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
@@ -468,7 +468,7 @@
                         } @else {
                           <div class="nota-editing">
                             <input type="text" inputmode="decimal" class="nota-input" [class.nota-error]="isNotaInvalida(est.id!, 'nota4')" [value]="getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota4')" (input)="onNotaInput(est.id!, 'nota4', $event)" [disabled]="getNotaEstudiante(est.id!)?.cerrado">
-                            @if (getNotaEstudiante(est.id!)?.notas?.['nota4'] != null && isNotaEnEdicion(est.id!, 'nota4')) {
+                            @if (notaGuardada(est.id!, 'nota4') && isNotaEnEdicion(est.id!, 'nota4')) {
                               <button class="nota-save-btn" (click)="guardarNotaIndividual(est.id!, 'nota4')" [disabled]="saving()" title="Actualizar nota">
                                 <span class="material-icons">check</span>
                               </button>
@@ -478,7 +478,7 @@
                       </td>
                       <!-- Nota 5 -->
                       <td>
-                        @if (getNotaEstudiante(est.id!)?.notas?.['nota5'] != null && !isNotaEnEdicion(est.id!, 'nota5')) {
+                        @if (notaGuardada(est.id!, 'nota5') && !isNotaEnEdicion(est.id!, 'nota5')) {
                           <div class="nota-readonly">
                             <span class="nota-valor">{{ getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota5') }}</span>
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
@@ -490,7 +490,7 @@
                         } @else {
                           <div class="nota-editing">
                             <input type="text" inputmode="decimal" class="nota-input" [class.nota-error]="isNotaInvalida(est.id!, 'nota5')" [value]="getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota5')" (input)="onNotaInput(est.id!, 'nota5', $event)" [disabled]="getNotaEstudiante(est.id!)?.cerrado">
-                            @if (getNotaEstudiante(est.id!)?.notas?.['nota5'] != null && isNotaEnEdicion(est.id!, 'nota5')) {
+                            @if (notaGuardada(est.id!, 'nota5') && isNotaEnEdicion(est.id!, 'nota5')) {
                               <button class="nota-save-btn" (click)="guardarNotaIndividual(est.id!, 'nota5')" [disabled]="saving()" title="Actualizar nota">
                                 <span class="material-icons">check</span>
                               </button>
@@ -500,7 +500,7 @@
                       </td>
                       <!-- Nota 6 -->
                       <td>
-                        @if (getNotaEstudiante(est.id!)?.notas?.['nota6'] != null && !isNotaEnEdicion(est.id!, 'nota6')) {
+                        @if (notaGuardada(est.id!, 'nota6') && !isNotaEnEdicion(est.id!, 'nota6')) {
                           <div class="nota-readonly">
                             <span class="nota-valor">{{ getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota6') }}</span>
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
@@ -512,7 +512,7 @@
                         } @else {
                           <div class="nota-editing">
                             <input type="text" inputmode="decimal" class="nota-input" [class.nota-error]="isNotaInvalida(est.id!, 'nota6')" [value]="getNotaValor(getNotaEstudiante(est.id!), est.id!, 'nota6')" (input)="onNotaInput(est.id!, 'nota6', $event)" [disabled]="getNotaEstudiante(est.id!)?.cerrado">
-                            @if (getNotaEstudiante(est.id!)?.notas?.['nota6'] != null && isNotaEnEdicion(est.id!, 'nota6')) {
+                            @if (notaGuardada(est.id!, 'nota6') && isNotaEnEdicion(est.id!, 'nota6')) {
                               <button class="nota-save-btn" (click)="guardarNotaIndividual(est.id!, 'nota6')" [disabled]="saving()" title="Actualizar nota">
                                 <span class="material-icons">check</span>
                               </button>

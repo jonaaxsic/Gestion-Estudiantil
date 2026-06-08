@@ -5,7 +5,7 @@ Simple and clean endpoints - no admin, no docs complications
 
 from django.urls import include, path, re_path
 from django.http import JsonResponse
-from core import views, inspector_views
+from core import views, inspector_views, auth_views
 
 
 def api_root(request):
@@ -36,6 +36,10 @@ urlpatterns = [
     # Authentication
     path("auth/login", views.login_view, name="login"),
     path("auth/create-test-user", views.create_test_user, name="create-test-user"),
+    # Recuperación de contraseña
+    path("auth/forgot-password", auth_views.forgot_password, name="forgot-password"),
+    path("auth/verify-reset-code", auth_views.verify_reset_code, name="verify-reset-code"),
+    path("auth/reset-password", auth_views.reset_password, name="reset-password"),
     # CRUD endpoints - con y sin trailing slash
     path("usuarios", views.UsuarioList.as_view(), name="usuario-list"),
     path("usuarios/", views.UsuarioList.as_view(), name="usuario-list-slash"),
