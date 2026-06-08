@@ -1277,13 +1277,21 @@ class NotaList(APIView, MongoObjectIdMixin):
                     if existing_notas.get(nkey) is None and new_notas.get(nkey) is not None:
                         existing_notas[nkey] = new_notas[nkey]
                 existing.notas = existing_notas
-                # Recalcular promedio
+                # Recalcular y persistir promedio
                 vals = [v for v in existing_notas.values() if v is not None]
-                existing.nota_final = round(sum(vals) / len(vals), 1) if vals else None
+                avg = round(sum(vals) / len(vals), 1) if vals else None
+                existing.nota_final = avg
+                try:
+                    Nota.get_collection().update_one(
+                        {"_id": ObjectId(existing._id)},
+                        {"$set": {"notas": existing_notas, "nota_final": avg}}
+                    )
+                except Exception:
+                    pass
                 # Mantener el _id del documento más antiguo
                 # Eliminar el duplicado de MongoDB
                 try:
-                    Nota.get_collection().delete_one({"_id": nota._id})
+                    Nota.get_collection().delete_one({"_id": ObjectId(nota._id)})
                 except Exception:
                     pass
 
@@ -1455,7 +1463,7 @@ def actualizar_nota_simple(request):
         valores = [v for v in notas.values() if v is not None]
         avg = round(sum(valores) / len(valores), 1) if valores else None
         collection.update_one(
-            {"_id": nota._id},
+            {"_id": ObjectId(nota._id)},
             {"$set": {"nota_final": avg, "updated_at": datetime.now()}},
         )
         nota.nota_final = avg
@@ -1525,7 +1533,7 @@ def eliminar_campo_nota(request):
         valores = [v for v in notas.values() if v is not None]
         avg = round(sum(valores) / len(valores), 1) if valores else None
         collection.update_one(
-            {"_id": nota._id},
+            {"_id": ObjectId(nota._id)},
             {"$set": {"nota_final": avg, "updated_at": datetime.now()}},
         )
         nota.nota_final = avg
