@@ -805,8 +805,11 @@ export class DashboardDocentePage implements OnInit {
 
   loadNotasEstudiantes(cursoId: string, asignatura: string): void {
     this.api.getNotas({ curso_id: cursoId, ano_escolar: this.anoEscolar }).subscribe(data => {
+      const norm = (s: string) =>
+        s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+      const asigNorm = norm(asignatura);
       this.notasEstudiantes.set(
-        asignatura ? data.filter(n => n.asignatura === asignatura) : data
+        asigNorm ? data.filter(n => norm(n.asignatura) === asigNorm) : data
       );
       this.notasEditando.set({});
     });
