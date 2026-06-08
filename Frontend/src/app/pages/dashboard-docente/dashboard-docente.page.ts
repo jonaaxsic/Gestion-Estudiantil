@@ -13,7 +13,6 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { SharedTabsComponent, SharedHeaderComponent, TabItem, SettingsPanelComponent } from '../../shared/components';
 import { Curso, Evaluacion, Anotacion, Estudiante, Asistencia, Reunione, Recordatorio, AsignacionDocente, Nota } from '../../shared/models';
-import { forkJoin, concatMap, of, map } from 'rxjs';
 
 interface CursoAsignado extends Curso {
   asignatura?: string;
@@ -897,7 +896,7 @@ export class DashboardDocentePage implements OnInit {
     return (suma / valores.length).toFixed(1);
   }
 
-  // Guardar TODAS las notas pendientes — serializado para evitar race conditions
+  // Guardar TODAS las notas pendientes — una por una (secuencial)
   guardarTodasLasNotas(): void {
     const curso = this.selectedCurso();
     if (!curso?.id) {
@@ -918,7 +917,7 @@ export class DashboardDocentePage implements OnInit {
 
     this.saving.set(true);
 
-    // Aplanar todas las notas pendientes en un solo array
+    // Aplanar todas las notas pendientes
     const operaciones: { estudianteId: string; numNota: string; valor: number }[] = [];
     for (const estId of estudianteIds) {
       const notasEst = editando[estId];
@@ -936,39 +935,42 @@ export class DashboardDocentePage implements OnInit {
       return;
     }
 
+    // Secuencial: de una en una, error individual no detiene el resto
     let exitosas = 0;
+    let fallidas = 0;
+    let indice = 0;
 
-    // Serializar con concatMap — cada llamada espera a que la anterior termine
-    forkJoin(
-      operaciones.map(op =>
-        this.api.actualizarNotaSimple({
-          estudiante_id: op.estudianteId,
-          curso_id: curso.id!,
-          asignatura: this.selectedAsignatura(),
-          ano_escolar: this.anoEscolar,
-          numero_nota: op.numNota,
-          valor: op.valor
-        }).pipe(
-          map(() => exitosas++),
-          concatMap(() => of(null)),
-        )
-      )
-    ).subscribe({
-      next: () => {
+    const siguiente = (): void => {
+      if (indice >= operaciones.length) {
+        // Todas procesadas
         this.saving.set(false);
         this.notasEditando.set({});
-        this.showSuccess(`${exitosas} de ${operaciones.length} notas guardadas correctamente`);
+        const msg = fallidas === 0
+          ? `${exitosas} nota(s) guardada(s) correctamente`
+          : `${exitosas} guardada(s), ${fallidas} fallaron`;
+        fallidas === 0 ? this.showSuccess(msg) : this.showError(msg);
         this.renderTick.update(v => v + 1);
         this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
-      },
-      error: () => {
-        this.saving.set(false);
-        this.notasEditando.set({});
-        this.showError('Error al guardar las notas');
-        this.renderTick.update(v => v + 1);
-        this.loadNotasEstudiantes(curso.id!, this.selectedAsignatura());
+        return;
       }
-    });
+
+      const op = operaciones[indice];
+      indice++;
+
+      this.api.actualizarNotaSimple({
+        estudiante_id: op.estudianteId,
+        curso_id: curso.id!,
+        asignatura: this.selectedAsignatura(),
+        ano_escolar: this.anoEscolar,
+        numero_nota: op.numNota,
+        valor: op.valor
+      }).subscribe({
+        next: () => { exitosas++; siguiente(); },
+        error: () => { fallidas++; siguiente(); }
+      });
+    };
+
+    siguiente();
   }
 
   // Verificar si hay cambios sin guardar

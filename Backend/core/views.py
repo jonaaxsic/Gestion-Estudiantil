@@ -2,6 +2,16 @@
 Views/ViewSets para la API REST
 Implementan los endpoints de la aplicación
 """
+import unicodedata
+
+def normalize_text(text):
+    """Normalizar texto: minúsculas, sin tildes, sin espacios extra"""
+    if not text:
+        return ""
+    text = text.strip().lower()
+    # Eliminar tildes/acentos
+    nfkd = unicodedata.normalize('NFKD', text)
+    return ''.join(c for c in nfkd if not unicodedata.combining(c))
 
 from collections import defaultdict
 from datetime import datetime
@@ -1235,16 +1245,49 @@ class NotaList(APIView, MongoObjectIdMixin):
             query["estudiante_id"] = request.query_params.get("estudiante_id")
         if request.query_params.get("curso_id"):
             query["curso_id"] = request.query_params.get("curso_id")
-        if request.query_params.get("asignatura"):
-            query["asignatura"] = request.query_params.get("asignatura")
         if request.query_params.get("ano_escolar"):
             try:
                 query["ano_escolar"] = int(request.query_params.get("ano_escolar"))
             except (ValueError, TypeError):
                 query["ano_escolar"] = request.query_params.get("ano_escolar")
 
-        notas = Nota.find(query, sort=[("created_at", -1)])
-        serializer = NotaSerializer(notas, many=True)
+        # Si se pide una asignatura específica, buscar por normalized match
+        asignatura_filter = None
+        if request.query_params.get("asignatura"):
+            asignatura_filter = normalize_text(request.query_params.get("asignatura"))
+
+        notas_raw = Nota.find(query, sort=[("created_at", 1)])
+
+        # Filtrar por asignatura normalizada si se especificó
+        if asignatura_filter:
+            notas_raw = [n for n in notas_raw if normalize_text(n.asignatura) == asignatura_filter]
+
+        # Fusionar duplicados: mismo estudiante+curso+asignatura(normalizada)
+        merged = {}
+        for nota in notas_raw:
+            key = f"{nota.estudiante_id}|{nota.curso_id}|{normalize_text(nota.asignatura)}"
+            if key not in merged:
+                merged[key] = nota
+            else:
+                # Fusionar: tomar valores no-null de ambos documentos
+                existing = merged[key]
+                existing_notas = existing.notas or {}
+                new_notas = nota.notas or {}
+                for nkey in ['nota1','nota2','nota3','nota4','nota5','nota6']:
+                    if existing_notas.get(nkey) is None and new_notas.get(nkey) is not None:
+                        existing_notas[nkey] = new_notas[nkey]
+                existing.notas = existing_notas
+                # Recalcular promedio
+                vals = [v for v in existing_notas.values() if v is not None]
+                existing.nota_final = round(sum(vals) / len(vals), 1) if vals else None
+                # Mantener el _id del documento más antiguo
+                # Eliminar el duplicado de MongoDB
+                try:
+                    Nota.get_collection().delete_one({"_id": nota._id})
+                except Exception:
+                    pass
+
+        serializer = NotaSerializer(list(merged.values()), many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -1328,7 +1371,7 @@ def actualizar_nota_simple(request):
     """Actualizar una nota específica de un estudiante en una asignatura"""
     estudiante_id = request.data.get("estudiante_id")
     curso_id = request.data.get("curso_id")
-    asignatura = request.data.get("asignatura")
+    asignatura = normalize_text(request.data.get("asignatura"))
     ano_escolar = request.data.get("ano_escolar")
     numero_nota = request.data.get("numero_nota")  # "nota1", "nota2", etc.
     valor = request.data.get("valor")  # valor numérico de la nota
@@ -1430,7 +1473,7 @@ def eliminar_campo_nota(request):
     """Eliminar un campo de nota específico (nota1..nota6) poniéndolo en null"""
     estudiante_id = request.data.get("estudiante_id")
     curso_id = request.data.get("curso_id")
-    asignatura = request.data.get("asignatura")
+    asignatura = normalize_text(request.data.get("asignatura"))
     numero_nota = request.data.get("numero_nota")
 
     if not all([estudiante_id, curso_id, asignatura, numero_nota]):
