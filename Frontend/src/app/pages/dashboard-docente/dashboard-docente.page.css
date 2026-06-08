@@ -1147,6 +1147,29 @@
   background: var(--bg-hover);
 }
 
+.nota-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  color: var(--danger, #e53935);
+  opacity: 0.4;
+  transition: opacity 0.2s, background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nota-delete-btn .material-icons {
+  font-size: 14px;
+}
+
+.nota-delete-btn:hover {
+  opacity: 1;
+  background: rgba(229, 57, 53, 0.08);
+}
+
 .nota-editing {
   display: flex;
   align-items: center;

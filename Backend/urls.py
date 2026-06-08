@@ -101,6 +101,7 @@ urlpatterns = [
     path("notas/", views.NotaList.as_view(), name="nota-list-slash"),
     path("notas/cerrar", views.cerrar_ramo, name="cerrar-ramo"),
     path("notas/actualizar", views.actualizar_nota_simple, name="actualizar-nota"),
+    path("notas/eliminar-campo", views.eliminar_campo_nota, name="eliminar-campo-nota"),
     path("notas/<str:pk>", views.NotaDetail.as_view(), name="nota-detail"),
     # Recordatorios
     path("recordatorios", views.RecordatorioList.as_view(), name="recordatorio-list"),

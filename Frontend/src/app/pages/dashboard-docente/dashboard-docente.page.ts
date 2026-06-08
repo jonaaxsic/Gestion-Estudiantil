@@ -1063,6 +1063,38 @@ export class DashboardDocentePage implements OnInit {
     });
   }
 
+  eliminarNota(estudianteId: string, numNota: string): void {
+    const curso = this.selectedCurso();
+    if (!curso?.id || !this.selectedAsignatura()) return;
+    if (!confirm('¿Eliminar esta nota?')) return;
+
+    this.saving.set(true);
+    this.api.eliminarCampoNota({
+      estudiante_id: estudianteId,
+      curso_id: curso.id,
+      asignatura: this.selectedAsignatura(),
+      ano_escolar: this.anoEscolar,
+      numero_nota: numNota,
+    }).subscribe({
+      next: (nota) => {
+        // Actualizar localmente
+        const notas = this.notasEstudiantes();
+        const idx = notas.findIndex(n => n.estudiante_id === estudianteId);
+        if (idx >= 0) {
+          const arr2 = notas.map((n, i) => i === idx ? { ...nota } : { ...n, notas: { ...(n.notas || {}) } });
+          this.notasEstudiantes.set(arr2);
+        }
+        this.saving.set(false);
+        this.renderTick.update(v => v + 1);
+        this.showSuccess('Nota eliminada');
+      },
+      error: () => {
+        this.saving.set(false);
+        this.showError('Error al eliminar la nota');
+      }
+    });
+  }
+
   // Verificar si una nota individual tiene cambios sin guardar
   tieneCambioSinGuardar(estudianteId: string, numNota: string): boolean {
     const localEdit = this.notasEditando();

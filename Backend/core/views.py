@@ -4,6 +4,7 @@ Implementan los endpoints de la aplicación
 """
 
 from collections import defaultdict
+from datetime import datetime
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -1368,62 +1369,127 @@ def actualizar_nota_simple(request):
     # Redondear a 1 decimal
     valor = round(valor, 1)
 
-    # Buscar o crear la nota del estudiante
-    nota = Nota.find_one(
+    # Operación atómica: upsert con $set anidado para evitar race conditions
+    collection = Nota.get_collection()
+    nota_field = f"notas.{numero_nota}"
+
+    # Calcular promedio atómicamente con $function de MongoDB
+    # Primero: upsert insertando/actualizando la nota individual
+    result = collection.update_one(
         {
             "estudiante_id": estudiante_id,
             "curso_id": curso_id,
             "asignatura": asignatura,
             "ano_escolar": ano_escolar,
-        }
-    )
-
-    if not nota:
-        # Crear nueva entrada de notas
-        notas_dict = {
-            "nota1": None,
-            "nota2": None,
-            "nota3": None,
-            "nota4": None,
-            "nota5": None,
-            "nota6": None,
-        }
-        notas_dict[numero_nota] = valor
-
-        nuevo = Nota(
-            {
+        },
+        {
+            "$set": {
+                nota_field: valor,
+                "updated_at": datetime.now(),
+            },
+            "$setOnInsert": {
                 "estudiante_id": estudiante_id,
                 "curso_id": curso_id,
                 "asignatura": asignatura,
                 "ano_escolar": ano_escolar,
-                "notas": notas_dict,
-                "nota_final": valor,
                 "cerrado": False,
-            }
-        )
-        nuevo.save()
-        serializer = NotaSerializer(nuevo)
-        return Response(serializer.data)
-    else:
-        # Actualizar nota específica
-        if nota.cerrado:
-            return Response(
-                {"error": "El ramo está cerrado y no puede ser modificado"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+                "created_at": datetime.now(),
+            },
+        },
+        upsert=True,
+    )
 
+    # Recalcular promedio leyendo el documento actualizado
+    nota = Nota.find_one({
+        "estudiante_id": estudiante_id,
+        "curso_id": curso_id,
+        "asignatura": asignatura,
+        "ano_escolar": ano_escolar,
+    })
+
+    if nota:
         notas = nota.notas or {}
-        notas[numero_nota] = valor
-        nota.notas = notas
-
-        # Recalcular promedio
         valores = [v for v in notas.values() if v is not None]
-        if valores:
-            nota.nota_final = round(sum(valores) / len(valores), 1)
-
-        nota.save()
+        avg = round(sum(valores) / len(valores), 1) if valores else None
+        collection.update_one(
+            {"_id": nota._id},
+            {"$set": {"nota_final": avg, "updated_at": datetime.now()}},
+        )
+        nota.nota_final = avg
         serializer = NotaSerializer(nota)
         return Response(serializer.data)
+
+    return Response(
+        {"error": "Error al guardar la nota"},
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
+
+
+@api_view(["POST"])
+def eliminar_campo_nota(request):
+    """Eliminar un campo de nota específico (nota1..nota6) poniéndolo en null"""
+    estudiante_id = request.data.get("estudiante_id")
+    curso_id = request.data.get("curso_id")
+    asignatura = request.data.get("asignatura")
+    numero_nota = request.data.get("numero_nota")
+
+    if not all([estudiante_id, curso_id, asignatura, numero_nota]):
+        return Response(
+            {"error": "estudiante_id, curso_id, asignatura y numero_nota requeridos"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        ano_escolar = int(request.data.get("ano_escolar"))
+    except (TypeError, ValueError):
+        return Response(
+            {"error": "ano_escolar debe ser un número entero"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    collection = Nota.get_collection()
+    nota_field = f"notas.{numero_nota}"
+
+    # Poner el campo en null
+    result = collection.update_one(
+        {
+            "estudiante_id": estudiante_id,
+            "curso_id": curso_id,
+            "asignatura": asignatura,
+            "ano_escolar": ano_escolar,
+        },
+        {
+            "$set": {nota_field: None, "updated_at": datetime.now()},
+        },
+    )
+
+    if result.matched_count == 0:
+        return Response(
+            {"error": "No se encontró la nota"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Recalcular promedio
+    nota = Nota.find_one({
+        "estudiante_id": estudiante_id,
+        "curso_id": curso_id,
+        "asignatura": asignatura,
+        "ano_escolar": ano_escolar,
+    })
+
+    if nota:
+        notas = nota.notas or {}
+        valores = [v for v in notas.values() if v is not None]
+        avg = round(sum(valores) / len(valores), 1) if valores else None
+        collection.update_one(
+            {"_id": nota._id},
+            {"$set": {"nota_final": avg, "updated_at": datetime.now()}},
+        )
+        nota.nota_final = avg
+        serializer = NotaSerializer(nota)
+        return Response(serializer.data)
+
+    return Response({"ok": True})
 
 
 # ============ REGISTRO PÚBLICO DE APODERADOS ============

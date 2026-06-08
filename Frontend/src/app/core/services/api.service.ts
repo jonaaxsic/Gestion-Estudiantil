@@ -353,6 +353,16 @@ export class ApiService {
     return this.http.post<Nota>(`${this.baseUrl}/notas/actualizar`, data, { headers: this.jsonHeaders });
   }
 
+  eliminarCampoNota(data: {
+    estudiante_id: string;
+    curso_id: string;
+    asignatura: string;
+    ano_escolar: number;
+    numero_nota: string;
+  }): Observable<Nota> {
+    return this.http.post<Nota>(`${this.baseUrl}/notas/eliminar-campo`, data, { headers: this.jsonHeaders });
+  }
+
   // ============ DASHBOARD ============
   getDashboardDocente(docenteId: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/dashboard/docente?docente_id=${docenteId}`, { headers: this.jsonHeaders });

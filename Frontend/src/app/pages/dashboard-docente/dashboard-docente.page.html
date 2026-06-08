@@ -397,6 +397,9 @@
                               <button class="nota-edit-btn" (click)="alternarEdicionNota(est.id!, 'nota1')" title="Editar nota">
                                 <span class="material-icons">edit</span>
                               </button>
+                              <button class="nota-delete-btn" (click)="eliminarNota(est.id!, 'nota1')" title="Eliminar nota">
+                                <span class="material-icons">close</span>
+                              </button>
                             }
                           </div>
                         } @else {
@@ -418,6 +421,9 @@
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
                               <button class="nota-edit-btn" (click)="alternarEdicionNota(est.id!, 'nota2')" title="Editar nota">
                                 <span class="material-icons">edit</span>
+                              </button>
+                              <button class="nota-delete-btn" (click)="eliminarNota(est.id!, 'nota2')" title="Eliminar nota">
+                                <span class="material-icons">close</span>
                               </button>
                             }
                           </div>
@@ -441,6 +447,9 @@
                               <button class="nota-edit-btn" (click)="alternarEdicionNota(est.id!, 'nota3')" title="Editar nota">
                                 <span class="material-icons">edit</span>
                               </button>
+                              <button class="nota-delete-btn" (click)="eliminarNota(est.id!, 'nota3')" title="Eliminar nota">
+                                <span class="material-icons">close</span>
+                              </button>
                             }
                           </div>
                         } @else {
@@ -462,6 +471,9 @@
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
                               <button class="nota-edit-btn" (click)="alternarEdicionNota(est.id!, 'nota4')" title="Editar nota">
                                 <span class="material-icons">edit</span>
+                              </button>
+                              <button class="nota-delete-btn" (click)="eliminarNota(est.id!, 'nota4')" title="Eliminar nota">
+                                <span class="material-icons">close</span>
                               </button>
                             }
                           </div>
@@ -485,6 +497,9 @@
                               <button class="nota-edit-btn" (click)="alternarEdicionNota(est.id!, 'nota5')" title="Editar nota">
                                 <span class="material-icons">edit</span>
                               </button>
+                              <button class="nota-delete-btn" (click)="eliminarNota(est.id!, 'nota5')" title="Eliminar nota">
+                                <span class="material-icons">close</span>
+                              </button>
                             }
                           </div>
                         } @else {
@@ -506,6 +521,9 @@
                             @if (!getNotaEstudiante(est.id!)?.cerrado) {
                               <button class="nota-edit-btn" (click)="alternarEdicionNota(est.id!, 'nota6')" title="Editar nota">
                                 <span class="material-icons">edit</span>
+                              </button>
+                              <button class="nota-delete-btn" (click)="eliminarNota(est.id!, 'nota6')" title="Eliminar nota">
+                                <span class="material-icons">close</span>
                               </button>
                             }
                           </div>
