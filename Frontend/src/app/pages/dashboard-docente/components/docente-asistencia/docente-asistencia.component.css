@@ -1,0 +1,64 @@
+/* ══ DOCENTE ASISTENCIA ══ */
+.panel-view { padding: 20px; }
+.panel-header { margin-bottom: 20px; }
+.panel-title { display: flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700; }
+.panel-title .material-icons { color: var(--brand); }
+
+.content-card {
+  background: var(--bg-card, #fff); border: 1px solid var(--border, #e2e5ee);
+  border-radius: var(--radius-lg, 12px); overflow: hidden;
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border-light, #eef0f4);
+}
+.card-title { display: flex; align-items: center; gap: 8px; font-size: 0.95rem; font-weight: 700; }
+.card-title .material-icons { color: var(--brand); font-size: 20px; }
+.card-body { padding: 16px 20px; }
+
+.form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 200px; margin-bottom: 12px; }
+.form-label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary); }
+.form-input, .form-select {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border, #e2e5ee);
+  border-radius: 8px; font-size: 0.85rem; background: var(--bg-card);
+}
+
+.btn-new {
+  display: flex; align-items: center; gap: 6px; padding: 8px 14px;
+  border: none; border-radius: 8px; background: var(--brand); color: #fff;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+}
+.btn-new:hover { filter: brightness(1.1); }
+.btn-new:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-new .material-icons { font-size: 18px; }
+
+.notas-table-wrapper { overflow-x: auto; }
+.notas-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.notas-table th {
+  background: var(--bg-tertiary, #f0f2f8); font-weight: 700;
+  padding: 8px 10px; text-align: center; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border, #e2e5ee);
+}
+.notas-table th:first-child { text-align: left; }
+.notas-table td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--border-light, #eef0f4); }
+.notas-table tr:hover td { background: var(--bg-hover); }
+
+.alumno-cell { font-weight: 500; text-align: left !important; white-space: nowrap; }
+.rut-cell { font-size: 0.8rem; color: var(--text-muted); }
+
+.asistencia-presente { color: #10b981; font-weight: 600; }
+.asistencia-ausente { color: #ef4444; font-weight: 600; }
+
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+.empty-state .material-icons { font-size: 48px; opacity: 0.4; }
+
+.success-toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 20px; border-radius: 10px;
+  background: var(--success, #10b981); color: #fff;
+  font-weight: 600; font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}

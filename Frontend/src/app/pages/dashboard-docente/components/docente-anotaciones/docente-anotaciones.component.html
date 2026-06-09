@@ -1,0 +1,56 @@
+<div class="panel-view">
+  <div class="panel-header">
+    <h2 class="panel-title"><span class="material-icons">note_add</span> Gestión de Anotaciones</h2>
+  </div>
+
+  <div class="content-card">
+    <div class="card-header">
+      <h3 class="card-title"><span class="material-icons">note_add</span> Anotaciones</h3>
+      <button class="btn-new" (click)="openDialog()"><span class="material-icons">add</span> Nueva Anotación</button>
+    </div>
+    <div class="card-body">
+      @if (getAnotacionesDelCurso().length === 0) {
+        <div class="empty-state"><span class="material-icons">note_add</span><p>No hay anotaciones</p></div>
+      } @else {
+        @for (anotacion of getAnotacionesDelCurso(); track anotacion.id) {
+          <div class="list-item">
+            <div class="list-icon" [class.positiva]="anotacion.tipo === 'positiva'" [class.negativa]="anotacion.tipo === 'negativa'">
+              <span class="material-icons">{{ anotacion.tipo === 'positiva' ? 'thumb_up' : 'thumb_down' }}</span>
+            </div>
+            <div class="list-content">
+              <span class="title">{{ data.getEstudianteNombre(anotacion.estudiante_id) }}</span>
+              <span class="subtitle">{{ anotacion.descripcion }} · {{ anotacion.fecha }}</span>
+            </div>
+            <button class="btn-icon delete" (click)="delete(anotacion)"><span class="material-icons">delete</span></button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="close()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>Nueva Anotación</h3>
+      <div class="form-group"><label>Estudiante</label>
+        <select class="form-select" [(ngModel)]="form.estudianteId">
+          <option value="">Seleccione...</option>
+          @for (est of data.estudiantes(); track est.id) { <option [value]="est.id">{{ est.apellido }} {{ est.nombre }}</option> }
+        </select>
+      </div>
+      <div class="form-group"><label>Tipo</label>
+        <select class="form-select" [(ngModel)]="form.tipo">
+          <option value="negativa">Negativa</option>
+          <option value="positiva">Positiva</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Descripción</label><textarea class="form-input" [(ngModel)]="form.descripcion" rows="3"></textarea></div>
+      <div class="form-group"><label>Fecha</label><input type="date" class="form-input" [(ngModel)]="form.fecha"></div>
+      <div class="modal-actions">
+        <button class="btn" (click)="close()">Cancelar</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Guardando...' : 'Crear' }}</button>
+      </div>
+    </div>
+  </div>
+}

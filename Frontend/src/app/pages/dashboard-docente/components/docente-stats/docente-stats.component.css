@@ -1,0 +1,18 @@
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px; padding: 20px;
+}
+.stat-card {
+  background: var(--bg-card, #fff); border: 1px solid var(--border, #e2e5ee);
+  border-radius: 12px; padding: 20px; text-align: center;
+  cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.stat-icon { margin-bottom: 10px; }
+.stat-icon .material-icons { font-size: 28px; }
+.stat-icon.cursos { color: var(--brand); }
+.stat-icon.estudiantes { color: var(--success, #10b981); }
+.stat-icon.evaluaciones { color: var(--warning, #f59e0b); }
+.stat-icon.recordatorios { color: var(--danger, #e53935); }
+.stat-value { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); }
+.stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }

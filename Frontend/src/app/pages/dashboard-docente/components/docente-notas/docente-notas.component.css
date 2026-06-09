@@ -1,0 +1,70 @@
+/* ══ DOCENTE NOTAS ══ */
+.subsection-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.9rem; font-weight: 700;
+  color: var(--text-primary); padding: 16px 20px 8px;
+  border-bottom: 1px solid var(--border-light);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 12px;
+}
+.subsection-title .material-icons { color: var(--brand); font-size: 18px; }
+
+.search-bar-wrapper {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-subtle, #f4f5f7); border: 1px solid var(--border, #e2e5ee);
+  border-radius: 12px; padding: 10px 16px; margin: 0 20px 12px;
+}
+.search-bar-wrapper .search-icon { color: var(--text-muted, #9ca3af); font-size: 20px; }
+.search-bar-wrapper .search-input {
+  flex: 1; border: none; background: transparent;
+  font-size: 14px; outline: none; color: var(--text-primary); font-family: inherit;
+}
+.search-bar-wrapper .search-input::placeholder { color: var(--text-muted, #9ca3af); }
+
+.nota-readonly { display: flex; align-items: center; gap: 4px; }
+.nota-valor { font-weight: 600; font-size: 0.95rem; min-width: 28px; text-align: center; }
+.nota-editing { display: flex; align-items: center; gap: 4px; }
+
+.nota-input {
+  width: 52px; padding: 4px 6px; text-align: center;
+  border: 2px solid var(--border, #e2e5ee); border-radius: 6px;
+  font-size: 0.9rem; font-weight: 600; transition: border-color 0.2s;
+}
+.nota-input:focus { border-color: var(--brand); outline: none; }
+.nota-input.nota-error { border-color: var(--danger, #e53935); background: #fff5f5; }
+
+.nota-edit-btn, .nota-delete-btn, .nota-save-btn {
+  width: 26px; height: 26px; border: none; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px; transition: all 0.15s;
+}
+.nota-edit-btn { background: transparent; color: var(--text-muted); }
+.nota-edit-btn:hover { background: var(--bg-hover); color: var(--brand); }
+.nota-delete-btn { background: transparent; color: var(--text-muted); }
+.nota-delete-btn:hover { background: #fde8e8; color: var(--danger, #e53935); }
+.nota-save-btn { background: var(--brand); color: #fff; }
+.nota-save-btn:hover { background: var(--brand-dark); }
+.nota-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.promedio-cell { font-weight: 700; font-size: 0.95rem; }
+.alumno-cell { font-weight: 500; white-space: nowrap; }
+
+.notas-table-wrapper { overflow-x: auto; margin: 0 20px 12px; }
+.notas-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.notas-table th {
+  background: var(--bg-tertiary, #f0f2f8); font-weight: 700;
+  padding: 8px 10px; text-align: center; font-size: 0.75rem;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--border, #e2e5ee);
+}
+.notas-table td {
+  padding: 8px 10px; text-align: center;
+  border-bottom: 1px solid var(--border-light, #eef0f4);
+}
+.notas-table tr:last-child td { border-bottom: none; }
+.notas-table tr:hover { background: var(--bg-hover); }
+
+.help-text {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; color: var(--text-muted); padding: 8px 20px;
+}
+.help-text .material-icons { font-size: 16px; }

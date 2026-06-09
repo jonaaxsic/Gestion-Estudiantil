@@ -1,0 +1,374 @@
+/* ============================================================
+   APODERADO VIEWS — Info cards, anotaciones, reuniones, avisos, solicitudes, perfil
+   ============================================================ */
+
+/* ── INFO CARDS ─────────────────────────────────────────── */
+.cards-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.info-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.info-card.azul { border-left: 4px solid var(--brand); }
+.info-card.verde { border-left: 4px solid var(--success); }
+
+.info-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+}
+
+.info-card .card-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.info-card .card-header .material-icons { font-size: 22px; }
+.info-card.azul .card-header .material-icons { color: var(--brand); }
+.info-card.verde .card-header .material-icons { color: var(--success); }
+
+.info-card .card-body { padding: 16px 20px; }
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-row .label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.info-row .value {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.student-name { color: var(--brand) !important; }
+
+.curso-badge {
+  background: var(--brand-light);
+  color: var(--brand);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem !important;
+}
+
+.promedio-bajo { color: var(--danger) !important; }
+.promedio-medio { color: var(--warning) !important; }
+.promedio-alto { color: var(--success) !important; }
+
+/* ── ANOTACIONES VIEW ───────────────────────────────────── */
+.anotaciones-view {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.anotaciones-view .stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.anotaciones-view .stat-card { padding: 20px 16px; }
+.anotaciones-view .stat-icon { width: 44px; height: 44px; }
+.anotaciones-view .stat-value { font-size: 1.8rem; }
+.anotaciones-view .content-card { margin-bottom: 4px; }
+
+/* ── REUNIONES VIEW ─────────────────────────────────────── */
+.reuniones-view { padding: 20px; }
+
+.reunion-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.reunion-fecha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.reunion-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── AVISOS VIEW ────────────────────────────────────────── */
+.avisos-view { padding: 20px; }
+
+.aviso-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.aviso-card.urgente { border-left: 4px solid var(--danger); }
+.aviso-card.informativo { border-left: 4px solid var(--brand); }
+
+.aviso-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.aviso-contenido {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.aviso-fecha {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── SOLICITUDES VIEW ───────────────────────────────────── */
+.solicitudes-view {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.solicitudes-view .content-card {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 20px;
+}
+
+.solicitudes-view .card-body { padding: 8px; }
+
+.solicitudes-view .form-group { margin-bottom: 14px; }
+
+.solicitudes-view .form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.solicitudes-view .form-select,
+.solicitudes-view .form-input,
+.solicitudes-view .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+
+.solicitudes-view .form-select:focus,
+.solicitudes-view .form-input:focus,
+.solicitudes-view .form-textarea:focus {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.solicitudes-view .form-textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.solicitudes-view .btn-primary {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-md);
+}
+
+.solicitudes-view .form-group p {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.solicitud-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.solicitud-estado {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.solicitud-estado.pendiente {
+  background: var(--warning);
+  color: var(--text-on-warning);
+}
+
+.solicitud-estado.aprobada {
+  background: var(--success);
+  color: var(--text-on-success);
+}
+
+.solicitud-estado.rechazada {
+  background: var(--danger);
+  color: var(--text-on-danger);
+}
+
+/* ── PERFIL VIEW ────────────────────────────────────────── */
+.perfil-view {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.perfil-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.perfil-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 20px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.perfil-card h3 .material-icons { color: var(--brand); }
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.perfil-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-on-brand);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.perfil-info h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.perfil-info p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.perfil-readonly, .perfil-field { margin-bottom: 16px; }
+
+.perfil-readonly label, .perfil-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.perfil-readonly span {
+  display: block;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: 10px 12px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.perfil-detail {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.perfil-detail:last-child { border-bottom: none; }
+
+.perfil-detail label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.perfil-detail span {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}

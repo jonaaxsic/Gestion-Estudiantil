@@ -1,0 +1,276 @@
+/* ============================================================
+   INSPECTOR ASISTENCIA — Attendance grid, critical section
+   ============================================================ */
+
+/* ── ATTENDANCE GRID ────────────────────────────────────── */
+.attendance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.attendance-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 22px 18px;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.attendance-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-muted));
+  border-radius: 0 0 3px 3px;
+}
+
+.attendance-card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.09);
+  transform: translateY(-3px);
+  border-color: var(--brand-muted);
+}
+
+.attendance-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.attendance-curso {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.attendance-total {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.attendance-bar {
+  display: flex;
+  height: 8px;
+  border-radius: 100px;
+  overflow: hidden;
+  background: var(--bg-subtle);
+  margin-bottom: 14px;
+}
+
+.attendance-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+  border-radius: 0;
+}
+
+.attendance-bar-fill:first-child { border-radius: 100px 0 0 100px; }
+.attendance-bar-fill:last-child { border-radius: 0 100px 100px 0; }
+
+.attendance-bar-fill.presente { background: linear-gradient(135deg, #10b981, #34d399); }
+.attendance-bar-fill.ausente  { background: linear-gradient(135deg, #ef4444, #f87171); }
+
+.attendance-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.attendance-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.attendance-stat.presente { color: #10b981; }
+.attendance-stat.ausente  { color: #ef4444; }
+
+.attendance-stat.porcentaje {
+  color: var(--color-text-on-brand);
+  margin-left: auto;
+  background: var(--brand);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+}
+
+.attendance-stat .stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.attendance-stat.presente .stat-dot { background: #10b981; }
+.attendance-stat.ausente .stat-dot  { background: #ef4444; }
+.attendance-stat .material-icons    { font-size: 16px; }
+
+/* ── ATTENDANCE EMPTY ───────────────────────────────────── */
+.attendance-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.attendance-empty .material-icons { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+
+.attendance-empty p {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.attendance-empty-hint { font-size: 0.85rem; opacity: 0.7; }
+
+/* ── CRITICAL SECTION ───────────────────────────────────── */
+.critical-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.critical-section:hover { box-shadow: 0 6px 24px rgba(239, 68, 68, 0.08); }
+
+.critical-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #fef2f2, #fff5f5);
+  border-bottom: 1px solid #fecaca;
+  position: relative;
+}
+
+.critical-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  border-radius: 0 0 3px 3px;
+}
+
+.critical-header .material-icons {
+  font-size: 20px;
+  color: #ef4444;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(239, 68, 68, 0.12);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.critical-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #991b1b;
+  flex: 1;
+}
+
+.critical-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #fecaca;
+  color: #991b1b;
+  padding: 4px 12px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.critical-list { display: flex; flex-direction: column; }
+
+.critical-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background 0.2s, padding-left 0.2s;
+}
+
+.critical-item:last-child { border-bottom: none; }
+
+.critical-item:hover {
+  background: var(--bg-hover);
+  padding-left: 26px;
+}
+
+.critical-item-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.critical-item-info { flex: 1; min-width: 0; }
+
+.critical-item-name {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.critical-item-meta {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.critical-item-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.critical-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ef4444;
+  line-height: 1;
+}
+
+.critical-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

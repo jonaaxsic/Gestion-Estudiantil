@@ -1,0 +1,69 @@
+<div class="panel-view">
+  <div class="panel-header">
+    <h2 class="panel-title"><span class="material-icons">event</span> Gestión de Reuniones</h2>
+  </div>
+
+  <div class="content-card">
+    <div class="card-header">
+      <h3 class="card-title"><span class="material-icons">event</span> Reuniones Programadas</h3>
+      <button class="btn-new" (click)="openDialog()"><span class="material-icons">add</span> Nueva Reunión</button>
+    </div>
+    <div class="card-body">
+      @if (getReunionesProximas().length === 0 && getReunionesPasadas().length === 0) {
+        <div class="empty-state"><span class="material-icons">event_busy</span><p>No hay reuniones programadas</p></div>
+      } @else {
+        @if (getReunionesProximas().length > 0) {
+          <h4 class="subsection-title"><span class="material-icons">upcoming</span> Próximas Reuniones</h4>
+          @for (reunion of getReunionesProximas(); track reunion.id) {
+            <div class="list-item">
+              <div class="list-icon"><span class="material-icons">event</span></div>
+              <div class="list-content">
+                <span class="title">{{ data.formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
+                <span class="subtitle">{{ reunion.lugar }}</span>
+                @if (reunion.descripcion) { <span class="desc">{{ reunion.descripcion }}</span> }
+              </div>
+              <div class="list-actions">
+                <button class="btn-icon edit" (click)="openEditDialog(reunion)"><span class="material-icons">edit</span></button>
+                <button class="btn-icon delete" (click)="delete(reunion)"><span class="material-icons">delete</span></button>
+              </div>
+            </div>
+          }
+        }
+        @if (getReunionesPasadas().length > 0) {
+          <h4 class="subsection-title"><span class="material-icons">history</span> Reuniones Pasadas</h4>
+          @for (reunion of getReunionesPasadas(); track reunion.id) {
+            <div class="list-item pasada">
+              <div class="list-icon"><span class="material-icons">history</span></div>
+              <div class="list-content">
+                <span class="title">{{ data.formatFecha(reunion.fecha) }} - {{ reunion.hora }}</span>
+                <span class="subtitle">{{ reunion.lugar }}</span>
+              </div>
+            </div>
+          }
+        }
+      }
+    </div>
+  </div>
+</div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="close()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h3>{{ selectedReunion() ? 'Editar' : 'Nueva' }} Reunión</h3>
+      <div class="form-group"><label>Curso</label>
+        <select class="form-select" [(ngModel)]="form.cursoId">
+          <option value="">Seleccione...</option>
+          @for (curso of data.cursosAsignados(); track curso.id) { <option [value]="curso.id">{{ curso.nombre }}</option> }
+        </select>
+      </div>
+      <div class="form-group"><label>Fecha</label><input type="date" class="form-input" [(ngModel)]="form.fecha"></div>
+      <div class="form-group"><label>Hora</label><input type="time" class="form-input" [(ngModel)]="form.hora"></div>
+      <div class="form-group"><label>Lugar</label><input class="form-input" [(ngModel)]="form.lugar" placeholder="Ej: Sala de profesores"></div>
+      <div class="form-group"><label>Descripción</label><textarea class="form-input" [(ngModel)]="form.descripcion" rows="2"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn" (click)="close()">Cancelar</button>
+        <button class="btn btn-primary" (click)="save()" [disabled]="saving()">{{ saving() ? 'Guardando...' : 'Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+}

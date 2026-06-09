@@ -24,7 +24,15 @@ import {
     SettingsPanelComponent,
   ],
   templateUrl: './dashboard-inspector.page.html',
-  styleUrls: ['./dashboard-inspector.page.css'],
+  styleUrls: [
+    './_inspector-buttons.css',
+    './_inspector-stats.css',
+    './_inspector-common.css',
+    './_inspector-form-modal.css',
+    './_inspector-asistencia.css',
+    './_inspector-documentos.css',
+    './dashboard-inspector.page.css'
+  ],
 })
 export class DashboardInspectorPage implements OnInit {
   private readonly api = inject(ApiService);

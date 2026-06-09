@@ -1,0 +1,31 @@
+<div class="content-card">
+  <div class="card-header">
+    <h3 class="card-title">
+      <span class="material-icons">class</span>
+      Mis Cursos Asignados
+    </h3>
+  </div>
+  <div class="card-body">
+    @if (data.cursosAsignados().length === 0) {
+      <div class="empty-state">
+        <span class="material-icons">school</span>
+        <p>No tienes cursos asignados</p>
+        <p class="hint">Contacta al administrador para que te asigne cursos</p>
+      </div>
+    } @else {
+      <div class="cursos-grid">
+        @for (curso of data.cursosAsignados(); track curso.id) {
+          <div class="curso-card" (click)="seleccionarCurso.emit(curso)">
+            <div class="curso-icon"><span class="material-icons">school</span></div>
+            <div class="curso-info">
+              <span class="curso-nivel">{{ curso.nivel }}</span>
+              <span class="curso-nombre">{{ data.getNombreLimpio(curso) }}</span>
+              <span class="curso-asignatura">{{ curso.asignatura }}</span>
+            </div>
+            <div class="curso-arrow"><span class="material-icons">chevron_right</span></div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

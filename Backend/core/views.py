@@ -135,6 +135,30 @@ class UsuarioDetail(APIView, MongoObjectIdMixin):
                 {"error": "Usuario no encontrado"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+        # Si es docente, desactivar sus asignaciones
+        if usuario.rol == "docente":
+            docente_id = str(pk)
+            asignaciones = AsignacionDocente.find({"docente_id": docente_id})
+
+            # Desactivar todas sus asignaciones
+            AsignacionDocente.get_collection().update_many(
+                {"docente_id": docente_id},
+                {"$set": {"activo": False}}
+            )
+
+            # Invalidar cache de asignaciones del docente
+            cache.delete(f"asignaciones_docente_{docente_id}")
+
+            # Opcional: eliminar notas si se pide limpieza total
+            if request.query_params.get("limpiar_notas") == "true":
+                for a in asignaciones:
+                    if a.curso_id and a.asignatura:
+                        Nota.get_collection().delete_many({
+                            "curso_id": a.curso_id,
+                            "asignatura": normalize_text(a.asignatura)
+                        })
+
         # Invalidar cache de usuarios al eliminar
         cache.delete("usuarios_list")
         usuario.delete()
@@ -908,8 +932,8 @@ def dashboard_docente(request):
         )
 
     try:
-        # 1. Obtener cursos asignados al docente (sin duplicados)
-        asignaciones = AsignacionDocente.find({"docente_id": docente_id})
+        # 1. Obtener cursos asignados al docente (sin duplicados, solo activos)
+        asignaciones = AsignacionDocente.find({"docente_id": docente_id, "activo": True})
         curso_ids = list(
             set([a.curso_id for a in asignaciones if a.curso_id])
         )  # Eliminar duplicados
@@ -1420,43 +1444,60 @@ def actualizar_nota_simple(request):
     # Redondear a 1 decimal
     valor = round(valor, 1)
 
-    # Operación atómica: upsert con $set anidado para evitar race conditions
     collection = Nota.get_collection()
     nota_field = f"notas.{numero_nota}"
 
-    # Calcular promedio atómicamente con $function de MongoDB
-    # Primero: upsert insertando/actualizando la nota individual
-    result = collection.update_one(
-        {
-            "estudiante_id": estudiante_id,
-            "curso_id": curso_id,
-            "asignatura": asignatura,
-            "ano_escolar": ano_escolar,
-        },
-        {
-            "$set": {
-                nota_field: valor,
-                "updated_at": datetime.now(),
-            },
-            "$setOnInsert": {
-                "estudiante_id": estudiante_id,
-                "curso_id": curso_id,
-                "asignatura": asignatura,
-                "ano_escolar": ano_escolar,
-                "cerrado": False,
-                "created_at": datetime.now(),
-            },
-        },
-        upsert=True,
-    )
-
-    # Recalcular promedio leyendo el documento actualizado
-    nota = Nota.find_one({
+    # Buscar nota existente por estudiante+curso+ano, filtrar asignatura con normalización
+    # (para que "Matemáticas" y "matematicas" matcheen igual)
+    candidatas = Nota.find({
         "estudiante_id": estudiante_id,
         "curso_id": curso_id,
-        "asignatura": asignatura,
         "ano_escolar": ano_escolar,
     })
+    nota_existente = None
+    for n in candidatas:
+        if normalize_text(n.asignatura) == asignatura:
+            nota_existente = n
+            break
+
+    now = datetime.now()
+
+    if nota_existente:
+        # Actualizar nota existente por _id
+        collection.update_one(
+            {"_id": ObjectId(nota_existente._id)},
+            {
+                "$set": {
+                    nota_field: valor,
+                    "updated_at": now,
+                },
+            },
+        )
+    else:
+        # Crear nueva nota
+        collection.insert_one({
+            "estudiante_id": estudiante_id,
+            "curso_id": curso_id,
+            "asignatura": asignatura,  # Siempre guardar normalizado
+            "ano_escolar": ano_escolar,
+            "notas": {numero_nota: valor},
+            "nota_final": valor,
+            "cerrado": False,
+            "created_at": now,
+            "updated_at": now,
+        })
+
+    # Recalcular promedio leyendo el documento actualizado
+    nota = None
+    candidatas2 = Nota.find({
+        "estudiante_id": estudiante_id,
+        "curso_id": curso_id,
+        "ano_escolar": ano_escolar,
+    })
+    for n in candidatas2:
+        if normalize_text(n.asignatura) == asignatura:
+            nota = n
+            break
 
     if nota:
         notas = nota.notas or {}
@@ -1501,46 +1542,46 @@ def eliminar_campo_nota(request):
     collection = Nota.get_collection()
     nota_field = f"notas.{numero_nota}"
 
-    # Poner el campo en null
-    result = collection.update_one(
-        {
-            "estudiante_id": estudiante_id,
-            "curso_id": curso_id,
-            "asignatura": asignatura,
-            "ano_escolar": ano_escolar,
-        },
-        {
-            "$set": {nota_field: None, "updated_at": datetime.now()},
-        },
-    )
+    # Buscar por estudiante+curso+ano, luego filtrar asignatura con normalización
+    # (para que "Matemáticas" y "matematicas" matcheen igual)
+    candidatas = Nota.find({
+        "estudiante_id": estudiante_id,
+        "curso_id": curso_id,
+        "ano_escolar": ano_escolar,
+    })
+    nota = None
+    for n in candidatas:
+        if normalize_text(n.asignatura) == asignatura:
+            nota = n
+            break
 
-    if result.matched_count == 0:
+    if not nota:
         return Response(
             {"error": "No se encontró la nota"},
             status=status.HTTP_404_NOT_FOUND,
         )
 
+    # Poner el campo en null
+    collection.update_one(
+        {"_id": ObjectId(nota._id)},
+        {
+            "$set": {nota_field: None, "updated_at": datetime.now()},
+        },
+    )
+
     # Recalcular promedio
-    nota = Nota.find_one({
-        "estudiante_id": estudiante_id,
-        "curso_id": curso_id,
-        "asignatura": asignatura,
-        "ano_escolar": ano_escolar,
-    })
-
-    if nota:
-        notas = nota.notas or {}
-        valores = [v for v in notas.values() if v is not None]
-        avg = round(sum(valores) / len(valores), 1) if valores else None
-        collection.update_one(
-            {"_id": ObjectId(nota._id)},
-            {"$set": {"nota_final": avg, "updated_at": datetime.now()}},
-        )
-        nota.nota_final = avg
-        serializer = NotaSerializer(nota)
-        return Response(serializer.data)
-
-    return Response({"ok": True})
+    notas = nota.notas or {}
+    notas[numero_nota] = None
+    valores = [v for v in notas.values() if v is not None]
+    avg = round(sum(valores) / len(valores), 1) if valores else None
+    collection.update_one(
+        {"_id": ObjectId(nota._id)},
+        {"$set": {"nota_final": avg, "updated_at": datetime.now()}},
+    )
+    nota.nota_final = avg
+    nota.notas = notas
+    serializer = NotaSerializer(nota)
+    return Response(serializer.data)
 
 
 # ============ REGISTRO PÚBLICO DE APODERADOS ============

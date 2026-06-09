@@ -1,0 +1,218 @@
+/* ============================================================
+   INSPECTOR FORM + MODAL — Form, modal, confirm, toast, PDF
+   ============================================================ */
+
+/* ── FORM ───────────────────────────────────────────────── */
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  background: var(--bg-card);
+}
+
+.form-textarea { min-height: 80px; resize: vertical; }
+
+/* ── MODAL ──────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+
+.modal-content.pdf-modal { max-width: 800px; }
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-subtle);
+  position: relative;
+}
+
+.modal-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-muted));
+  border-radius: 0 0 3px 3px;
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-header h2 .material-icons {
+  color: var(--color-text-on-brand);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--brand), var(--brand-muted));
+  border-radius: 8px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.modal-body { padding: 22px; }
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-subtle);
+}
+
+/* ── CONFIRM MODAL ──────────────────────────────────────── */
+.confirm-overlay { display: flex; align-items: center; justify-content: center; }
+
+.modal-confirm {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 28px 24px;
+  text-align: center;
+  animation: confirmIn var(--dur-base) var(--ease-spring);
+}
+
+@keyframes confirmIn {
+  from { opacity: 0; transform: scale(0.9) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-confirm-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.modal-confirm-icon .material-icons { font-size: 28px; color: #ef4444; }
+
+.modal-confirm-title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.modal-confirm-message {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.modal-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.modal-confirm-actions .btn { min-width: 120px; justify-content: center; }
+
+/* ── TOAST ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.9rem;
+  animation: slideInToast 0.3s ease;
+  z-index: 1001;
+  box-shadow: var(--shadow-lg);
+}
+
+.toast.success { background: var(--success); color: var(--text-on-success); }
+.toast .material-icons { font-size: 22px; }
+
+@keyframes slideInToast {
+  from { transform: translateY(100px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* ── PDF PREVIEW ────────────────────────────────────────── */
+.pdf-modal .modal-body { padding: 0; }
+.pdf-modal iframe { border: none; display: block; }

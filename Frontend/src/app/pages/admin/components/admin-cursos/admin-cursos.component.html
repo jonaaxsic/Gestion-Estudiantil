@@ -1,0 +1,51 @@
+<div class="content-card">
+  <div class="card-header">
+    <div class="card-header-left">
+      <h3 class="card-title"><span class="material-icons">class</span> Gestión de Cursos</h3>
+    </div>
+    <div class="card-header-right">
+      <button class="btn-new" (click)="createCurso.emit()">
+        <span class="material-icons">add</span> Nuevo Curso
+      </button>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr><th>Curso</th><th>Nivel</th><th>Año</th><th>Estudiantes</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        @for (curso of data.cursos(); track curso.id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar course">{{ curso.nombre.charAt(0) }}</div>
+                <span class="user-name-table">{{ curso.nombre }}</span>
+              </div>
+            </td>
+            <td>{{ curso.nivel }}</td>
+            <td>{{ curso.ano }}</td>
+            <td>{{ data.getEstudiantesCount(curso.id) }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="editCurso.emit(curso)" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="btn-icon delete" (click)="deleteCurso.emit(curso)" title="Eliminar">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (data.cursos().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon"><span class="material-icons">class</span></div>
+        <p>No hay cursos registrados</p>
+        <span class="hint">Cree el primer curso usando el botón "Nuevo Curso"</span>
+      </div>
+    }
+  </div>
+</div>

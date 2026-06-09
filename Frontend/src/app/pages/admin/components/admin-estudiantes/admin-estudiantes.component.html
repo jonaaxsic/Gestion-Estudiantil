@@ -1,0 +1,82 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon students"><span class="material-icons">school</span></div>
+    <div class="stat-value">{{ data.estudiantes().length }}</div>
+    <div class="stat-label">Total Estudiantes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon courses"><span class="material-icons">class</span></div>
+    <div class="stat-value">{{ data.cursos().length }}</div>
+    <div class="stat-label">Cursos</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon guardian"><span class="material-icons">family_restroom</span></div>
+    <div class="stat-value">{{ data.getEstudiantesConApoderado() }}</div>
+    <div class="stat-label">Con Apoderado</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon no-guardian"><span class="material-icons">person_off</span></div>
+    <div class="stat-value">{{ data.estudiantes().length - data.getEstudiantesConApoderado() }}</div>
+    <div class="stat-label">Sin Apoderado</div>
+  </div>
+</div>
+
+<div class="content-card">
+  <div class="card-header">
+    <div class="card-header-left">
+      <h3 class="card-title"><span class="material-icons">school</span> Gestión de Estudiantes</h3>
+    </div>
+    <div class="card-header-right">
+      <button class="btn-new" (click)="createStudent.emit()">
+        <span class="material-icons">add</span> Nuevo Estudiante
+      </button>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr><th>Estudiante</th><th>RUT</th><th>Curso</th><th>Apoderado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        @for (est of data.estudiantes(); track est.id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar student">{{ est.nombre.charAt(0) }}{{ est.apellido.charAt(0) }}</div>
+                <div class="user-info">
+                  <span class="user-name-table">{{ est.nombre }} {{ est.apellido }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ est.rut }}</td>
+            <td><span class="badge badge-curso">{{ data.getCursoNombreDisplay(est.curso_id) }}</span></td>
+            <td>
+              @if (est.apoderado_id) {
+                <span class="badge badge-activo">Asignado</span>
+              } @else {
+                <span class="badge badge-inactivo">Sin asignar</span>
+              }
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="editStudent.emit(est)" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="btn-icon delete" (click)="deleteStudent.emit(est)" title="Eliminar">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (data.estudiantes().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon"><span class="material-icons">school</span></div>
+        <p>No hay estudiantes registrados</p>
+        <span class="hint">Importe o registre estudiantes desde la sección correspondiente</span>
+      </div>
+    }
+  </div>
+</div>

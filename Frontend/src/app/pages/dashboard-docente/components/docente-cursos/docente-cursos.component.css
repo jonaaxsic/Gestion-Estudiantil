@@ -1,0 +1,14 @@
+.cursos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.curso-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-card, #fff); border: 1px solid var(--border, #e2e5ee);
+  border-radius: 12px; padding: 16px 20px; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.curso-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.curso-icon .material-icons { font-size: 32px; color: var(--brand); }
+.curso-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.curso-nivel { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.curso-nombre { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.curso-asignatura { font-size: 0.8rem; color: var(--brand); font-weight: 500; }
+.curso-arrow .material-icons { color: var(--text-muted); }

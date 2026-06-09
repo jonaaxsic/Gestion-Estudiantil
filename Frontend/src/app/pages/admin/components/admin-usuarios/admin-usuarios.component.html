@@ -1,0 +1,93 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon users"><span class="material-icons">people</span></div>
+    <div class="stat-value">{{ data.usuarios().length }}</div>
+    <div class="stat-label">Usuarios Totales</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon admins"><span class="material-icons">shield</span></div>
+    <div class="stat-value">{{ data.getCountByRole('administrador') }}</div>
+    <div class="stat-label">Administradores</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon docentes"><span class="material-icons">school</span></div>
+    <div class="stat-value">{{ data.getCountByRole('docente') }}</div>
+    <div class="stat-label">Docentes</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon apoderados"><span class="material-icons">family_restroom</span></div>
+    <div class="stat-value">{{ data.getCountByRole('apoderado') }}</div>
+    <div class="stat-label">Apoderados</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon inspectors"><span class="material-icons">badge</span></div>
+    <div class="stat-value">{{ data.getCountByRole('inspector_general') }}</div>
+    <div class="stat-label">Inspectores</div>
+  </div>
+</div>
+
+<div class="content-card">
+  <div class="card-header">
+    <div class="card-header-left">
+      <h3 class="card-title"><span class="material-icons">person</span> Gestión de Usuarios</h3>
+    </div>
+    <div class="card-header-right">
+      <select class="filter-select" [(ngModel)]="rolFilter">
+        <option value="">Todos los roles</option>
+        <option value="administrador">Administrador</option>
+        <option value="docente">Docente</option>
+        <option value="apoderado">Apoderado</option>
+        <option value="inspector_general">Inspector General</option>
+      </select>
+      <button class="btn-new" (click)="createUser.emit()">
+        <span class="material-icons">add</span> Nuevo Usuario
+      </button>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr><th>Usuario</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        @for (user of filteredUsuarios; track user.id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar">{{ user.nombre.charAt(0) }}{{ user.apellido.charAt(0) }}</div>
+                <div class="user-info">
+                  <span class="user-name-table">{{ user.nombre }} {{ user.apellido }}</span>
+                  <span class="user-username">&#64;{{ user.username }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td><span class="badge badge-{{ user.rol }}">{{ user.rol }}</span></td>
+            <td>
+              <span class="badge" [class.badge-activo]="user.activo" [class.badge-inactivo]="!user.activo">
+                {{ user.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="editUser.emit(user)" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="btn-icon delete" (click)="deleteUser.emit(user)" title="Eliminar">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    @if (data.usuarios().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon"><span class="material-icons">person_off</span></div>
+        <p>No hay usuarios registrados</p>
+        <span class="hint">Agregue el primer usuario usando el botón "Nuevo Usuario"</span>
+      </div>
+    }
+  </div>
+</div>

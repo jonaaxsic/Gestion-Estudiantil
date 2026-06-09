@@ -1,0 +1,78 @@
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon"><span class="material-icons">family_restroom</span></div>
+    <div class="stat-value">{{ data.getApoderadosConUsuario().length }}</div>
+    <div class="stat-label">Total Apoderados</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon"><span class="material-icons">check_circle</span></div>
+    <div class="stat-value">{{ data.getEstudiantesConApoderado() }}</div>
+    <div class="stat-label">Estudiantes con Apoderado</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon warning"><span class="material-icons">warning</span></div>
+    <div class="stat-value">{{ data.getEstudiantesSinApoderado().length }}</div>
+    <div class="stat-label">Sin Apoderado</div>
+  </div>
+</div>
+
+<div class="content-card">
+  <div class="card-header">
+    <div class="card-header-left">
+      <h3 class="card-title"><span class="material-icons">family_restroom</span> Gestión de Apoderados</h3>
+    </div>
+    <div class="card-header-right">
+      <input type="text" class="search-input" placeholder="Buscar por nombre o RUT..."
+        [(ngModel)]="searchTerm" />
+      <button class="btn-new" (click)="createUser.emit()">
+        <span class="material-icons">add</span> Nuevo Apoderado
+      </button>
+    </div>
+  </div>
+  <div class="table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr><th>Apoderado</th><th>RUT</th><th>Teléfono</th><th>Email</th><th>Pupilo Asignado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        @for (apodero of filteredApoderados; track apodero.id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar">{{ apodero.nombre.charAt(0) }}{{ apodero.apellido.charAt(0) }}</div>
+                <div class="user-info">
+                  <span class="user-name-table">{{ apodero.nombre }} {{ apodero.apellido }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ apodero.rut || '-' }}</td>
+            <td>{{ apodero.telefono || '-' }}</td>
+            <td>{{ apodero.email || '-' }}</td>
+            <td>
+              @if (data.getPupiloNombre(apodero.id!) !== 'Sin pupilo') {
+                <span class="badge badge-activo">{{ data.getPupiloNombre(apodero.id!) }}</span>
+              } @else {
+                <span class="badge badge-inactivo">Sin pupilo</span>
+              }
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="editUser.emit(apodero)" title="Editar">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="btn-icon delete" (click)="deleteUser.emit(apodero)" title="Eliminar">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+        @if (filteredApoderados.length === 0) {
+          <tr>
+            <td colspan="6" class="text-center">No hay apoderados registrados</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

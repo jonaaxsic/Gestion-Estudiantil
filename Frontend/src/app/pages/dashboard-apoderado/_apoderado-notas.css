@@ -1,0 +1,154 @@
+/* ============================================================
+   APODERADO NOTAS — Table, search bar, year select
+   ============================================================ */
+
+/* ── NOTAS TABLE (spreadsheet style) ────────────────────── */
+.notas-tabla-wrapper {
+  overflow-x: auto;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.notas-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.notas-tabla th {
+  background: var(--bg-subtle);
+  font-weight: 700;
+  padding: 10px 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--border);
+}
+
+.notas-tabla td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.notas-tabla tr:last-child td { border-bottom: none; }
+
+.col-asignatura {
+  text-align: left !important;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.col-promedio { font-weight: 700; }
+
+.celda-nota {
+  display: inline-block;
+  min-width: 42px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.celda-nota.vacio {
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+}
+
+.celda-nota.rojo {
+  background: #fde8e8;
+  color: #c62828;
+}
+
+.celda-nota.amarillo {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
+.celda-nota.verde {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.promedio-celda {
+  background: var(--bg-subtle) !important;
+  font-weight: 800;
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+.promedio-celda.rojo { background: #fde8e8 !important; }
+.promedio-celda.amarillo { background: #fff8e1 !important; }
+.promedio-celda.verde { background: #e8f5e9 !important; }
+
+/* ── SEARCH BAR (compact) ────────────────────────────────── */
+.search-bar-compact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 16px;
+  max-width: 280px;
+}
+
+.search-bar-compact .search-icon {
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.search-bar-compact .search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  outline: none;
+  color: var(--text-primary);
+  font-family: inherit;
+  min-width: 0;
+}
+
+.search-bar-compact .search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── YEAR SELECT ─────────────────────────────────────────── */
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ano-select {
+  padding: 6px 28px 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: auto;
+  outline: none;
+}
+
+.ano-select:focus { border-color: var(--brand); }
+
+/* ── NOTAS VIEW ──────────────────────────────────────────── */
+.notas-view { padding: 20px; }
+
+.notas-view .content-card { padding: 0; overflow: hidden; }
+
+.notas-view .card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notas-view .card-body { padding: 20px; }

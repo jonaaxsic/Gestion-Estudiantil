@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,15 @@ import { Estudiante, Asistencia, Evaluacion, Anotacion, Curso, Recordatorio, Reu
   standalone: true,
   imports: [CommonModule, FormsModule, MatIconModule, SharedTabsComponent, SharedHeaderComponent, SettingsPanelComponent],
   templateUrl: './dashboard-apoderado.page.html',
-  styleUrls: ['./dashboard-apoderado.page.css']
+  styleUrls: [
+    './_apoderado-buttons.css',
+    './_apoderado-cards.css',
+    './_apoderado-menu.css',
+    './_apoderado-notas.css',
+    './_apoderado-asistencia.css',
+    './_apoderado-views.css',
+    './dashboard-apoderado.page.css'
+  ]
 })
 export class DashboardApoderadoPage implements OnInit {
   private readonly api = inject(ApiService);
@@ -61,7 +69,8 @@ export class DashboardApoderadoPage implements OnInit {
     this.activeSection.set(tabId as any);
   }
   
-  anoEscolar = new Date().getFullYear();
+  anoEscolar = signal(new Date().getFullYear());
+  anosDisponibles = [2024, 2025, 2026, 2027];
   
   // Formulario de solicitudes
   solicitudTipo = '';
@@ -78,6 +87,7 @@ export class DashboardApoderadoPage implements OnInit {
   };
   saving = signal(false);
   successMessage = signal('');
+  studentSearchQuery = signal('');
   
   ngOnInit(): void {
     this.loadData();
@@ -113,7 +123,7 @@ export class DashboardApoderadoPage implements OnInit {
     this.api.getAnotaciones(studentId).subscribe(data => this.anotaciones.set(data));
     
     // Cargar notas del estudiante
-    this.api.getNotas({ estudiante_id: studentId, ano_escolar: this.anoEscolar }).subscribe(data => this.notas.set(data));
+    this.api.getNotas({ estudiante_id: studentId, ano_escolar: this.anoEscolar() }).subscribe(data => this.notas.set(data));
     
     // Cargar reuniones del curso del estudiante
     if (student?.curso_id) {
@@ -133,6 +143,14 @@ export class DashboardApoderadoPage implements OnInit {
   setSection(section: 'inicio' | 'notas' | 'asistencia' | 'anotaciones' | 'reuniones' | 'avisos' | 'solicitudes' | 'perfil'): void {
     this.activeSection.set(section);
     this.closeMobileMenu();
+  }
+
+  onAnoChange(ano: number): void {
+    this.anoEscolar.set(ano);
+    const student = this.estudiante();
+    if (student?.id) {
+      this.api.getNotas({ estudiante_id: student.id, ano_escolar: ano }).subscribe(data => this.notas.set(data));
+    }
   }
   
   // Crear solicitud de certificado
@@ -319,7 +337,7 @@ export class DashboardApoderadoPage implements OnInit {
   }
   
   // Filtrar solo asignaturas que tienen al menos una nota ingresada
-  get notasConDatos(): Nota[] {
+  get notasConDatosRaw(): Nota[] {
     return this.notas().filter(nota => {
       if (!nota?.notas) return false;
       for (const key of ['nota1', 'nota2', 'nota3', 'nota4', 'nota5', 'nota6']) {
@@ -329,6 +347,17 @@ export class DashboardApoderadoPage implements OnInit {
       return false; // Todas las notas son null → no mostrar
     });
   }
+
+  notasConDatos = computed(() => {
+    const query = this.studentSearchQuery().toLowerCase().trim();
+    let lista = this.notasConDatosRaw;
+    if (query) {
+      lista = lista.filter(nota =>
+        (nota.asignatura || '').toLowerCase().includes(query)
+      );
+    }
+    return lista;
+  });
 
   // Calcular promedio por asignatura desde notas individuales
   calcularPromedioAsignatura(nota: Nota): string {
@@ -354,7 +383,7 @@ export class DashboardApoderadoPage implements OnInit {
 
   // Promedio general (solo considera asignaturas con notas)
   getPromedioGeneral(): number {
-    const notasDelEstudiante = this.notasConDatos;
+    const notasDelEstudiante = this.notasConDatos();
     if (notasDelEstudiante.length === 0) return 0;
     
     const promedios: number[] = [];

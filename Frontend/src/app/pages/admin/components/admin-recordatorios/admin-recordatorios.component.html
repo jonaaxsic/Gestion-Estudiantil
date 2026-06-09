@@ -1,0 +1,53 @@
+<div class="recordatorios-view">
+  <div class="content-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h3 class="card-title"><span class="material-icons">notifications</span> Mis Recordatorios</h3>
+      </div>
+      <div class="card-header-right">
+        <button class="btn-new" (click)="createRecordatorio.emit()">
+          <span class="material-icons">add_alert</span> Nuevo Recordatorio
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      @if (data.recordatorios().length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon"><span class="material-icons">notifications_none</span></div>
+          <p>No hay recordatorios</p>
+          <span class="hint">Usa el botón de arriba para crear uno</span>
+        </div>
+      } @else {
+        <div class="recordatorios-list">
+          @for (rec of data.recordatorios(); track rec.id) {
+            <div class="list-item" [class.completed]="rec.completada">
+              <div class="list-icon" [class.completed]="rec.completada" [class.pending]="!rec.completada">
+                <span class="material-icons">{{ rec.completada ? 'check_circle' : 'schedule' }}</span>
+              </div>
+              <div class="list-content">
+                <span class="title" [style.text-decoration]="rec.completada ? 'line-through' : 'none'">
+                  {{ rec.titulo }}
+                </span>
+                <span class="subtitle">
+                  {{ rec.fecha_limite ? 'Para: ' + data.formatFecha(rec.fecha_limite) : 'Sin fecha' }}
+                </span>
+                @if (rec.descripcion) {
+                  <span class="rec-desc">{{ rec.descripcion }}</span>
+                }
+              </div>
+              <div class="list-actions">
+                <button class="btn-icon" (click)="toggleCompleted.emit(rec)"
+                  [title]="rec.completada ? 'Marcar pendiente' : 'Marcar completo'">
+                  <span class="material-icons">{{ rec.completada ? 'undo' : 'check' }}</span>
+                </button>
+                <button class="btn-icon delete" (click)="deleteRecordatorio.emit(rec)" title="Eliminar">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

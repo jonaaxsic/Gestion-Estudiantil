@@ -20,36 +20,28 @@
       </div>
       <div class="mobile-menu-content">
         <button class="mobile-menu-item" (click)="activeTab.set('usuarios'); closeMobileMenu()">
-          <span class="material-icons">people</span>
-          <span>Usuarios</span>
+          <span class="material-icons">people</span><span>Usuarios</span>
         </button>
         <button class="mobile-menu-item" (click)="activeTab.set('estudiantes'); closeMobileMenu()">
-          <span class="material-icons">school</span>
-          <span>Estudiantes</span>
+          <span class="material-icons">school</span><span>Estudiantes</span>
         </button>
         <button class="mobile-menu-item" (click)="activeTab.set('cursos'); closeMobileMenu()">
-          <span class="material-icons">class</span>
-          <span>Cursos</span>
+          <span class="material-icons">class</span><span>Cursos</span>
         </button>
         <button class="mobile-menu-item" (click)="activeTab.set('docentes'); closeMobileMenu()">
-          <span class="material-icons">co_present</span>
-          <span>Docentes</span>
+          <span class="material-icons">co_present</span><span>Docentes</span>
         </button>
         <button class="mobile-menu-item" (click)="openRecordatorioDialog(); closeMobileMenu()">
-          <span class="material-icons">add_alert</span>
-          <span>Nuevo Recordatorio</span>
+          <span class="material-icons">add_alert</span><span>Nuevo Recordatorio</span>
         </button>
-        <button class="mobile-menu-item" (click)="activeTab.set('docentes'); closeMobileMenu()">
-          <span class="material-icons">notifications</span>
-          <span>Mis Recordatorios</span>
+        <button class="mobile-menu-item" (click)="activeTab.set('recordatorios'); closeMobileMenu()">
+          <span class="material-icons">notifications</span><span>Mis Recordatorios</span>
         </button>
         <button class="mobile-menu-item" (click)="activeTab.set('configuracion'); closeMobileMenu()">
-          <span class="material-icons">settings</span>
-          <span>Configuración</span>
+          <span class="material-icons">settings</span><span>Configuración</span>
         </button>
         <button class="mobile-menu-item logout" (click)="logout()">
-          <span class="material-icons">logout</span>
-          <span>Cerrar Sesión</span>
+          <span class="material-icons">logout</span><span>Cerrar Sesión</span>
         </button>
       </div>
     </div>
@@ -67,17 +59,14 @@
     </div>
     <div class="side-panel-body">
       <button class="btn btn-primary full-width" (click)="activeTab.set('cursos')">
-        <span class="material-icons">add</span>
-        Crear Nuevo Curso
+        <span class="material-icons">add</span> Crear Nuevo Curso
       </button>
-      @for (curso of cursos(); track curso.id) {
+      @for (curso of data.cursos(); track curso.id) {
         <div class="course-item" (click)="selectCurso(curso)">
-          <div class="course-icon">
-            <span class="material-icons">school</span>
-          </div>
+          <div class="course-icon"><span class="material-icons">school</span></div>
           <div class="course-info">
             <span class="course-name">{{ curso.nivel }} {{ curso.nombre }}</span>
-            <span class="course-students">{{ getEstudiantesCount(curso.id) }} estudiantes</span>
+            <span class="course-students">{{ data.getEstudiantesCount(curso.id) }} estudiantes</span>
           </div>
         </div>
       }
@@ -86,541 +75,61 @@
 }
 
 <div class="page-container" [class.with-panel]="showCursosPanel()">
-  <!-- Tabs usando componente compartido -->
-  <app-shared-tabs
-    [tabs]="adminTabs"
-    [selectedIndex]="tabIndex"
-    (tabChanged)="onTabChanged($event)">
+  <app-shared-tabs [tabs]="adminTabs" [selectedIndex]="tabIndex" (tabChanged)="onTabChanged($event)">
   </app-shared-tabs>
-  
+
   <div class="tab-content">
-  <!-- USUARIOS TAB -->
-  @if (activeTab() === 'usuarios') {
-    <!-- Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon users">
-          <span class="material-icons">people</span>
-        </div>
-        <div class="stat-value">{{ usuarios().length }}</div>
-        <div class="stat-label">Usuarios Totales</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon admins">
-          <span class="material-icons">shield</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('administrador') }}</div>
-        <div class="stat-label">Administradores</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon docentes">
-          <span class="material-icons">school</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('docente') }}</div>
-        <div class="stat-label">Docentes</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon apoderados">
-          <span class="material-icons">family_restroom</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('apoderado') }}</div>
-        <div class="stat-label">Apoderados</div>
-      </div>
+    @if (activeTab() === 'usuarios') {
+      <app-admin-usuarios
+        (createUser)="openUserDialog()"
+        (editUser)="openUserDialog($event)"
+        (deleteUser)="deleteUserFromChild($event)"
+      ></app-admin-usuarios>
+    }
 
-      <div class="stat-card">
-        <div class="stat-icon inspectors">
-          <span class="material-icons">badge</span>
-        </div>
-        <div class="stat-value">{{ getCountByRole('inspector_general') }}</div>
-        <div class="stat-label">Inspectores</div>
-      </div>
-    </div>
-    
-    <!-- Users Table -->
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">person</span>
-            Gestión de Usuarios
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <select class="filter-select" [(ngModel)]="rolFilter" (ngModelChange)="applyFilter()">
-            <option value="">Todos los roles</option>
-            <option value="administrador">Administrador</option>
-            <option value="docente">Docente</option>
-            <option value="apoderado">Apoderado</option>
-            <option value="inspector_general">Inspector General</option>
-          </select>
-          <button class="btn-new" (click)="openUserDialog()">
-            <span class="material-icons">add</span>
-            Nuevo Usuario
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Usuario</th>
-              <th>Correo</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (user of usuarios(); track user.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar">{{ user.nombre.charAt(0) }}{{ user.apellido.charAt(0) }}</div>
-                    <div class="user-info">
-                      <span class="user-name-table">{{ user.nombre }} {{ user.apellido }}</span>
-                      <span class="user-username">&#64;{{ user.username }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>{{ user.email }}</td>
-                <td>
-                  <span class="badge badge-{{ user.rol }}">{{ user.rol }}</span>
-                </td>
-                <td>
-                  <span class="badge" [class.badge-activo]="user.activo" [class.badge-inactivo]="!user.activo">
-                    {{ user.activo ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openUserDialog(user)" title="Editar">
-                      <span class="material-icons">edit</span>
-                    </button>
-                    <button class="btn-icon delete" (click)="deleteUsuario(user)" title="Eliminar">
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        
-        @if (usuarios().length === 0) {
-          <div class="empty-state">
-            <div class="empty-icon"><span class="material-icons">person_off</span></div>
-            <p>No hay usuarios registrados</p>
-            <span class="hint">Agregue el primer usuario usando el botón "Nuevo Usuario"</span>
-          </div>
-        }
-      </div>
-    </div>
-  }
-  
-  <!-- ESTUDIANTES TAB -->
-  @if (activeTab() === 'estudiantes') {
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon students">
-          <span class="material-icons">school</span>
-        </div>
-        <div class="stat-value">{{ estudiantes().length }}</div>
-        <div class="stat-label">Total Estudiantes</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon courses">
-          <span class="material-icons">class</span>
-        </div>
-        <div class="stat-value">{{ cursos().length }}</div>
-        <div class="stat-label">Cursos</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon guardian">
-          <span class="material-icons">family_restroom</span>
-        </div>
-        <div class="stat-value">{{ getEstudiantesConApoderado() }}</div>
-        <div class="stat-label">Con Apoderado</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon no-guardian">
-          <span class="material-icons">person_off</span>
-        </div>
-        <div class="stat-value">{{ estudiantes().length - getEstudiantesConApoderado() }}</div>
-        <div class="stat-label">Sin Apoderado</div>
-      </div>
-    </div>
-    
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">school</span>
-            Gestión de Estudiantes
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <button class="btn-new" (click)="openStudentDialog()">
-            <span class="material-icons">add</span>
-            Nuevo Estudiante
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Estudiante</th>
-              <th>RUT</th>
-              <th>Curso</th>
-              <th>Apoderado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (est of estudiantes(); track est.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar student">{{ est.nombre.charAt(0) }}{{ est.apellido.charAt(0) }}</div>
-                    <div class="user-info">
-                      <span class="user-name-table">{{ est.nombre }} {{ est.apellido }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>{{ est.rut }}</td>
-                <td>
-                  <span class="badge badge-curso">{{ getCursoNombreDisplay(est.curso_id) }}</span>
-                </td>
-                <td>
-                  @if (est.apoderado_id) {
-                    <span class="badge badge-activo">Asignado</span>
-                  } @else {
-                    <span class="badge badge-inactivo">Sin asignar</span>
-                  }
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openStudentDialog(est)" title="Editar">
-                      <span class="material-icons">edit</span>
-                    </button>
-                    <button class="btn-icon delete" (click)="deleteEstudiante(est)" title="Eliminar">
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        
-        @if (estudiantes().length === 0) {
-          <div class="empty-state">
-            <div class="empty-icon"><span class="material-icons">school</span></div>
-            <p>No hay estudiantes registrados</p>
-            <span class="hint">Importe o registre estudiantes desde la sección correspondiente</span>
-          </div>
-        }
-      </div>
-    </div>
-  }
-  
-  <!-- CURSOS TAB -->
-  @if (activeTab() === 'cursos') {
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">class</span>
-            Gestión de Cursos
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <button class="btn-new" (click)="openCursoDialog()">
-            <span class="material-icons">add</span>
-            Nuevo Curso
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Curso</th>
-              <th>Nivel</th>
-              <th>Año</th>
-              <th>Estudiantes</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (curso of cursos(); track curso.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar course">{{ curso.nombre.charAt(0) }}</div>
-                    <span class="user-name-table">{{ curso.nombre }}</span>
-                  </div>
-                </td>
-                <td>{{ curso.nivel }}</td>
-                <td>{{ curso.ano }}</td>
-                <td>{{ getEstudiantesCount(curso.id) }}</td>
-                <td>
-                  <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openCursoDialog(curso)" title="Editar">
-                      <span class="material-icons">edit</span>
-                    </button>
-                    <button class="btn-icon delete" (click)="deleteCurso(curso)" title="Eliminar">
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        
-        @if (cursos().length === 0) {
-          <div class="empty-state">
-            <div class="empty-icon"><span class="material-icons">class</span></div>
-            <p>No hay cursos registrados</p>
-            <span class="hint">Cree el primer curso usando el botón "Nuevo Curso"</span>
-          </div>
-        }
-      </div>
-    </div>
-  }
-  
-  <!-- DOCENTES TAB - Asignaciones Docente-Curso-Asignatura -->
-  @if (activeTab() === 'docentes') {
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">co_present</span>
-            Asignación de Docentes a Cursos
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <button class="btn-new" (click)="openAsignacionDocenteDialog()">
-            <span class="material-icons">add</span>
-            Nueva Asignación
-          </button>
-        </div>
-      </div>
-      
-      <div class="card-body">
-        <!-- Barra de búsqueda -->
-        <div class="search-bar-wrapper">
-          <span class="material-icons search-icon">search</span>
-          <input
-            type="text"
-            class="search-input"
-            placeholder="Buscar docente, curso o asignatura..."
-            [value]="docenteSearchQuery()"
-            (input)="docenteSearchQuery.set($any($event.target).value)"
-          />
-        </div>
+    @if (activeTab() === 'estudiantes') {
+      <app-admin-estudiantes
+        (createStudent)="openStudentDialog()"
+        (editStudent)="openStudentDialog($event)"
+        (deleteStudent)="deleteStudentFromChild($event)"
+      ></app-admin-estudiantes>
+    }
 
-        <!-- Tarjetas de docentes -->
-        <div class="docentes-cards-grid">
-          @for (docente of getDocentesFiltrados(); track docente.docente_id) {
-            <div class="docente-card">
-              <div class="docente-card-header">
-                <div class="docente-avatar-large">{{ docente.inicial }}</div>
-                <div class="docente-info">
-                  <h4 class="docente-nombre">{{ docente.nombre }}</h4>
-                  <span class="docente-cursos-count">
-                    {{ docente.cursos.length }} curso(s) asignado(s)
-                  </span>
-                </div>
-              </div>
-              <div class="docente-cursos-list">
-                @for (curso of docente.cursos; track curso.asignacion_id) {
-                  <div class="docente-curso-item">
-                    <div class="curso-info">
-                      <span class="material-icons curso-icon">class</span>
-                      <div>
-                        <span class="curso-nombre">{{ curso.curso }}</span>
-                        <span class="badge badge-asignatura">{{ curso.asignatura }}</span>
-                      </div>
-                    </div>
-                    <button
-                      class="btn-icon btn-danger-soft"
-                      (click)="deleteAsignacionDocente({ id: curso.asignacion_id })"
-                      title="Quitar asignación"
-                    >
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-          @if (getDocentesFiltrados().length === 0) {
-            <div class="empty-state">
-              <span class="material-icons">search_off</span>
-              <p>No se encontraron docentes con esa búsqueda</p>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-    
-    <!-- Recordatorios Section -->
-    <div class="content-card" style="margin-top: 24px;">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">notifications</span>
-            Mis Recordatorios
-          </h3>
-        </div>
-      </div>
-      <div class="card-body">
-        @if (recordatorios().length === 0) {
-          <div class="empty-state">
-            <div class="empty-icon"><span class="material-icons">notifications_none</span></div>
-            <p>No hay recordatorios</p>
-            <span class="hint">Los recordatorios aparecerán aquí cuando los cree</span>
-          </div>
-        } @else {
-          @for (rec of recordatorios(); track rec.id) {
-            <div class="list-item">
-              <div class="list-icon" [class.completed]="rec.completada" [class.pending]="!rec.completada">
-                <span class="material-icons">{{ rec.completada ? 'check_circle' : 'schedule' }}</span>
-              </div>
-              <div class="list-content">
-                <span class="title" [style.text-decoration]="rec.completada ? 'line-through' : 'none'">{{ rec.titulo }}</span>
-                <span class="subtitle">{{ rec.fecha_limite ? 'Para: ' + formatFecha(rec.fecha_limite) : 'Sin fecha' }}</span>
-              </div>
-              <button class="btn-icon" (click)="toggleRecordatorioCompleted(rec)">
-                <span class="material-icons">{{ rec.completada ? 'undo' : 'check' }}</span>
-              </button>
-              <button class="btn-icon delete" (click)="deleteRecordatorio(rec)">
-                <span class="material-icons">delete</span>
-              </button>
-            </div>
-          }
-        }
-      </div>
-    </div>
-  }
-  
-  <!-- APODERADOS TAB -->
-  @if (activeTab() === 'apoderados') {
-    <!-- Stats de apoderados -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <span class="material-icons">family_restroom</span>
-        </div>
-        <div class="stat-value">{{ usuarios().filter(u => u.rol === 'apoderado').length }}</div>
-        <div class="stat-label">Total Apoderados</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon">
-          <span class="material-icons">check_circle</span>
-        </div>
-        <div class="stat-value">{{ getEstudiantesConApoderado() }}</div>
-        <div class="stat-label">Estudiantes con Apoderado</div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon warning">
-          <span class="material-icons">warning</span>
-        </div>
-        <div class="stat-value">{{ getEstudiantesSinApoderado().length }}</div>
-        <div class="stat-label">Sin Apoderado</div>
-      </div>
-    </div>
-    
-    <div class="content-card">
-      <div class="card-header">
-        <div class="card-header-left">
-          <h3 class="card-title">
-            <span class="material-icons">family_restroom</span>
-            Gestión de Apoderados
-          </h3>
-        </div>
-        <div class="card-header-right">
-          <input type="text" class="search-input" placeholder="Buscar por nombre o RUT..." [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)">
-          <button class="btn-new" (click)="openUserDialog()">
-            <span class="material-icons">add</span>
-            Nuevo Apoderado
-          </button>
-        </div>
-      </div>
-      
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Apoderado</th>
-              <th>RUT</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th>Pupilo Asignado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (apodero of getApoderadosConUsuario(); track apodero.id) {
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar">{{ apodero.nombre.charAt(0) }}{{ apodero.apellido.charAt(0) }}</div>
-                    <div class="user-info">
-                      <span class="user-name-table">{{ apodero.nombre }} {{ apodero.apellido }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>{{ apodero.rut || '-' }}</td>
-                <td>{{ apodero.telefono || '-' }}</td>
-                <td>{{ apodero.email || '-' }}</td>
-                <td>
-                  @if (getPupiloNombre(apodero.id!) !== 'Sin pupilo') {
-                    <span class="badge badge-activo">{{ getPupiloNombre(apodero.id!) }}</span>
-                  } @else {
-                    <span class="badge badge-inactivo">Sin pupilo</span>
-                  }
-                </td>
-                <td>
-                  <div class="action-buttons">
-                    <button class="btn-icon edit" (click)="openUserDialog(apodero)" title="Editar">
-                      <span class="material-icons">edit</span>
-                    </button>
-                    <button class="btn-icon delete" (click)="deleteApoderado(apodero)" title="Eliminar">
-                      <span class="material-icons">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            }
-            @if (getApoderadosConUsuario().length === 0) {
-              <tr>
-                <td colspan="6" class="text-center">No hay apoderados registrados</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-  }
+    @if (activeTab() === 'cursos') {
+      <app-admin-cursos
+        (createCurso)="openCursoDialog()"
+        (editCurso)="openCursoDialog($event)"
+        (deleteCurso)="deleteCursoFromChild($event)"
+      ></app-admin-cursos>
+    }
 
-  <!-- CONFIGURACIÓN TAB -->
-  @if (activeTab() === 'configuracion') {
-    <app-settings-panel></app-settings-panel>
-  }
+    @if (activeTab() === 'docentes') {
+      <app-admin-docentes
+        (createAsignacion)="openAsignacionDocenteDialog()"
+        (deleteAsignacion)="deleteAsignacionFromChild($event)"
+      ></app-admin-docentes>
+    }
+
+    @if (activeTab() === 'recordatorios') {
+      <app-admin-recordatorios
+        (createRecordatorio)="openRecordatorioDialog()"
+        (toggleCompleted)="toggleRecordatorioCompleted($event)"
+        (deleteRecordatorio)="deleteRecordatorioFromChild($event)"
+      ></app-admin-recordatorios>
+    }
+
+    @if (activeTab() === 'apoderados') {
+      <app-admin-apoderados
+        (createUser)="openUserDialog()"
+        (editUser)="openUserDialog($event)"
+        (deleteUser)="deleteUserFromChild($event)"
+      ></app-admin-apoderados>
+    }
+
+    @if (activeTab() === 'configuracion') {
+      <app-settings-panel></app-settings-panel>
+    }
+  </div>
 </div>
 
 <!-- User Dialog -->
@@ -628,20 +137,14 @@
   <div class="dialog-overlay" (click)="closeUserDialog()">
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
-        <h2 class="dialog-title">
-          {{ editingUser() ? 'Editar' : 'Crear' }} Usuario
-        </h2>
-        <button class="btn-icon" (click)="closeUserDialog()">
-          <span class="material-icons">close</span>
-        </button>
+        <h2 class="dialog-title">{{ editingUser() ? 'Editar' : 'Crear' }} Usuario</h2>
+        <button class="btn-icon" (click)="closeUserDialog()"><span class="material-icons">close</span></button>
       </div>
-      
       <form (ngSubmit)="saveUser()" class="dialog-form">
         <div class="form-group">
           <label class="form-label">RUT</label>
           <input type="text" class="form-input" [(ngModel)]="userForm.rut" name="rut" placeholder="12345678-9">
         </div>
-        
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Nombre</label>
@@ -652,12 +155,10 @@
             <input type="text" class="form-input" [(ngModel)]="userForm.apellido" name="apellido" required>
           </div>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Correo electrónico</label>
           <input type="email" class="form-input" [(ngModel)]="userForm.email" name="email" required>
         </div>
-        
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Usuario</label>
@@ -668,12 +169,10 @@
             <input type="text" class="form-input" [(ngModel)]="userForm.telefono" name="telefono">
           </div>
         </div>
-        
         <div class="form-group">
           <label class="form-label">{{ editingUser() ? 'Nueva Contraseña (opcional)' : 'Contraseña' }}</label>
           <input type="password" class="form-input" [(ngModel)]="userForm.password" name="password" [required]="!editingUser()">
         </div>
-        
         <div class="form-group">
           <label class="form-label">Rol</label>
           <select class="form-input" [(ngModel)]="userForm.rol" name="rol" required>
@@ -683,12 +182,9 @@
             <option value="inspector_general">Inspector General</option>
           </select>
         </div>
-        
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="closeUserDialog()">Cancelar</button>
-          <button type="submit" class="btn-save">
-            {{ editingUser() ? 'Actualizar' : 'Crear' }} Usuario
-          </button>
+          <button type="submit" class="btn-save">{{ editingUser() ? 'Actualizar' : 'Crear' }} Usuario</button>
         </div>
       </form>
     </div>
@@ -700,14 +196,9 @@
   <div class="dialog-overlay" (click)="closeStudentDialog()">
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
-        <h2 class="dialog-title">
-          {{ editingStudent() ? 'Editar' : 'Crear' }} Estudiante
-        </h2>
-        <button class="btn-icon" (click)="closeStudentDialog()">
-          <span class="material-icons">close</span>
-        </button>
+        <h2 class="dialog-title">{{ editingStudent() ? 'Editar' : 'Crear' }} Estudiante</h2>
+        <button class="btn-icon" (click)="closeStudentDialog()"><span class="material-icons">close</span></button>
       </div>
-      
       <form (ngSubmit)="saveStudent()" class="dialog-form">
         <div class="form-row">
           <div class="form-group">
@@ -719,7 +210,6 @@
             <input type="text" class="form-input" [(ngModel)]="studentForm.apellido" name="apellido" required>
           </div>
         </div>
-        
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">RUT</label>
@@ -730,39 +220,33 @@
             <input type="text" class="form-input" [(ngModel)]="studentForm.telefono" name="telefono">
           </div>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Curso</label>
           <select class="form-input" [(ngModel)]="studentForm.curso_id" name="curso_id">
             <option value="">Sin curso asignado</option>
-            @for (curso of cursos(); track curso.id) {
+            @for (curso of data.cursos(); track curso.id) {
               <option [value]="curso.id">{{ curso.nombre }} - {{ curso.nivel }}</option>
             }
           </select>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Apoderado (Usuario)</label>
           <select class="form-input" [(ngModel)]="studentForm.apoderado_id" name="apoderado_id">
             <option value="">Sin apoderado asignado</option>
-            @for (user of usuarios(); track user.id) {
+            @for (user of data.usuarios(); track user.id) {
               @if (user.rol === 'apoderado') {
                 <option [value]="user.id">{{ user.nombre }} {{ user.apellido }}</option>
               }
             }
           </select>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Dirección</label>
           <input type="text" class="form-input" [(ngModel)]="studentForm.direccion" name="direccion">
         </div>
-        
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="closeStudentDialog()">Cancelar</button>
-          <button type="submit" class="btn-save">
-            {{ editingStudent() ? 'Actualizar' : 'Crear' }} Estudiante
-          </button>
+          <button type="submit" class="btn-save">{{ editingStudent() ? 'Actualizar' : 'Crear' }} Estudiante</button>
         </div>
       </form>
     </div>
@@ -774,14 +258,9 @@
   <div class="dialog-overlay" (click)="closeCursoDialog()">
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
-        <h2 class="dialog-title">
-          {{ editingCurso() ? 'Editar' : 'Crear' }} Curso
-        </h2>
-        <button class="btn-icon" (click)="closeCursoDialog()">
-          <span class="material-icons">close</span>
-        </button>
+        <h2 class="dialog-title">{{ editingCurso() ? 'Editar' : 'Crear' }} Curso</h2>
+        <button class="btn-icon" (click)="closeCursoDialog()"><span class="material-icons">close</span></button>
       </div>
-      
       <form (ngSubmit)="saveCurso()" class="dialog-form">
         <div class="form-group">
           <label class="form-label">Nivel</label>
@@ -792,39 +271,26 @@
             <option value="Medio">Medio</option>
           </select>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Nombre del Curso</label>
           <select class="form-input" [(ngModel)]="cursoForm.nombre" name="nombre" required>
-            <option value="1ºA">1ºA</option>
-            <option value="1ºB">1ºB</option>
-            <option value="2ºA">2ºA</option>
-            <option value="2ºB">2ºB</option>
-            <option value="3ºA">3ºA</option>
-            <option value="3ºB">3ºB</option>
-            <option value="4ºA">4ºA</option>
-            <option value="4ºB">4ºB</option>
-            <option value="5ºA">5ºA</option>
-            <option value="5ºB">5ºB</option>
-            <option value="6ºA">6ºA</option>
-            <option value="6ºB">6ºB</option>
-            <option value="7ºA">7ºA</option>
-            <option value="7ºB">7ºB</option>
-            <option value="8ºA">8ºA</option>
-            <option value="8ºB">8ºB</option>
+            <option value="1ºA">1ºA</option><option value="1ºB">1ºB</option>
+            <option value="2ºA">2ºA</option><option value="2ºB">2ºB</option>
+            <option value="3ºA">3ºA</option><option value="3ºB">3ºB</option>
+            <option value="4ºA">4ºA</option><option value="4ºB">4ºB</option>
+            <option value="5ºA">5ºA</option><option value="5ºB">5ºB</option>
+            <option value="6ºA">6ºA</option><option value="6ºB">6ºB</option>
+            <option value="7ºA">7ºA</option><option value="7ºB">7ºB</option>
+            <option value="8ºA">8ºA</option><option value="8ºB">8ºB</option>
           </select>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Año</label>
           <input type="number" class="form-input" [(ngModel)]="cursoForm.ano" name="ano" required>
         </div>
-        
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="closeCursoDialog()">Cancelar</button>
-          <button type="submit" class="btn-save">
-            {{ editingCurso() ? 'Actualizar' : 'Crear' }} Curso
-          </button>
+          <button type="submit" class="btn-save">{{ editingCurso() ? 'Actualizar' : 'Crear' }} Curso</button>
         </div>
       </form>
     </div>
@@ -836,36 +302,25 @@
   <div class="dialog-overlay" (click)="closeRecordatorioDialog()">
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
-        <h2 class="dialog-title">
-          <span class="material-icons">add_alert</span>
-          Nuevo Recordatorio
-        </h2>
-        <button class="btn-icon" (click)="closeRecordatorioDialog()">
-          <span class="material-icons">close</span>
-        </button>
+        <h2 class="dialog-title"><span class="material-icons">add_alert</span> Nuevo Recordatorio</h2>
+        <button class="btn-icon" (click)="closeRecordatorioDialog()"><span class="material-icons">close</span></button>
       </div>
-      
       <form (ngSubmit)="saveRecordatorio()" class="dialog-form">
         <div class="form-group">
           <label class="form-label">Título</label>
           <input type="text" class="form-input" [(ngModel)]="recordatorioForm.titulo" name="titulo" required>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Descripción</label>
           <textarea class="form-input" [(ngModel)]="recordatorioForm.descripcion" name="descripcion" rows="3"></textarea>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Fecha Límite (opcional)</label>
           <input type="date" class="form-input" [(ngModel)]="recordatorioForm.fecha_limite" name="fecha_limite">
         </div>
-        
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="closeRecordatorioDialog()">Cancelar</button>
-          <button type="submit" class="btn-save" [disabled]="saving()">
-            {{ saving() ? 'Guardando...' : 'Crear' }}
-          </button>
+          <button type="submit" class="btn-save" [disabled]="saving()">{{ saving() ? 'Guardando...' : 'Crear' }}</button>
         </div>
       </form>
     </div>
@@ -877,46 +332,35 @@
   <div class="dialog-overlay" (click)="closeAsignacionDocenteDialog()">
     <div class="dialog-content" (click)="$event.stopPropagation()">
       <div class="dialog-header">
-        <h2 class="dialog-title">
-          <span class="material-icons">co_present</span>
-          Asignar Docente a Curso
-        </h2>
-        <button class="btn-icon" (click)="closeAsignacionDocenteDialog()">
-          <span class="material-icons">close</span>
-        </button>
+        <h2 class="dialog-title"><span class="material-icons">co_present</span> Asignar Docente a Curso</h2>
+        <button class="btn-icon" (click)="closeAsignacionDocenteDialog()"><span class="material-icons">close</span></button>
       </div>
-      
       <form (ngSubmit)="saveAsignacionDocente()" class="dialog-form">
         <div class="form-group">
           <label class="form-label">Docente</label>
           <select class="form-input" [(ngModel)]="asignacionDocenteForm.docente_id" name="docente_id" required>
             <option value="">Seleccionar docente</option>
-            @for (docente of getDocentes(); track docente.id) {
+            @for (docente of data.getDocentes(); track docente.id) {
               <option [value]="docente.id">{{ docente.nombre }} {{ docente.apellido }}</option>
             }
           </select>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Curso</label>
           <select class="form-input" [(ngModel)]="asignacionDocenteForm.curso_id" name="curso_id" required>
             <option value="">Seleccionar curso</option>
-            @for (curso of cursos(); track curso.id) {
+            @for (curso of data.cursos(); track curso.id) {
               <option [value]="curso.id">{{ curso.nivel }} {{ curso.nombre }}</option>
             }
           </select>
         </div>
-        
         <div class="form-group">
           <label class="form-label">Asignatura</label>
           <input type="text" class="form-input" [(ngModel)]="asignacionDocenteForm.asignatura" name="asignatura" placeholder="Ej: Historia, Matemáticas" required>
         </div>
-        
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="closeAsignacionDocenteDialog()">Cancelar</button>
-          <button type="submit" class="btn-save" [disabled]="saving()">
-            {{ saving() ? 'Guardando...' : 'Asignar' }}
-          </button>
+          <button type="submit" class="btn-save" [disabled]="saving()">{{ saving() ? 'Guardando...' : 'Asignar' }}</button>
         </div>
       </form>
     </div>

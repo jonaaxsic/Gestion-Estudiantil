@@ -1,0 +1,54 @@
+<div class="content-card">
+  <div class="card-header">
+    <div class="card-header-left">
+      <h3 class="card-title"><span class="material-icons">co_present</span> Asignación de Docentes a Cursos</h3>
+    </div>
+    <div class="card-header-right">
+      <button class="btn-new" (click)="createAsignacion.emit()">
+        <span class="material-icons">add</span> Nueva Asignación
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="search-bar-wrapper">
+      <span class="material-icons search-icon">search</span>
+      <input type="text" class="search-input" placeholder="Buscar docente..."
+        [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)" />
+    </div>
+    <div class="docentes-cards-grid">
+      @for (docente of getDocentesFiltrados(); track docente.docente_id) {
+        <div class="docente-card">
+          <div class="docente-card-header">
+            <div class="docente-avatar-large">{{ docente.inicial }}</div>
+            <div class="docente-info">
+              <h4 class="docente-nombre">{{ docente.nombre }}</h4>
+              <span class="docente-cursos-count">{{ docente.cursos.length }} curso(s) asignado(s)</span>
+            </div>
+          </div>
+          <div class="docente-cursos-list">
+            @for (curso of docente.cursos; track curso.asignacion_id) {
+              <div class="docente-curso-item">
+                <div class="curso-info">
+                  <span class="material-icons curso-icon">class</span>
+                  <div>
+                    <span class="curso-nombre">{{ curso.curso }}</span>
+                    <span class="badge badge-asignatura">{{ curso.asignatura }}</span>
+                  </div>
+                </div>
+                <button class="btn-icon btn-danger-soft" (click)="deleteAsignacion.emit({ id: curso.asignacion_id })" title="Quitar asignación">
+                  <span class="material-icons">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      @if (getDocentesFiltrados().length === 0) {
+        <div class="empty-state">
+          <span class="material-icons">search_off</span>
+          <p>No se encontraron docentes con esa búsqueda</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

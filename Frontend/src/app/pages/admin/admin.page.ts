@@ -4,708 +4,267 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { ApiService } from '../../core/services/api.service';
+import { AdminDataService } from './services/admin-data.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { SharedTabsComponent, SharedHeaderComponent, TabItem, SettingsPanelComponent } from '../../shared/components';
-import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente, Apoderado } from '../../shared/models';
+import { Usuario, Estudiante, Curso, Recordatorio, AsignacionDocente } from '../../shared/models';
+import { AdminUsuariosComponent } from './components/admin-usuarios/admin-usuarios.component';
+import { AdminEstudiantesComponent } from './components/admin-estudiantes/admin-estudiantes.component';
+import { AdminCursosComponent } from './components/admin-cursos/admin-cursos.component';
+import { AdminDocentesComponent } from './components/admin-docentes/admin-docentes.component';
+import { AdminRecordatoriosComponent } from './components/admin-recordatorios/admin-recordatorios.component';
+import { AdminApoderadosComponent } from './components/admin-apoderados/admin-apoderados.component';
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    MatIconModule, 
-    MatButtonModule,
-    MatCardModule,
-    SharedTabsComponent,
-    SharedHeaderComponent,
-    SettingsPanelComponent,
+    CommonModule, FormsModule, MatIconModule, MatButtonModule, MatCardModule,
+    SharedTabsComponent, SharedHeaderComponent, SettingsPanelComponent,
+    AdminUsuariosComponent, AdminEstudiantesComponent, AdminCursosComponent,
+    AdminDocentesComponent, AdminRecordatoriosComponent, AdminApoderadosComponent,
   ],
   templateUrl: './admin.page.html',
-  styleUrls: ['./admin.page.css']
+  styleUrls: ['_admin-shared-ui.css', '_admin-shared-docentes.css', '_admin-shared-responsive.css', './admin.page.css']
 })
 export class AdminPage implements OnInit {
-  private readonly api = inject(ApiService);
+  readonly data = inject(AdminDataService);
   readonly auth = inject(AuthService);
   readonly theme = inject(ThemeService);
 
-  // Toast notification
   successMessage = signal('');
-
-  // Data signals
-  usuarios = signal<Usuario[]>([]);
-  estudiantes = signal<Estudiante[]>([]);
-  cursos = signal<Curso[]>([]);
-  recordatorios = signal<Recordatorio[]>([]);
-  asignacionesDocente = signal<AsignacionDocente[]>([]);
-  apoderados = signal<Apoderado[]>([]);
-  
-  // Tab state
-  activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'apoderados' | 'configuracion'>('usuarios');
-  
-  // Tab index para el componente SharedTabs
-  get tabIndex(): number {
-    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados', 'configuracion'];
-    return tabs.indexOf(this.activeTab());
-  }
-  
-  set tabIndex(index: number) {
-    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'apoderados', 'configuracion'];
-    if (index >= 0 && index < tabs.length) {
-      this.activeTab.set(tabs[index] as any);
-    }
-  }
-  
-  // Mobile menu state
+  activeTab = signal<'usuarios' | 'estudiantes' | 'cursos' | 'docentes' | 'recordatorios' | 'apoderados' | 'configuracion'>('usuarios');
   showMobileMenu = signal(false);
-  
+  showCursosPanel = signal(false);
+  selectedCurso = signal<Curso | null>(null);
+
   // Dialog states
   showUserDialog = signal(false);
   showStudentDialog = signal(false);
   showCursoDialog = signal(false);
   showRecordatorioDialog = signal(false);
   showAsignacionDocenteDialog = signal(false);
-  showCursosPanel = signal(false);
-  selectedCurso = signal<Curso | null>(null);
-  
-  // Editing states
+
+  // Editing
   editingUser = signal<Usuario | null>(null);
   editingStudent = signal<Estudiante | null>(null);
   editingCurso = signal<Curso | null>(null);
-  
-  // Filters
-  rolFilter = '';
-  searchTerm = signal('');
-  cursoFilter = signal('');
-  
-  // Computed filtered lists
-  get filteredUsuarios(): Usuario[] {
-    const term = this.searchTerm().toLowerCase();
-    const rol = this.rolFilter;
-    return this.usuarios().filter(u => {
-      const matchesSearch = !term || 
-        u.nombre?.toLowerCase().includes(term) || 
-        u.apellido?.toLowerCase().includes(term) ||
-        u.rut?.toLowerCase().includes(term);
-      const matchesRol = !rol || u.rol === rol;
-      return matchesSearch && matchesRol;
-    });
-  }
-  
-  get filteredEstudiantes(): Estudiante[] {
-    const term = this.searchTerm().toLowerCase();
-    const cursoId = this.cursoFilter();
-    return this.estudiantes().filter(e => {
-      const matchesSearch = !term || 
-        e.nombre?.toLowerCase().includes(term) || 
-        e.apellido?.toLowerCase().includes(term) ||
-        e.rut?.toLowerCase().includes(term);
-      const matchesCurso = !cursoId || e.curso_id === cursoId;
-      return matchesSearch && matchesCurso;
-    });
-  }
-  
-  // Form data
-  userForm: Partial<Usuario> = {
-    rut: '',
-    nombre: '',
-    apellido: '',
-    email: '',
-    username: '',
-    password: '',
-    telefono: '',
-    rol: 'docente',
-    activo: true
-  };
-  
-  studentForm: Partial<Estudiante> = {
-    rut: '',
-    nombre: '',
-    apellido: '',
-    fecha_nacimiento: '',
-    direccion: '',
-    telefono: '',
-    curso_id: '',
-    apoderado_id: ''
-  };
-  
-  cursoForm: Partial<Curso> = {
-    nombre: '',
-    nivel: '',
-    ano: new Date().getFullYear()
-  };
-  
-  // Recordatorio form
-  recordatorioForm = {
-    titulo: '',
-    descripcion: '',
-    fecha_limite: ''
-  };
-  
-  // Asignacion docente form
-  asignacionDocenteForm = {
-    docente_id: '',
-    curso_id: '',
-    asignatura: ''
-  };
-  
+
+  // Forms
+  userForm: Partial<Usuario> = { rut: '', nombre: '', apellido: '', email: '', username: '', password: '', telefono: '', rol: 'docente', activo: true };
+  studentForm: Partial<Estudiante> = { rut: '', nombre: '', apellido: '', fecha_nacimiento: '', direccion: '', telefono: '', curso_id: '', apoderado_id: '' };
+  cursoForm: Partial<Curso> = { nombre: '', nivel: '', ano: new Date().getFullYear() };
+  recordatorioForm = { titulo: '', descripcion: '', fecha_limite: '' };
+  asignacionDocenteForm = { docente_id: '', curso_id: '', asignatura: '' };
   saving = signal(false);
-  
-  // Tabs para el componente compartido
+
   adminTabs: TabItem[] = [
     { id: 'usuarios', label: 'Usuarios', icon: 'people' },
     { id: 'estudiantes', label: 'Estudiantes', icon: 'school' },
     { id: 'cursos', label: 'Cursos', icon: 'class' },
     { id: 'docentes', label: 'Docentes', icon: 'co_present' },
+    { id: 'recordatorios', label: 'Recordatorios', icon: 'notifications' },
     { id: 'apoderados', label: 'Apoderados', icon: 'family_restroom' },
     { id: 'configuracion', label: 'Configuración', icon: 'settings' }
   ];
-  
-  onTabChanged(tabId: string): void {
-    this.activeTab.set(tabId as any);
+
+  get tabIndex(): number {
+    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'recordatorios', 'apoderados', 'configuracion'];
+    return tabs.indexOf(this.activeTab());
   }
 
-  ngOnInit(): void {
-    this.loadAll();
-  }
-  
-  loadAll(): void {
-    this.loadUsuarios();
-    this.loadEstudiantes();
-    this.loadCursos();
-    this.loadRecordatorios();
-    this.loadAsignacionesDocente();
-  }
-  
-  loadRecordatorios(): void {
-    const userId = this.auth.user()?.id;
-    if (userId) {
-      this.api.getRecordatorios(userId).subscribe({
-        next: (data) => this.recordatorios.set(data),
-        error: () => {}
-      });
-    }
-  }
-  
-  loadAsignacionesDocente(): void {
-    this.api.getAsignacionesDocente().subscribe({
-      next: (data) => this.asignacionesDocente.set(data),
-      error: () => {}
-    });
-  }
-  
-  loadApoderados(): void {
-    this.api.getApoderados().subscribe({
-      next: (data) => this.apoderados.set(data),
-      error: () => this.showMessage('Error al cargar apoderados')
-    });
-  }
-  
-  // Get estudiantes sin apoderado
-  getEstudiantesSinApoderado(): Estudiante[] {
-    return this.estudiantes().filter(e => !e.apoderado_id);
-  }
-  
-  // Get nombre del pupilo
-  getPupiloNombre(apoderadoId: string): string {
-    const estudiante = this.estudiantes().find(e => e.apoderado_id === apoderadoId);
-    return estudiante ? `${estudiante.nombre} ${estudiante.apellido}` : 'Sin pupilo';
-  }
-  
-  // Get nombre del estudiante por ID
-  getEstudianteNombre(estudianteId: string): string {
-    const estudiante = this.estudiantes().find(e => e.id === estudianteId);
-    return estudiante ? `${estudiante.nombre} ${estudiante.apellido}` : 'Sin estudiante';
-  }
-  
-  // Get apoderados from usuarios con rol apoderado
-  getApoderadosConUsuario(): Usuario[] {
-    return this.usuarios().filter(u => u.rol === 'apoderado');
-  }
-  
-  // Delete apoderado (usuario con rol apoderado)
-  deleteApoderado(apoderado: Usuario): void {
-    if (confirm(`¿Estás seguro de eliminar al apoderado ${apoderado.nombre}?`)) {
-      if (apoderado.id) {
-        this.api.deleteUsuario(apoderado.id).subscribe({
-          next: () => {
-            this.showMessage('Apoderado eliminado correctamente');
-            this.loadUsuarios();
-          },
-          error: () => this.showMessage('Error al eliminar apoderado')
-        });
-      }
-    }
-  }
-  
-  // Toggle panel lateral
-  toggleCursosPanel(): void {
-    this.showCursosPanel.update(v => !v);
-  }
-  
-  selectCurso(curso: Curso): void {
-    this.selectedCurso.set(curso);
-  }
-  
-  // Recordatorio methods
-  openRecordatorioDialog(): void {
-    this.recordatorioForm = { titulo: '', descripcion: '', fecha_limite: '' };
-    this.showRecordatorioDialog.set(true);
-  }
-  
-  closeRecordatorioDialog(): void {
-    this.showRecordatorioDialog.set(false);
-  }
-  
-  saveRecordatorio(): void {
-    if (!this.recordatorioForm.titulo) {
-      this.showMessage('Ingrese un título');
-      return;
-    }
-    const userId = this.auth.user()?.id || (this.auth.user() as any)?._id;
-    if (!userId) {
-      console.error('No hay userId disponible');
-      return;
-    }
-    
-    this.saving.set(true);
-    this.api.createRecordatorio({
-      usuario_id: userId,
-      titulo: this.recordatorioForm.titulo,
-      descripcion: this.recordatorioForm.descripcion || '',
-      fecha_limite: this.normalizeDate(this.recordatorioForm.fecha_limite),
-      completada: false
-    }).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.showMessage('Recordatorio creado');
-        this.closeRecordatorioDialog();
-        this.loadRecordatorios();
-      },
-      error: (err) => {
-        this.saving.set(false);
-        console.error('Error creating recordatorio:', err);
-        this.showMessage('Error al crear recordatorio');
-      }
-    });
-  }
-  
-  toggleRecordatorioCompleted(rec: Recordatorio): void {
-    if (rec.id) {
-      this.api.updateRecordatorio(rec.id, { completada: !rec.completada }).subscribe({
-        next: () => this.loadRecordatorios(),
-        error: () => this.showMessage('Error')
-      });
-    }
-  }
-  
-  deleteRecordatorio(rec: Recordatorio): void {
-    if (rec.id && confirm('¿Eliminar?')) {
-      this.api.deleteRecordatorio(rec.id).subscribe({
-        next: () => { this.showMessage('Eliminado'); this.loadRecordatorios(); },
-        error: () => this.showMessage('Error')
-      });
-    }
-  }
-  
-  // Asignacion docente methods
-  openAsignacionDocenteDialog(): void {
-    this.asignacionDocenteForm = { docente_id: '', curso_id: '', asignatura: '' };
-    this.showAsignacionDocenteDialog.set(true);
-  }
-  
-  closeAsignacionDocenteDialog(): void {
-    this.showAsignacionDocenteDialog.set(false);
-  }
-  
-  saveAsignacionDocente(): void {
-    if (!this.asignacionDocenteForm.docente_id || !this.asignacionDocenteForm.curso_id || !this.asignacionDocenteForm.asignatura) {
-      this.showMessage('Complete todos los campos');
-      return;
-    }
-    
-    this.saving.set(true);
-    console.log('DEBUG - Enviando datos:', {
-      docente_id: this.asignacionDocenteForm.docente_id,
-      curso_id: this.asignacionDocenteForm.curso_id,
-      asignatura: this.asignacionDocenteForm.asignatura
-    });
-    
-    this.api.createAsignacionDocente({
-      docente_id: this.asignacionDocenteForm.docente_id,
-      curso_id: this.asignacionDocenteForm.curso_id,
-      asignatura: this.asignacionDocenteForm.asignatura
-    }).subscribe({
-      next: (data) => {
-        console.log('DEBUG - Respuesta exitosa:', data);
-        this.saving.set(false);
-        this.showMessage('Asignación creada');
-        this.closeAsignacionDocenteDialog();
-        this.loadAsignacionesDocente();
-      },
-      error: (err) => {
-        console.error('DEBUG - Error completo:', err);
-        this.saving.set(false);
-        const msg = err.error ? JSON.stringify(err.error) : 'Error al crear asignación';
-        this.showMessage(msg);
-      }
-    });
+  set tabIndex(index: number) {
+    const tabs = ['usuarios', 'estudiantes', 'cursos', 'docentes', 'recordatorios', 'apoderados', 'configuracion'];
+    if (index >= 0 && index < tabs.length) this.activeTab.set(tabs[index] as any);
   }
 
-  // Agrupa asignaciones por docente para vista de tarjetas
-  docenteSearchQuery = signal<string>('');
+  ngOnInit(): void { this.data.loadAll(); }
+  onTabChanged(tabId: string): void { this.activeTab.set(tabId as any); }
 
-  getDocentesConAsignaciones() {
-    const mapa = new Map<string, {
-      docente_id: string;
-      nombre: string;
-      inicial: string;
-      cursos: Array<{ asignacion_id: string; curso: string; asignatura: string }>;
-    }>();
+  // ===== Mobile & Panel =====
+  toggleMobileMenu(): void { this.showMobileMenu.update(v => !v); }
+  closeMobileMenu(): void { this.showMobileMenu.set(false); }
+  toggleCursosPanel(): void { this.showCursosPanel.update(v => !v); }
+  selectCurso(curso: Curso): void { this.selectedCurso.set(curso); }
+  logout(): void { this.auth.logout(); }
 
-    for (const asig of this.asignacionesDocente()) {
-      if (!asig.docente_id) continue;
-      if (!mapa.has(asig.docente_id)) {
-        const nombre = this.getDocenteNombre(asig.docente_id);
-        mapa.set(asig.docente_id, {
-          docente_id: asig.docente_id,
-          nombre,
-          inicial: nombre.charAt(0).toUpperCase(),
-          cursos: []
-        });
-      }
-      mapa.get(asig.docente_id)!.cursos.push({
-        asignacion_id: asig.id || '',
-        curso: this.getCursoNombreDisplay(asig.curso_id),
-        asignatura: asig.asignatura || ''
-      });
-    }
-
-    return Array.from(mapa.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
-  }
-
-  getDocentesFiltrados() {
-    const q = this.docenteSearchQuery().toLowerCase().trim();
-    const todos = this.getDocentesConAsignaciones();
-    if (!q) return todos;
-    return todos.filter(d =>
-      d.nombre.toLowerCase().includes(q) ||
-      d.cursos.some(c => c.curso.toLowerCase().includes(q) || c.asignatura.toLowerCase().includes(q))
-    );
-  }
-
-  deleteAsignacionDocente(asignacion: AsignacionDocente | { id: string }): void {
-    if (asignacion.id && confirm('¿Eliminar esta asignación?')) {
-      this.api.deleteAsignacionDocente(asignacion.id).subscribe({
-        next: () => { this.showMessage('Asignación eliminada'); this.loadAsignacionesDocente(); },
-        error: () => this.showMessage('Error')
-      });
-    }
-  }
-  
-  getDocenteNombre(docenteId: string): string {
-    const docente = this.usuarios().find(u => u.id === docenteId);
-    return docente ? `${docente.nombre} ${docente.apellido}` : 'Docente';
-  }
-  
-  getCursoNombre(cursoId: string | undefined): string {
-    if (!cursoId) return 'Sin curso';
-    const curso = this.cursos().find(c => c.id === cursoId);
-    return curso ? `${curso.nivel} ${curso.nombre}` : 'Sin curso';
-  }
-  
-  getDocentes(): Usuario[] {
-    return this.usuarios().filter(u => u.rol === 'docente');
-  }
-
-  // Nuevo método para formatear nombre de curso
-  getCursoNombreDisplay(cursoId: string | undefined): string {
-    if (!cursoId) return 'Sin curso';
-    const curso = this.cursos().find(c => c.id === cursoId);
-    if (!curso) return 'Sin curso';
-    // Formato: "6ºA - Básico" en lugar de "6° Básico 6° A"
-    return `${curso.nombre} - ${curso.nivel}`;
-  }
-  
-  loadUsuarios(): void {
-    this.api.getUsuarios().subscribe({
-      next: (data) => this.usuarios.set(data),
-      error: () => this.showMessage('Error al cargar usuarios')
-    });
-  }
-  
-  loadEstudiantes(): void {
-    this.api.getEstudiantes().subscribe({
-      next: (data) => this.estudiantes.set(data),
-      error: () => this.showMessage('Error al cargar estudiantes')
-    });
-  }
-  
-  loadCursos(): void {
-    this.api.getCursos().subscribe({
-      next: (data) => this.cursos.set(data),
-      error: () => this.showMessage('Error al cargar cursos')
-    });
-  }
-
-  getCountByRole(rol: string): number {
-    return this.usuarios().filter(u => u.rol === rol).length;
-  }
-  
-  getEstudiantesConApoderado(): number {
-    return this.estudiantes().filter(e => e.apoderado_id).length;
-  }
-  
-  getEstudiantesCount(cursoId: string | undefined): number {
-    if (!cursoId) return 0;
-    return this.estudiantes().filter(e => e.curso_id === cursoId).length;
-  }
-
-  applyFilter(): void {
-    if (this.rolFilter) {
-      this.api.getUsuarios().subscribe({
-        next: (data) => this.usuarios.set(data.filter(u => u.rol === this.rolFilter)),
-        error: () => this.showMessage('Error al filtrar')
-      });
-    } else {
-      this.loadUsuarios();
-    }
-  }
-  
-  // ============ USER METHODS ============
+  // ===== USER Dialog =====
   openUserDialog(user?: Usuario): void {
     if (user) {
       this.editingUser.set(user);
       this.userForm = { ...user };
     } else {
       this.editingUser.set(null);
-      this.userForm = {
-        rut: '',
-        nombre: '',
-        apellido: '',
-        email: '',
-        username: '',
-        password: '',
-        telefono: '',
-        rol: 'docente',
-        activo: true
-      };
+      this.userForm = { rut: '', nombre: '', apellido: '', email: '', username: '', password: '', telefono: '', rol: 'docente', activo: true };
     }
     this.showUserDialog.set(true);
   }
-  
-  closeUserDialog(): void {
-    this.showUserDialog.set(false);
-    this.editingUser.set(null);
-  }
-  
+  closeUserDialog(): void { this.showUserDialog.set(false); this.editingUser.set(null); }
   saveUser(): void {
     const user = this.editingUser();
-    
     if (user?.id) {
-      this.api.updateUsuario(user.id, this.userForm).subscribe({
-        next: () => {
-          this.showMessage('Usuario actualizado correctamente');
-          this.loadUsuarios();
-          this.closeUserDialog();
-        },
-        error: (err) => {
-          const mensaje = err.error?.error || 'Error al actualizar usuario';
-          this.showMessage(mensaje);
-        }
+      this.data.updateUsuario(user.id, this.userForm).subscribe({
+        next: () => { this.showMessage('Usuario actualizado correctamente'); this.data.loadUsuarios(); this.closeUserDialog(); },
+        error: (err) => { this.showMessage(err.error?.error || 'Error al actualizar usuario'); }
       });
     } else {
-      this.api.createUsuario(this.userForm).subscribe({
-        next: () => {
-          this.showMessage('Usuario creado correctamente');
-          this.loadUsuarios();
-          this.closeUserDialog();
-        },
-        error: (err) => {
-          const mensaje = err.error?.error || 'Error al crear usuario';
-          this.showMessage(mensaje);
-        }
+      this.data.createUsuario(this.userForm).subscribe({
+        next: () => { this.showMessage('Usuario creado correctamente'); this.data.loadUsuarios(); this.closeUserDialog(); },
+        error: (err) => { this.showMessage(err.error?.error || 'Error al crear usuario'); }
       });
     }
   }
-  
-  deleteUsuario(user: Usuario): void {
+  deleteUserFromChild(user: Usuario): void {
     if (confirm(`¿Estás seguro de eliminar a ${user.nombre}?`)) {
       if (user.id) {
-        this.api.deleteUsuario(user.id).subscribe({
-          next: () => {
-            this.showMessage('Usuario eliminado correctamente');
-            this.loadUsuarios();
-          },
+        this.data.deleteUsuario(user.id).subscribe({
+          next: () => { this.showMessage('Usuario eliminado correctamente'); this.data.loadUsuarios(); },
           error: () => this.showMessage('Error al eliminar usuario')
         });
       }
     }
   }
-  
-  // ============ STUDENT METHODS ============
+
+  // ===== STUDENT Dialog =====
   openStudentDialog(student?: Estudiante): void {
     if (student) {
       this.editingStudent.set(student);
       this.studentForm = { ...student };
     } else {
       this.editingStudent.set(null);
-      this.studentForm = {
-        rut: '',
-        nombre: '',
-        apellido: '',
-        fecha_nacimiento: '',
-        direccion: '',
-        telefono: '',
-        curso_id: '',
-        apoderado_id: ''
-      };
+      this.studentForm = { rut: '', nombre: '', apellido: '', fecha_nacimiento: '', direccion: '', telefono: '', curso_id: '', apoderado_id: '' };
     }
     this.showStudentDialog.set(true);
   }
-  
-  closeStudentDialog(): void {
-    this.showStudentDialog.set(false);
-    this.editingStudent.set(null);
-  }
-  
+  closeStudentDialog(): void { this.showStudentDialog.set(false); this.editingStudent.set(null); }
   saveStudent(): void {
     const student = this.editingStudent();
     if (student?.id) {
-      this.api.updateEstudiante(student.id, this.studentForm).subscribe({
-        next: () => {
-          this.showMessage('Estudiante actualizado correctamente');
-          this.loadEstudiantes();
-          this.closeStudentDialog();
-        },
+      this.data.updateEstudiante(student.id, this.studentForm).subscribe({
+        next: () => { this.showMessage('Estudiante actualizado correctamente'); this.data.loadEstudiantes(); this.closeStudentDialog(); },
         error: () => this.showMessage('Error al actualizar estudiante')
       });
     } else {
-      this.api.createEstudiante(this.studentForm).subscribe({
-        next: () => {
-          this.showMessage('Estudiante creado correctamente');
-          this.loadEstudiantes();
-          this.closeStudentDialog();
-        },
+      this.data.createEstudiante(this.studentForm).subscribe({
+        next: () => { this.showMessage('Estudiante creado correctamente'); this.data.loadEstudiantes(); this.closeStudentDialog(); },
         error: () => this.showMessage('Error al crear estudiante')
       });
     }
   }
-  
-  deleteEstudiante(student: Estudiante): void {
+  deleteStudentFromChild(student: Estudiante): void {
     if (confirm(`¿Estás seguro de eliminar a ${student.nombre}?`)) {
       if (student.id) {
-        this.api.deleteEstudiante(student.id).subscribe({
-          next: () => {
-            this.showMessage('Estudiante eliminado correctamente');
-            this.loadEstudiantes();
-          },
+        this.data.deleteEstudiante(student.id).subscribe({
+          next: () => { this.showMessage('Estudiante eliminado correctamente'); this.data.loadEstudiantes(); },
           error: () => this.showMessage('Error al eliminar estudiante')
         });
       }
     }
   }
-  
-  // ============ CURSO METHODS ============
+
+  // ===== CURSO Dialog =====
   openCursoDialog(curso?: Curso): void {
     if (curso) {
       this.editingCurso.set(curso);
       this.cursoForm = { ...curso };
     } else {
       this.editingCurso.set(null);
-      this.cursoForm = {
-        nombre: '',
-        nivel: '',
-        ano: new Date().getFullYear()
-      };
+      this.cursoForm = { nombre: '', nivel: '', ano: new Date().getFullYear() };
     }
     this.showCursoDialog.set(true);
   }
-  
-  closeCursoDialog(): void {
-    this.showCursoDialog.set(false);
-    this.editingCurso.set(null);
-  }
-  
+  closeCursoDialog(): void { this.showCursoDialog.set(false); this.editingCurso.set(null); }
   saveCurso(): void {
     const curso = this.editingCurso();
-    const dataToSend = {
-      nombre: this.cursoForm.nombre,
-      nivel: this.cursoForm.nivel,
-      ano: this.cursoForm.ano || new Date().getFullYear()
-    };
-    
+    const dataToSend = { nombre: this.cursoForm.nombre, nivel: this.cursoForm.nivel, ano: this.cursoForm.ano || new Date().getFullYear() };
     if (curso?.id) {
-      this.api.updateCurso(curso.id, dataToSend).subscribe({
-        next: () => {
-          this.showMessage('Curso actualizado correctamente');
-          this.loadCursos();
-          this.closeCursoDialog();
-        },
+      this.data.updateCurso(curso.id, dataToSend).subscribe({
+        next: () => { this.showMessage('Curso actualizado correctamente'); this.data.loadCursos(); this.closeCursoDialog(); },
         error: () => this.showMessage('Error al actualizar curso')
       });
     } else {
-      this.api.createCurso(dataToSend).subscribe({
-        next: () => {
-          this.showMessage('Curso creado correctamente');
-          this.loadCursos();
-          this.closeCursoDialog();
-        },
+      this.data.createCurso(dataToSend).subscribe({
+        next: () => { this.showMessage('Curso creado correctamente'); this.data.loadCursos(); this.closeCursoDialog(); },
         error: () => this.showMessage('Error al crear curso')
       });
     }
   }
-  
-  deleteCurso(curso: Curso): void {
+  deleteCursoFromChild(curso: Curso): void {
     if (confirm(`¿Estás seguro de eliminar el curso ${curso.nombre}?`)) {
       if (curso.id) {
-        this.api.deleteCurso(curso.id).subscribe({
-          next: () => {
-            this.showMessage('Curso eliminado correctamente');
-            this.loadCursos();
-          },
+        this.data.deleteCurso(curso.id).subscribe({
+          next: () => { this.showMessage('Curso eliminado correctamente'); this.data.loadCursos(); },
           error: () => this.showMessage('Error al eliminar curso')
         });
       }
     }
   }
 
+  // ===== RECORDATORIO Dialog =====
+  openRecordatorioDialog(): void {
+    this.recordatorioForm = { titulo: '', descripcion: '', fecha_limite: '' };
+    this.showRecordatorioDialog.set(true);
+  }
+  closeRecordatorioDialog(): void { this.showRecordatorioDialog.set(false); }
+  saveRecordatorio(): void {
+    if (!this.recordatorioForm.titulo) { this.showMessage('Ingrese un título'); return; }
+    const userId = this.auth.user()?.id || (this.auth.user() as any)?._id;
+    if (!userId) return;
+    this.saving.set(true);
+    this.data.createRecordatorio({
+      usuario_id: userId, titulo: this.recordatorioForm.titulo,
+      descripcion: this.recordatorioForm.descripcion || '',
+      fecha_limite: this.data.normalizeDate(this.recordatorioForm.fecha_limite),
+      completada: false
+    }).subscribe({
+      next: () => { this.saving.set(false); this.showMessage('Recordatorio creado'); this.closeRecordatorioDialog(); this.data.loadRecordatorios(); },
+      error: () => { this.saving.set(false); this.showMessage('Error al crear recordatorio'); }
+    });
+  }
+  toggleRecordatorioCompleted(rec: Recordatorio): void {
+    if (rec.id) {
+      this.data.updateRecordatorio(rec.id, { completada: !rec.completada }).subscribe({
+        next: () => this.data.loadRecordatorios(), error: () => this.showMessage('Error')
+      });
+    }
+  }
+  deleteRecordatorioFromChild(rec: Recordatorio): void {
+    if (rec.id && confirm('¿Eliminar?')) {
+      this.data.deleteRecordatorio(rec.id).subscribe({
+        next: () => { this.showMessage('Eliminado'); this.data.loadRecordatorios(); },
+        error: () => this.showMessage('Error')
+      });
+    }
+  }
+
+  // ===== ASIGNACION DOCENTE Dialog =====
+  openAsignacionDocenteDialog(): void {
+    this.asignacionDocenteForm = { docente_id: '', curso_id: '', asignatura: '' };
+    this.showAsignacionDocenteDialog.set(true);
+  }
+  closeAsignacionDocenteDialog(): void { this.showAsignacionDocenteDialog.set(false); }
+  saveAsignacionDocente(): void {
+    if (!this.asignacionDocenteForm.docente_id || !this.asignacionDocenteForm.curso_id || !this.asignacionDocenteForm.asignatura) {
+      this.showMessage('Complete todos los campos'); return;
+    }
+    this.saving.set(true);
+    this.data.createAsignacionDocente(this.asignacionDocenteForm).subscribe({
+      next: () => { this.saving.set(false); this.showMessage('Asignación creada'); this.closeAsignacionDocenteDialog(); this.data.loadAsignacionesDocente(); },
+      error: (err) => { this.saving.set(false); this.showMessage(err.error ? JSON.stringify(err.error) : 'Error al crear asignación'); }
+    });
+  }
+  deleteAsignacionFromChild(asig: { id: string }): void {
+    if (asig.id && confirm('¿Eliminar esta asignación?')) {
+      this.data.deleteAsignacionDocente(asig.id).subscribe({
+        next: () => { this.showMessage('Asignación eliminada'); this.data.loadAsignacionesDocente(); },
+        error: () => this.showMessage('Error')
+      });
+    }
+  }
+
   showMessage(message: string): void {
     this.successMessage.set(message);
     setTimeout(() => this.successMessage.set(''), 3000);
-  }
-
-  logout(): void {
-    this.auth.logout();
-  }
-
-  toggleMobileMenu(): void {
-    this.showMobileMenu.update(v => !v);
-  }
-
-  closeMobileMenu(): void {
-    this.showMobileMenu.set(false);
-  }
-  
-  // Formatear fecha ISO (YYYY-MM-DD) a DD-MM-YYYY para mostrar
-  formatFecha(isoDate: string | undefined): string {
-    if (!isoDate) return '';
-    if (/^\d{2}-\d{2}-\d{4}$/.test(isoDate)) return isoDate;
-    const parts = isoDate.split('T')[0].split('-');
-    if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    return isoDate;
-  }
-
-  // Normalizar fecha para el backend
-  private normalizeDate(dateStr: string | undefined): string | undefined {
-    if (!dateStr) return dateStr;
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-    if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
-      const [d, m, y] = dateStr.split('-');
-      return `${y}-${m}-${d}`;
-    }
-    return dateStr;
   }
 }
