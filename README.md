@@ -26,7 +26,7 @@ Aplicación web para la gestión académica institucional que permite digitaliza
 | **Frontend**      | Angular 21 + Angular Material   |
 | **Backend**       | Python + Django REST Framework  |
 | **Base de Datos** | MongoDB Atlas                   |
-| **Despliegue**    | Cloudflare Pages + Render       |
+| **Despliegue**    | Cloudflare Pages + Vercel       |
 | **Desarrollo**    | TypeScript, Python, Django      |
 
 ---
